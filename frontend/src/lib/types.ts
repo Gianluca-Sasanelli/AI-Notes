@@ -1,0 +1,24 @@
+import { InferSelectModel, InferInsertModel } from "drizzle-orm"
+import { notes } from "@/db/schema"
+
+export type ErrorData = {
+  message: string
+  detail?: string
+}
+
+export type PaginationOptions = {
+  skip?: number
+  limit?: number
+  includeTotal?: boolean
+}
+
+export type PaginatedResponse<T> = {
+  data: T[]
+  skip: number
+  limit: number
+  hasNext: boolean
+  total?: number
+}
+
+export type NoteData = InferSelectModel<typeof notes>
+export type NewNoteData = InferInsertModel<typeof notes>
