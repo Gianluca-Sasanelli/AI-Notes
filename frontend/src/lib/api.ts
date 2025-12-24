@@ -46,3 +46,13 @@ export async function updateNoteClient(id: number, data: UpdateNoteData) {
     throw new Error(error.message)
   }
 }
+
+export async function deleteNoteClient(id: number) {
+  const res = await fetch(`/api/notes/${id}`, {
+    method: "DELETE"
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+}

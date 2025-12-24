@@ -40,3 +40,7 @@ export const updateNote = async (id: number, data: UpdateNoteData) => {
     .set({ ...data, updatedAt: new Date() })
     .where(eq(notes.id, id))
 }
+
+export const deleteNote = async (id: number) => {
+  await db.delete(notes).where(eq(notes.id, id))
+}
