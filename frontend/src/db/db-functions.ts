@@ -1,6 +1,7 @@
 import { db } from "@/index"
 import { notes, type NoteMetadata } from "@/db/schema"
-import { desc, count } from "drizzle-orm"
+import { desc, count, eq } from "drizzle-orm"
+import type { UpdateNoteData } from "@/lib/types"
 
 export const createNote = async (content: string, timestamp: Date, metadata: NoteMetadata) => {
   const [note] = await db
@@ -31,4 +32,11 @@ export const getNotes = async (
   }
 
   return { data, hasNext, total }
+}
+
+export const updateNote = async (id: number, data: UpdateNoteData) => {
+  await db
+    .update(notes)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(notes.id, id))
 }
