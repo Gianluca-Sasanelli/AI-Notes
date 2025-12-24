@@ -22,3 +22,6 @@ export type PaginatedResponse<T> = {
 
 export type NoteData = InferSelectModel<typeof notes>
 export type NewNoteData = InferInsertModel<typeof notes>
+export type UpdateNoteData = Partial<Omit<NoteData, "id">> & {
+  content?: Exclude<NoteData["content"], "">
+}

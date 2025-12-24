@@ -1,4 +1,4 @@
-import { NoteData, PaginatedResponse, PaginationOptions } from "@/lib/types"
+import { NoteData, PaginatedResponse, PaginationOptions, UpdateNoteData } from "@/lib/types"
 import type { NoteMetadata } from "@/db/schema"
 
 export async function createNoteClient(timestamp: Date, content: string, metadata: NoteMetadata) {
@@ -29,4 +29,20 @@ export async function getNotesClient(options: PaginationOptions = {}) {
     throw new Error(error.message)
   }
   return (await res.json()) as PaginatedResponse<NoteData>
+}
+
+export async function updateNoteClient(id: number, data: UpdateNoteData) {
+  const body = {
+    ...data,
+    timestamp: data.timestamp instanceof Date ? data.timestamp.toISOString() : data.timestamp
+  }
+  const res = await fetch(`/api/notes/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
 }
