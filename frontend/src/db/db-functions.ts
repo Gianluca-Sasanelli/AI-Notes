@@ -1,7 +1,8 @@
 import { db } from "@/index"
-import { notes, type NoteMetadata } from "@/db/schema"
+import { notes, chats, type NoteMetadata } from "@/db/schema"
 import { desc, count, eq } from "drizzle-orm"
-import type { UpdateNoteData } from "@/lib/types"
+import type { UpdateNoteData } from "@/lib/types/database-types"
+import type { ChatUIMessage } from "@/lib/types/chat-types"
 
 export const createNote = async (content: string, timestamp: Date, metadata: NoteMetadata) => {
   const [note] = await db
@@ -43,4 +44,27 @@ export const updateNote = async (id: number, data: UpdateNoteData) => {
 
 export const deleteNote = async (id: number) => {
   await db.delete(notes).where(eq(notes.id, id))
+}
+
+function removeDataPartsFromMessages(messages: ChatUIMessage[]): ChatUIMessage[] {
+  return messages.map((message) => ({
+    ...message,
+    parts: message.parts.filter((part) => !part.type.startsWith("data"))
+  }))
+}
+
+export const createChat = async (id: string, messages: ChatUIMessage[]) => {
+  await db.insert(chats).values({ id, messages: removeDataPartsFromMessages(messages) })
+}
+
+export const updateChat = async (id: string, messages: ChatUIMessage[]) => {
+  await db
+    .update(chats)
+    .set({ messages: removeDataPartsFromMessages(messages), updatedAt: new Date() })
+    .where(eq(chats.id, id))
+}
+
+export const getChat = async (id: string) => {
+  const [chat] = await db.select().from(chats).where(eq(chats.id, id))
+  return chat
 }

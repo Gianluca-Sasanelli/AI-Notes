@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <main className="h-screen flex-1 overflow-y-auto bg-background">{children}</main>
+          <main className="min-h-screen flex-1 bg-background">{children}</main>
           <Toaster />
         </ThemeProvider>
       </body>

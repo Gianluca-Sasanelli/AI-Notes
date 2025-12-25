@@ -1,5 +1,5 @@
 import { updateNote, deleteNote } from "@/db/db-functions"
-import { ErrorData, UpdateNoteData } from "@/lib/types"
+import { ErrorData, UpdateNoteData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {

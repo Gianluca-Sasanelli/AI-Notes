@@ -1,4 +1,9 @@
-import { NoteData, PaginatedResponse, PaginationOptions, UpdateNoteData } from "@/lib/types"
+import {
+  NoteData,
+  PaginatedResponse,
+  PaginationOptions,
+  UpdateNoteData
+} from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 
 export async function createNoteClient(timestamp: Date, content: string, metadata: NoteMetadata) {
