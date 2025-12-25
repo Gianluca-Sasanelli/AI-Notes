@@ -21,7 +21,7 @@ import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { getNotesClient, updateNoteClient, deleteNoteClient } from "@/lib/api"
 import { toast } from "sonner"
-import type { NoteData } from "@/lib/types"
+import type { NoteData } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 
 export function NotesList() {
@@ -120,7 +120,7 @@ export function NotesList() {
       />
 
       <div className="space-y-3">
-        {notes.map((note) => (
+        {notes.map((note: NoteData) => (
           <NoteCard
             key={note.id}
             note={note}

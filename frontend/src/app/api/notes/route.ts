@@ -1,5 +1,5 @@
 import { createNote, getNotes } from "@/db/db-functions"
-import { ErrorData } from "@/lib/types"
+import { ErrorData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import type { NoteMetadata } from "@/db/schema"
 
