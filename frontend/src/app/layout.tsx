@@ -9,8 +9,7 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Notes App",
-  description:
-    "Write your notes and ask the AI about them.",
+  description: "Write your notes and ask the AI about them."
 }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
