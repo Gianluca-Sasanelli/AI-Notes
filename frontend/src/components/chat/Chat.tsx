@@ -37,10 +37,10 @@ export default function Chat({
       <>
         <div className="mx-2 flex h-[100dvh] flex-col items-center justify-center gap-6 bg-background lg:mx-10">
           <h1 className="text-center text-4xl font-bold tracking-tight text-primary">
-            Lona Trader
+            Medical History AI
           </h1>
           <p className="text-base text-muted-foreground">
-            Design, test and refine your trading strategies with me.
+            Ask about your medical notes and general questions.
           </p>
           <div className="flex w-full max-w-2xl flex-col rounded-xl">
             <ChatInput

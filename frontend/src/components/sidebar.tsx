@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -12,7 +13,9 @@ import {
   Pencil,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Moon,
+  Sun
 } from "lucide-react"
 import { ChatHistory } from "@/components/chat/ChatHistory"
 
@@ -25,6 +28,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(true)
+  const { theme, setTheme } = useTheme()
 
   return (
     <aside
@@ -104,6 +108,32 @@ export function Sidebar() {
       )}
 
       <div className="mt-auto flex flex-col items-center gap-2 px-2">
+        {isCollapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+            <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
+          </Button>
+        )}
         {isCollapsed ? (
           <Tooltip>
             <TooltipTrigger asChild>
