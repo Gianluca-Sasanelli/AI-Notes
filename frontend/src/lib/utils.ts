@@ -1,9 +1,16 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { APICallError } from "ai"
+import { ChatUIMessage } from "./types/chat-types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+export function removeDataPartsFromMessages(messages: ChatUIMessage[]): ChatUIMessage[] {
+  return messages.map((message) => ({
+    ...message,
+    parts: message.parts.filter((part) => !part.type.startsWith("data"))
+  }))
 }
 
 export function handleAgentError(error: { error: unknown }, agentName: string): Error {

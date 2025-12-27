@@ -1,5 +1,5 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm"
-import { notes } from "@/db/schema"
+import { notes, chats } from "@/db/schema"
 
 export type ErrorData = {
   message: string
@@ -25,3 +25,5 @@ export type NewNoteData = InferInsertModel<typeof notes>
 export type UpdateNoteData = Partial<Omit<NoteData, "id">> & {
   content?: Exclude<NoteData["content"], "">
 }
+
+export type ChatHistoryItem = Pick<InferSelectModel<typeof chats>, "id" | "title" | "updatedAt">

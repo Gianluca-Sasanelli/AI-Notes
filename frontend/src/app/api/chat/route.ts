@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
         if (isFirstUserMessage) {
           try {
-            await createChat(chatId, messages)
+            await createChat(chatId, messages, ServerMessages)
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error)
             console.error("Error creating chat", errorMsg)
