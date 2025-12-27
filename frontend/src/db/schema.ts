@@ -23,6 +23,7 @@ export const chats = pgTable(
   {
     id: text().primaryKey(),
     messages: jsonb().$type<ChatUIMessage[]>().notNull(),
+    title: text(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
   },

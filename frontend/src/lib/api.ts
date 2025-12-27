@@ -1,4 +1,5 @@
 import {
+  ChatHistoryItem,
   NoteData,
   PaginatedResponse,
   PaginationOptions,
@@ -60,4 +61,16 @@ export async function deleteNoteClient(id: number) {
     const error = await res.json()
     throw new Error(error.message)
   }
+}
+
+export async function getChatsClient(skip: number = 0, limit: number = 10) {
+  const params = new URLSearchParams()
+  params.set("skip", skip.toString())
+  params.set("limit", limit.toString())
+  const res = await fetch(`/api/chats?${params.toString()}`)
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+  return (await res.json()) as PaginatedResponse<ChatHistoryItem>
 }

@@ -3,7 +3,9 @@ import { notes, chats, type NoteMetadata } from "@/db/schema"
 import { desc, count, eq } from "drizzle-orm"
 import type { UpdateNoteData } from "@/lib/types/database-types"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
-
+import { removeDataPartsFromMessages } from "@/lib/utils"
+import { generateTitle } from "@/lib/agents/title-generations"
+import { ModelMessage } from "ai"
 export const createNote = async (content: string, timestamp: Date, metadata: NoteMetadata) => {
   const [note] = await db
     .insert(notes)
@@ -46,15 +48,19 @@ export const deleteNote = async (id: number) => {
   await db.delete(notes).where(eq(notes.id, id))
 }
 
-function removeDataPartsFromMessages(messages: ChatUIMessage[]): ChatUIMessage[] {
-  return messages.map((message) => ({
-    ...message,
-    parts: message.parts.filter((part) => !part.type.startsWith("data"))
-  }))
-}
-
-export const createChat = async (id: string, messages: ChatUIMessage[]) => {
+export const createChat = async (
+  id: string,
+  messages: ChatUIMessage[],
+  serverMessages: ModelMessage[]
+) => {
   await db.insert(chats).values({ id, messages: removeDataPartsFromMessages(messages) })
+  // fire and forget
+  console.log("Generating title for chat", id)
+  void generateTitle(serverMessages)
+    .then((title) => db.update(chats).set({ title }).where(eq(chats.id, id)))
+    .catch((error) => {
+      console.error("Error generating title", error)
+    })
 }
 
 export const updateChat = async (id: string, messages: ChatUIMessage[]) => {
@@ -67,4 +73,16 @@ export const updateChat = async (id: string, messages: ChatUIMessage[]) => {
 export const getChat = async (id: string) => {
   const [chat] = await db.select().from(chats).where(eq(chats.id, id))
   return chat
+}
+
+export const getChats = async (skip: number = 0, limit: number = 10) => {
+  const items = await db
+    .select({ id: chats.id, title: chats.title, updatedAt: chats.updatedAt })
+    .from(chats)
+    .orderBy(desc(chats.updatedAt))
+    .limit(limit + 1)
+    .offset(skip)
+  const hasNext = items.length > limit
+  const data = hasNext ? items.slice(0, limit) : items
+  return { data, hasNext }
 }

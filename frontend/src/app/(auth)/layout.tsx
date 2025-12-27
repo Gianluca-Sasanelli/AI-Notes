@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
+import { Sidebar } from "@/components/sidebar"
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -19,5 +20,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       })
   )
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 overflow-hidden">{children}</div>
+      </div>
+    </QueryClientProvider>
+  )
 }

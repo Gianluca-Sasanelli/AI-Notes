@@ -8,6 +8,20 @@
       "when": 1766506330132,
       "tag": "0000_fuzzy_karnak",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766653746614,
+      "tag": "0001_noisy_mad_thinker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766823300660,
+      "tag": "0002_many_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

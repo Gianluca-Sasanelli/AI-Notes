@@ -44,6 +44,7 @@ export function StatusIndicator({ lastAssistantMessage, chatStatus, error }: Sta
     if (!lastAssistantMessage) return null
     const dataStatus = lastAssistantMessage.parts.filter((part) => part.type === "data-ai-status")
     if (!Array.isArray(dataStatus) || dataStatus.length === 0 || !dataStatus) return null
+    // @ts-expect-error - data is not defined on TextUIPart
     return dataStatus[dataStatus.length - 1].data
   }, [lastAssistantMessage])
 
