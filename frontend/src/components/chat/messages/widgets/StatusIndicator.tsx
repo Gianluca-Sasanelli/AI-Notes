@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/ui/avatar"
-import type { ChatUIMessage } from "@/lib/types/chat-types"
-import type { ChatStatus } from "ai"
+import type { AgentStatusData, ChatUIMessage } from "@/lib/types/chat-types"
+import type { ChatStatus, DataUIPart } from "ai"
 import { Bot } from "lucide-react"
 import { useMemo } from "react"
 export function RoutingIndicator() {
@@ -42,9 +42,10 @@ const IsChatStatusLoading = (
 export function StatusIndicator({ lastAssistantMessage, chatStatus, error }: StatusIndicatorProps) {
   const latestDataStatus = useMemo(() => {
     if (!lastAssistantMessage) return null
-    const dataStatus = lastAssistantMessage.parts.filter((part) => part.type === "data-ai-status")
-    if (!Array.isArray(dataStatus) || dataStatus.length === 0 || !dataStatus) return null
-    // @ts-expect-error - data is not defined on TextUIPart
+    const dataStatus = lastAssistantMessage.parts.filter(
+      (part): part is DataUIPart<AgentStatusData> => part.type === "data-ai-status"
+    )
+    if (dataStatus.length === 0) return null
     return dataStatus[dataStatus.length - 1].data
   }, [lastAssistantMessage])
 
