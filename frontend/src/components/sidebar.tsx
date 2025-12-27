@@ -1,5 +1,6 @@
 "use client"
 
+import { UserButton, useUser } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
@@ -11,7 +12,6 @@ import {
   Notebook,
   MessageSquarePlus,
   Pencil,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Moon,
@@ -29,6 +29,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(true)
   const { theme, setTheme } = useTheme()
+  const { isLoaded } = useUser()
 
   return (
     <aside
@@ -134,28 +135,35 @@ export function Sidebar() {
             <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
           </Button>
         )}
-        {isCollapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                <Settings className="size-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
-        ) : (
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          >
-            <Settings className="size-5" />
-            <span className="ml-2">Settings</span>
-          </Button>
-        )}
+        <div className="h-[50px] flex-none">
+          {!isLoaded ? (
+            <div
+              className={cn(
+                "animate-pulse rounded-md bg-sidebar-accent",
+                isCollapsed ? "mx-auto size-6" : "mx-2 h-[40px]"
+              )}
+            />
+          ) : (
+            <UserButton
+              appearance={{
+                elements: {
+                  rootBox: cn(
+                    "size-full hover:bg-sidebar-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground",
+                    isCollapsed && "flex justify-center"
+                  ),
+                  userButtonTrigger: "size-full cursor-pointer",
+                  userButtonBox: "size-full",
+                  userButtonAvatarBox: "order-first size-6",
+                  userButtonOuterIdentifier: cn(
+                    "flex-1 cursor-pointer whitespace-nowrap text-left text-sm text-sidebar-foreground/60",
+                    isCollapsed && "hidden"
+                  )
+                }
+              }}
+              showName={!isCollapsed}
+            />
+          )}
+        </div>
       </div>
     </aside>
   )

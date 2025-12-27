@@ -1,8 +1,14 @@
+import { auth } from "@clerk/nextjs/server"
 import { updateNote, deleteNote } from "@/db/db-functions"
 import { ErrorData, UpdateNoteData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
+  }
+
   const { id } = await params
   const noteId = parseInt(id, 10)
 
@@ -16,7 +22,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   try {
-    await updateNote(noteId, body)
+    await updateNote(userId, noteId, body)
     return new NextResponse(null, { status: 201 })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to update note"
@@ -25,6 +31,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
+  }
+
   const { id } = await params
   const noteId = parseInt(id, 10)
 
@@ -33,7 +44,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   }
 
   try {
-    await deleteNote(noteId)
+    await deleteNote(userId, noteId)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to delete note"

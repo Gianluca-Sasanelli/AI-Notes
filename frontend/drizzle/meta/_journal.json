@@ -22,6 +22,13 @@
       "when": 1766823300660,
       "tag": "0002_many_the_liberteens",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766853626620,
+      "tag": "0003_wooden_chat",
+      "breakpoints": true
     }
   ]
 }
