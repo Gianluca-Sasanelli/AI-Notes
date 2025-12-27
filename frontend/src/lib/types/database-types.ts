@@ -20,10 +20,11 @@ export type PaginatedResponse<T> = {
   total?: number
 }
 
-export type NoteData = InferSelectModel<typeof notes>
-export type NewNoteData = InferInsertModel<typeof notes>
+export type NoteData = Omit<InferSelectModel<typeof notes>, "userId">
+export type NewNoteData = Omit<InferInsertModel<typeof notes>, "userId">
 export type UpdateNoteData = Partial<Omit<NoteData, "id">> & {
   content?: Exclude<NoteData["content"], "">
 }
 
-export type ChatHistoryItem = Pick<InferSelectModel<typeof chats>, "id" | "title" | "updatedAt">
+export type ChatData = Omit<InferSelectModel<typeof chats>, "userId">
+export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">

@@ -1,27 +1,42 @@
 import { db } from "@/index"
 import { notes, chats, type NoteMetadata } from "@/db/schema"
-import { desc, count, eq } from "drizzle-orm"
+import { desc, count, eq, and } from "drizzle-orm"
 import type { UpdateNoteData } from "@/lib/types/database-types"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
 import { removeDataPartsFromMessages } from "@/lib/utils"
 import { generateTitle } from "@/lib/agents/title-generations"
 import { ModelMessage } from "ai"
-export const createNote = async (content: string, timestamp: Date, metadata: NoteMetadata) => {
+
+export const createNote = async (
+  userId: string,
+  content: string,
+  timestamp: Date,
+  metadata: NoteMetadata
+) => {
   const [note] = await db
     .insert(notes)
-    .values({ content, timestamp, metadata })
+    .values({ userId, content, timestamp, metadata })
     .returning({ id: notes.id })
   return note.id
 }
 
 export const getNotes = async (
+  userId: string,
   skip: number = 0,
   limit: number = 10,
   includeTotal: boolean = false
 ) => {
   const items = await db
-    .select()
+    .select({
+      id: notes.id,
+      timestamp: notes.timestamp,
+      createdAt: notes.createdAt,
+      updatedAt: notes.updatedAt,
+      content: notes.content,
+      metadata: notes.metadata
+    })
     .from(notes)
+    .where(eq(notes.userId, userId))
     .orderBy(desc(notes.timestamp))
     .limit(limit + 1)
     .offset(skip)
@@ -30,31 +45,31 @@ export const getNotes = async (
 
   let total: number | undefined
   if (includeTotal) {
-    const [result] = await db.select({ count: count() }).from(notes)
+    const [result] = await db.select({ count: count() }).from(notes).where(eq(notes.userId, userId))
     total = result.count
   }
 
   return { data, hasNext, total }
 }
 
-export const updateNote = async (id: number, data: UpdateNoteData) => {
+export const updateNote = async (userId: string, id: number, data: UpdateNoteData) => {
   await db
     .update(notes)
     .set({ ...data, updatedAt: new Date() })
-    .where(eq(notes.id, id))
+    .where(and(eq(notes.id, id), eq(notes.userId, userId)))
 }
 
-export const deleteNote = async (id: number) => {
-  await db.delete(notes).where(eq(notes.id, id))
+export const deleteNote = async (userId: string, id: number) => {
+  await db.delete(notes).where(and(eq(notes.id, id), eq(notes.userId, userId)))
 }
 
 export const createChat = async (
+  userId: string,
   id: string,
   messages: ChatUIMessage[],
   serverMessages: ModelMessage[]
 ) => {
-  await db.insert(chats).values({ id, messages: removeDataPartsFromMessages(messages) })
-  // fire and forget
+  await db.insert(chats).values({ id, userId, messages: removeDataPartsFromMessages(messages) })
   console.log("Generating title for chat", id)
   void generateTitle(serverMessages)
     .then((title) => db.update(chats).set({ title }).where(eq(chats.id, id)))
@@ -63,22 +78,32 @@ export const createChat = async (
     })
 }
 
-export const updateChat = async (id: string, messages: ChatUIMessage[]) => {
+export const updateChat = async (userId: string, id: string, messages: ChatUIMessage[]) => {
   await db
     .update(chats)
     .set({ messages: removeDataPartsFromMessages(messages), updatedAt: new Date() })
-    .where(eq(chats.id, id))
+    .where(and(eq(chats.id, id), eq(chats.userId, userId)))
 }
 
-export const getChat = async (id: string) => {
-  const [chat] = await db.select().from(chats).where(eq(chats.id, id))
+export const getChat = async (userId: string, id: string) => {
+  const [chat] = await db
+    .select({
+      id: chats.id,
+      messages: chats.messages,
+      title: chats.title,
+      createdAt: chats.createdAt,
+      updatedAt: chats.updatedAt
+    })
+    .from(chats)
+    .where(and(eq(chats.id, id), eq(chats.userId, userId)))
   return chat
 }
 
-export const getChats = async (skip: number = 0, limit: number = 10) => {
+export const getChats = async (userId: string, skip: number = 0, limit: number = 10) => {
   const items = await db
     .select({ id: chats.id, title: chats.title, updatedAt: chats.updatedAt })
     .from(chats)
+    .where(eq(chats.userId, userId))
     .orderBy(desc(chats.updatedAt))
     .limit(limit + 1)
     .offset(skip)
@@ -87,10 +112,13 @@ export const getChats = async (skip: number = 0, limit: number = 10) => {
   return { data, hasNext }
 }
 
-export const updateChatTitle = async (id: string, title: string) => {
-  await db.update(chats).set({ title, updatedAt: new Date() }).where(eq(chats.id, id))
+export const updateChatTitle = async (userId: string, id: string, title: string) => {
+  await db
+    .update(chats)
+    .set({ title, updatedAt: new Date() })
+    .where(and(eq(chats.id, id), eq(chats.userId, userId)))
 }
 
-export const deleteChat = async (id: string) => {
-  await db.delete(chats).where(eq(chats.id, id))
+export const deleteChat = async (userId: string, id: string) => {
+  await db.delete(chats).where(and(eq(chats.id, id), eq(chats.userId, userId)))
 }

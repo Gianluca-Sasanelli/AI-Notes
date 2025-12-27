@@ -1,5 +1,6 @@
 import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse } from "ai"
 import { type NextRequest } from "next/server"
+import { auth } from "@clerk/nextjs/server"
 
 import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
@@ -7,6 +8,11 @@ import { createChat, updateChat } from "@/db/db-functions"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {
+  const { userId } = await auth()
+  if (!userId) {
+    return new Response("Unauthorized", { status: 401 })
+  }
+
   const json = await req.json()
   const parseResult = chatRequestSchema.safeParse(json)
   if (!parseResult.success) {
@@ -60,7 +66,7 @@ export async function POST(req: NextRequest) {
 
         if (isFirstUserMessage) {
           try {
-            await createChat(chatId, messages, ServerMessages)
+            await createChat(userId, chatId, messages, ServerMessages)
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error)
             console.error("Error creating chat", errorMsg)
@@ -69,7 +75,7 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-          await updateChat(chatId, messages)
+          await updateChat(userId, chatId, messages)
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
           console.error(
