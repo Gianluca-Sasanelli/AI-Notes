@@ -86,3 +86,11 @@ export const getChats = async (skip: number = 0, limit: number = 10) => {
   const data = hasNext ? items.slice(0, limit) : items
   return { data, hasNext }
 }
+
+export const updateChatTitle = async (id: string, title: string) => {
+  await db.update(chats).set({ title, updatedAt: new Date() }).where(eq(chats.id, id))
+}
+
+export const deleteChat = async (id: string) => {
+  await db.delete(chats).where(eq(chats.id, id))
+}
