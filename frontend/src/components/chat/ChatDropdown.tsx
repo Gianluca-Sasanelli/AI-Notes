@@ -55,7 +55,7 @@ export function ChatDropdown({
       toast.error("Failed to rename chat")
     }
   })
-  
+
   const { mutate: deleteChatMutation, isPending: isDeletingChat } = useMutation({
     mutationFn: (chatId: string) => deleteChatClient(chatId),
     onSuccess: () => {

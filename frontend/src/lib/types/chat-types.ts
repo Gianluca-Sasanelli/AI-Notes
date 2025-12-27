@@ -8,9 +8,9 @@ export type AgentStatusData = {
 }
 
 export type AgentStatusUIData = DataUIPart<AgentStatusData>
-
-export type ChatUIMessage = UIMessage<null, AgentStatusData>
-export type ChatUIMessagePart = UIMessagePart<AgentStatusData, UITools>
+export type AIData = AgentStatusData
+export type ChatUIMessage = UIMessage<null, AIData>
+export type ChatUIMessagePart = UIMessagePart<AIData, UITools>
 
 export const chatRequestSchema = z.object({
   id: z.string().describe("Chat id"),
