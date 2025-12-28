@@ -7,6 +7,8 @@ import { toast } from "sonner"
 import ChatInput from "./ChatInput"
 import ChatMessages from "./messages/ChatMessages"
 import { ChatUIMessage } from "@/lib/types/chat-types"
+import { useEffect } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 
 export default function Chat({
   chatId,
@@ -17,7 +19,7 @@ export default function Chat({
 }) {
   const backupChatId = useMemo(() => crypto.randomUUID(), [])
   const inputRef = useRef<HTMLDivElement>(null)
-
+  const queryClient = useQueryClient()
   const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>({
     ...(storedmessages && { messages: storedmessages }),
     id: chatId ?? backupChatId,
@@ -31,7 +33,15 @@ export default function Chat({
   })
 
   const isLoadingFromSDK = useMemo(() => status === "streaming" || status === "submitted", [status])
-
+  useEffect(() => {
+    if (messages.length === 2 && !chatId && !isLoadingFromSDK) {
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["chats"]
+        })
+      }, 1000)
+    }
+  }, [messages.length, chatId, queryClient, isLoadingFromSDK])
   if (messages.length === 0) {
     return (
       <>
