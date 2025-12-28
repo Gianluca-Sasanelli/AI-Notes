@@ -183,11 +183,11 @@ function DesktopSidebar() {
               size="icon"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className={cn(
-                "hover:bg-accent hover:text-accent-foreground",
+                "hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 !isCollapsed && "ml-auto"
               )}
             >
-              <PanelLeft className="size-5 cursor-pointer" />
+              <PanelLeft className="size-5 " />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">{isCollapsed ? "Expand" : "Collapse"}</TooltipContent>
@@ -205,7 +205,7 @@ function MobileSidebar() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="fixed top-2 left-2 z-40">
-          <PanelLeft className="size-5 cursor-pointer" />
+          <PanelLeft className="size-5 " />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[80%] max-w-[280px] bg-secondary p-0 py-2">
