@@ -6,10 +6,13 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/lib/hooks"
 import { Notebook, Plus, Pencil, PanelLeft, Moon, Sun } from "lucide-react"
 import { ChatHistory } from "@/components/chat/ChatHistory"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 
 const navigationItems = [
   {
@@ -32,36 +35,13 @@ const navigationItems = [
   }
 ]
 
-export function Sidebar() {
+function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClose?: () => void }) {
   const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(true)
   const { theme, setTheme } = useTheme()
   const { isLoaded } = useUser()
 
   return (
-    <aside
-      className={cn(
-        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground py-2 transition-all duration-200 overflow-hidden",
-        isCollapsed ? "w-14" : "w-56"
-      )}
-    >
-      <div className="flex items-center px-2">
-        {!isCollapsed && <span className="px-2 font-semibold text-foreground whitespace-nowrap">Medical Notes</span>}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className={cn("hover:bg-accent hover:text-accent-foreground", !isCollapsed && "ml-auto")}
-            >
-              <PanelLeft className="size-5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{isCollapsed ? "Expand" : "Collapse"}</TooltipContent>
-        </Tooltip>
-      </div>
-
+    <>
       <div className="flex min-h-0 flex-1 flex-col transition-all duration-200">
         <div className="flex-none p-2">
           <nav className="flex flex-col space-y-1">
@@ -71,6 +51,7 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   data-testid={item.testId}
+                  onClick={onClose}
                   className={cn(
                     "group inline-flex items-center justify-start whitespace-nowrap rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
                     pathname === item.href ? "bg-accent text-accent-foreground" : "bg-transparent"
@@ -103,46 +84,44 @@ export function Sidebar() {
           <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap pb-2">
             <span className="text-foreground/80 flex-none px-4 pt-4 font-medium">Chat History</span>
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin">
-              <ChatHistory />
+              <ChatHistory onNavigate={onClose} />
             </div>
           </div>
         )}
       </div>
 
       <div className="h-[100px] min-h-0 flex-none mt-auto">
-        <>
-          {isCollapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  data-testid="theme-toggle"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  variant="ghost"
-                  className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
-                >
-                  <div className="flex size-6 items-center justify-start">
-                    {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
-                  </div>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                {theme === "dark" ? "Light mode" : "Dark mode"}
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Button
-              data-testid="theme-toggle"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              variant="ghost"
-              className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
-            >
-              <div className="flex size-6 items-center justify-start">
-                {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
-              </div>
-              <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
-            </Button>
-          )}
-        </>
+        {isCollapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                data-testid="theme-toggle"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                variant="ghost"
+                className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                <div className="flex size-6 items-center justify-start">
+                  {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
+                </div>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Button
+            data-testid="theme-toggle"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            variant="ghost"
+            className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+          >
+            <div className="flex size-6 items-center justify-start">
+              {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
+            </div>
+            <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
+          </Button>
+        )}
 
         <div className="h-[50px] flex-none justify-start border-t">
           {!isLoaded ? (
@@ -177,6 +156,77 @@ export function Sidebar() {
           )}
         </div>
       </div>
+    </>
+  )
+}
+
+function DesktopSidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(true)
+
+  return (
+    <aside
+      className={cn(
+        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground py-2 transition-all duration-200 overflow-hidden",
+        isCollapsed ? "w-14" : "w-56"
+      )}
+    >
+      <div className="flex items-center px-2">
+        {!isCollapsed && (
+          <span className="px-2 font-semibold text-foreground whitespace-nowrap">
+            Medical Notes
+          </span>
+        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={cn(
+                "hover:bg-accent hover:text-accent-foreground",
+                !isCollapsed && "ml-auto"
+              )}
+            >
+              <PanelLeft className="size-5 cursor-pointer" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{isCollapsed ? "Expand" : "Collapse"}</TooltipContent>
+        </Tooltip>
+      </div>
+      <SidebarContent isCollapsed={isCollapsed} />
     </aside>
   )
+}
+
+function MobileSidebar() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="fixed top-2 left-2 z-40">
+          <PanelLeft className="size-5 cursor-pointer" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[80%] max-w-[280px] bg-secondary p-0 py-2">
+        <VisuallyHidden.Root>
+          <SheetTitle>Navigation Menu</SheetTitle>
+        </VisuallyHidden.Root>
+        <div className="flex items-center px-4 pb-2">
+          <span className="font-semibold text-foreground">Medical Notes</span>
+        </div>
+        <SidebarContent isCollapsed={false} onClose={() => setOpen(false)} />
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+export function Sidebar() {
+  const isMobile = useIsMobile()
+
+  if (isMobile === undefined) {
+    return null
+  }
+
+  return isMobile ? <MobileSidebar /> : <DesktopSidebar />
 }

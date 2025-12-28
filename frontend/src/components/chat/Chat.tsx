@@ -45,7 +45,7 @@ export default function Chat({
   if (messages.length === 0) {
     return (
       <>
-        <div className="mx-2 flex h-[100dvh] flex-col items-center justify-center gap-6 bg-background lg:mx-10">
+        <div className="flex h-[100dvh] flex-col items-center justify-center gap-6 bg-background mx-10">
           <h1 className="text-center text-4xl font-bold tracking-tight text-primary">
             Medical History AI
           </h1>
