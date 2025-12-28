@@ -1,7 +1,9 @@
 import type { CreateUIMessage, UIMessage } from "@ai-sdk/react"
 import type { ChatRequestOptions } from "ai"
 import type { Dispatch, SetStateAction } from "react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+
+const MOBILE_BREAKPOINT = 768
 export interface UseSendMessageProps {
   sendMessage: (
     message: UIMessage | CreateUIMessage<UIMessage>,
@@ -94,4 +96,20 @@ export default function usePlaceholderUpdater(
       })
     }
   }, [status, ChatMessagesRef])
+}
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+
+    const onChange = () => setIsMobile(mql.matches)
+
+    onChange()
+    mql.addEventListener("change", onChange)
+
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return isMobile
 }

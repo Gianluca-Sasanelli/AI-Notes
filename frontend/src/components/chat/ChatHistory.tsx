@@ -9,7 +9,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChatDropdown } from "./ChatDropdown"
 
-export function ChatHistory() {
+export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   const { data, isLoading } = useQuery({
     queryKey: ["chats", 0, 10],
     queryFn: () => getChatsClient(0, 5),
@@ -35,6 +35,7 @@ export function ChatHistory() {
               >
                 <Link
                   href={`/chat/${chat.id}`}
+                  onClick={onNavigate}
                   className={cn(
                     "flex-1 flex items-center gap-2 px-2 py-1.5 text-sm text-sidebar-foreground rounded-md",
                     isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -52,6 +53,7 @@ export function ChatHistory() {
           {data.hasNext && (
             <Link
               href="/recents"
+              onClick={onNavigate}
               className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:border-sidebar-border hover:bg-sidebar-accent text-xs text-sidebar-foreground"
             >
               <Settings className="mr-2 size-4 shrink-0 text-sidebar-foreground/60" />
