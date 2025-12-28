@@ -6,23 +6,30 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import {
-  Notebook,
-  MessageSquarePlus,
-  Pencil,
-  ChevronLeft,
-  ChevronRight,
-  Moon,
-  Sun
-} from "lucide-react"
+import { Notebook, Plus, Pencil, PanelLeft, Moon, Sun } from "lucide-react"
 import { ChatHistory } from "@/components/chat/ChatHistory"
 
-const navItems = [
-  { href: "/notes", icon: Notebook, label: "Notes" },
-  { href: "/new", icon: Pencil, label: "New Note" },
-  { href: "/chat/new", icon: MessageSquarePlus, label: "New Chat" }
+const navigationItems = [
+  {
+    href: "/notes",
+    title: "Notes",
+    icon: <Notebook className="size-6" />,
+    testId: "nav-notes"
+  },
+  {
+    href: "/new",
+    title: "New Note",
+    icon: <Pencil className="size-6" />,
+    testId: "nav-new"
+  },
+  {
+    href: "/chat/new",
+    title: "New Chat",
+    icon: <Plus className="size-6" />,
+    testId: "nav-chat"
+  }
 ]
 
 export function Sidebar() {
@@ -34,130 +41,135 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col border-r border-sidebar-border bg-sidebar py-4 transition-all duration-200",
+        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground py-2 transition-all duration-200 overflow-hidden",
         isCollapsed ? "w-14" : "w-56"
       )}
     >
-      <div className="flex items-center justify-center px-2">
-        {isCollapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsCollapsed(false)}
-                className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                <ChevronRight className="size-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Expand</TooltipContent>
-          </Tooltip>
-        ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsCollapsed(true)}
-            className="ml-auto text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
+      <div className="flex items-center px-2">
+        {!isCollapsed && <span className="px-2 font-semibold text-foreground whitespace-nowrap">Medical Notes</span>}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={cn("hover:bg-accent hover:text-accent-foreground", !isCollapsed && "ml-auto")}
+            >
+              <PanelLeft className="size-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{isCollapsed ? "Expand" : "Collapse"}</TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col transition-all duration-200">
+        <div className="flex-none p-2">
+          <nav className="flex flex-col space-y-1">
+            {navigationItems.map((item) => {
+              const LinkContent = (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  data-testid={item.testId}
+                  className={cn(
+                    "group inline-flex items-center justify-start whitespace-nowrap rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    pathname === item.href ? "bg-accent text-accent-foreground" : "bg-transparent"
+                  )}
+                >
+                  <div className="size-6 justify-start">{item.icon}</div>
+                  {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                </Link>
+              )
+
+              if (isCollapsed) {
+                return (
+                  <TooltipProvider key={item.href}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>{LinkContent}</TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>{item.title}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )
+              }
+
+              return LinkContent
+            })}
+          </nav>
+        </div>
+
+        {!isCollapsed && (
+          <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap pb-2">
+            <span className="text-foreground/80 flex-none px-4 pt-4 font-medium">Chat History</span>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin">
+              <ChatHistory />
+            </div>
+          </div>
         )}
       </div>
 
-      <nav className="mt-2 flex flex-col gap-1 px-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-          const linkContent = (
+      <div className="h-[100px] min-h-0 flex-none mt-auto">
+        <>
+          {isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  data-testid="theme-toggle"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  variant="ghost"
+                  className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                >
+                  <div className="flex size-6 items-center justify-start">
+                    {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
+                  </div>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {theme === "dark" ? "Light mode" : "Dark mode"}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
             <Button
-              asChild
+              data-testid="theme-toggle"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               variant="ghost"
-              size={isCollapsed ? "icon" : "default"}
-              className={cn(
-                "w-full text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
-                !isCollapsed && "justify-start"
-              )}
+              className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
             >
-              <Link href={item.href}>
-                <item.icon className="size-5" />
-                {!isCollapsed && <span className="ml-2">{item.label}</span>}
-              </Link>
+              <div className="flex size-6 items-center justify-start">
+                {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
+              </div>
+              <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
             </Button>
-          )
+          )}
+        </>
 
-          if (isCollapsed) {
-            return (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
-                <TooltipContent side="right">{item.label}</TooltipContent>
-              </Tooltip>
-            )
-          }
-
-          return <div key={item.href}>{linkContent}</div>
-        })}
-      </nav>
-
-      {!isCollapsed && (
-        <div className="flex flex-1 flex-col overflow-hidden px-2">
-          <span className="mb-2 px-2 text-xs font-medium text-sidebar-foreground/60">History</span>
-          <div className="flex-1 overflow-y-auto scrollbar-thin">
-            <ChatHistory />
-          </div>
-        </div>
-      )}
-
-      <div className="mt-auto flex flex-col items-center gap-2 px-2">
-        {isCollapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
-            <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
-          </Button>
-        )}
-        <div className="h-[50px] flex-none">
+        <div className="h-[50px] flex-none justify-start border-t">
           {!isLoaded ? (
             <div
               className={cn(
-                "animate-pulse rounded-md bg-sidebar-accent",
-                isCollapsed ? "mx-auto size-6" : "mx-2 h-[40px]"
+                "animate-pulse rounded-md bg-muted",
+                isCollapsed ? "mx-auto size-6" : "h-[40px] w-full"
               )}
             />
           ) : (
             <UserButton
               appearance={{
                 elements: {
-                  rootBox: cn(
-                    "size-full hover:bg-sidebar-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground",
-                    isCollapsed && "flex justify-center"
-                  ),
+                  rootBox:
+                    "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 py-2 text-sm font-medium text-foreground",
                   userButtonTrigger: "size-full cursor-pointer",
                   userButtonBox: "size-full",
-                  userButtonAvatarBox: "order-first size-6",
+                  userButtonAvatarBox: cn("order-first size-6"),
                   userButtonOuterIdentifier: cn(
-                    "flex-1 cursor-pointer whitespace-nowrap text-left text-sm text-sidebar-foreground/60",
+                    "flex-1 cursor-pointer whitespace-nowrap text-left text-sm text-muted-foreground",
                     isCollapsed && "hidden"
-                  )
+                  ),
+                  card: "bg-popover border-border",
+                  profileSectionTitle: "text-foreground",
+                  accordionTriggerButton: "text-foreground hover:bg-accent",
+                  accordionContent: "bg-background",
+                  profileSectionContent: "text-muted-foreground"
                 }
               }}
               showName={!isCollapsed}

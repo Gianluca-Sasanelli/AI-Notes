@@ -14,7 +14,6 @@ export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextReques
   }
 
   if (!isPublicRoute(req)) {
-    console.warn("An user is trying to access a protected route")
     await auth.protect({ unauthenticatedUrl: new URL("/", req.url).toString() })
   }
 

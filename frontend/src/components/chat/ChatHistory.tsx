@@ -11,7 +11,7 @@ import { ChatDropdown } from "./ChatDropdown"
 
 export function ChatHistory() {
   const { data, isLoading } = useQuery({
-    queryKey: ["chats", 0, 5],
+    queryKey: ["chats", 0, 10],
     queryFn: () => getChatsClient(0, 5),
     staleTime: 2 * 60 * 1000,
     gcTime: 60 * 60 * 1000
