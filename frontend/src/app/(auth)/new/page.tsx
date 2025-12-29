@@ -12,18 +12,21 @@ import type { NoteMetadata } from "@/db/schema"
 
 export default function NewNotePage() {
   const [content, setContent] = useState("")
-  const [timestamp, setTimestamp] = useState<Date>(new Date())
+  const [startTimestamp, setStartTimestamp] = useState<Date>(new Date())
+  const [endTimestamp, setEndTimestamp] = useState<Date | null>(null)
   const [metadata, setMetadata] = useState<NoteMetadata>({})
   const queryClient = useQueryClient()
 
   const resetState = () => {
     setContent("")
-    setTimestamp(new Date())
+    setStartTimestamp(new Date())
+    setEndTimestamp(null)
     setMetadata({})
   }
 
   const mutation = useMutation({
-    mutationFn: () => createNoteClient(timestamp, content.trim(), metadata),
+    mutationFn: () =>
+      createNoteClient(startTimestamp, content.trim(), metadata, endTimestamp ?? undefined),
     onSuccess: (id) => {
       toast.success(`Note created with id: ${id}`)
       resetState()
@@ -44,7 +47,12 @@ export default function NewNotePage() {
     <div className="flex flex-col items-center justify-center w-full mt-10 px-10">
       <h1 className="text-2xl font-bold mb-7 text-primary text-center">Add New Note</h1>
       <div className="flex flex-col items-center gap-6 w-full max-w-md">
-        <DateTimePicker value={timestamp} onChange={setTimestamp} />
+        <DateTimePicker
+          startTimestamp={startTimestamp}
+          endTimestamp={endTimestamp}
+          onStartChange={setStartTimestamp}
+          onEndChange={setEndTimestamp}
+        />
         <Textarea
           id="content"
           value={content}
