@@ -103,7 +103,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 </div>
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side="right" className="text-secondary-foreground">
               {theme === "dark" ? "Light mode" : "Dark mode"}
             </TooltipContent>
           </Tooltip>
@@ -133,19 +133,19 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
               appearance={{
                 elements: {
                   rootBox:
-                    "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 py-2 text-sm font-medium text-foreground",
+                    "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 py-2 text-sm font-medium text-secondary-foreground",
                   userButtonTrigger: "size-full cursor-pointer",
                   userButtonBox: "size-full",
                   userButtonAvatarBox: cn("order-first size-6"),
                   userButtonOuterIdentifier: cn(
-                    "flex-1 cursor-pointer whitespace-nowrap text-left text-sm text-muted-foreground",
+                    "flex-1 cursor-pointer whitespace-nowrap text-left text-sm !text-secondary-foreground",
                     isCollapsed && "hidden"
                   ),
                   card: "bg-popover border-border",
-                  profileSectionTitle: "text-foreground",
-                  accordionTriggerButton: "text-foreground hover:bg-accent",
+                  profileSectionTitle: "!text-secondary-foreground",
+                  accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
                   accordionContent: "bg-background",
-                  profileSectionContent: "text-muted-foreground"
+                  profileSectionContent: "text-secondary-foreground"
                 }
               }}
               showName={!isCollapsed}

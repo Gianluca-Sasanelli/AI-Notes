@@ -31,7 +31,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
             return (
               <div
                 key={chat.id}
-                className="group relative flex items-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                className="group relative flex items-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground !cursor-pointer"
               >
                 <Link
                   href={`/chat/${chat.id}`}
@@ -44,7 +44,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                   <MessageSquare className="size-4 shrink-0" />
                   <span className="truncate">{chat.title || "Untitled"}</span>
                 </Link>
-                <div className="absolute right-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="absolute right-1 flex items-center opacity-0 transition-opacity group-hover:opacity-100 group-hover:border group-hover:border-sidebar-border group-hover:rounded-md group-hover:bg-card group-hover:hover:border-secondary">
                   <ChatDropdown chatId={chat.id} currentTitle={chat.title || "Untitled"} />
                 </div>
               </div>

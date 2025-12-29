@@ -71,7 +71,7 @@ export default function NewNotePage() {
           onKeyDown={handleKeyDown}
           placeholder="Write your note here..."
           rows={6}
-          className="min-h-[200px] w-full bg-secondary"
+          className="min-h-[200px] w-full bg-secondary focus:border-primary focus:outline-none"
           required
         />
         <MetadataEditor value={metadata} onChange={setMetadata} />
