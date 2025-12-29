@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import { Calendar, FileText, Tag, Pencil, Trash2, Loader2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
@@ -35,24 +35,12 @@ export function NotesList() {
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const queryClient = useQueryClient()
 
-  useEffect(() => {
-    const cached = localStorage.getItem("cached-notes")
-    if (cached) {
-      queryClient.setQueryData(["notes", 0, 10], JSON.parse(cached))
-    }
-  }, [queryClient])
-
   const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit],
     queryFn: () => getNotesClient({ skip, limit }),
     placeholderData: keepPreviousData
   })
 
-  useEffect(() => {
-    if (data && skip === 0 && limit === 10) {
-      localStorage.setItem("cached-notes", JSON.stringify(data))
-    }
-  }, [data, skip, limit])
   const updateMutation = useMutation({
     mutationFn: () => {
       if (editingNoteId === null) {
