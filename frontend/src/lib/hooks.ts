@@ -98,7 +98,7 @@ export default function usePlaceholderUpdater(
   }, [status, ChatMessagesRef])
 }
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)

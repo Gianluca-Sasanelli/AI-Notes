@@ -17,7 +17,6 @@ export function MessageBubble(props: MessageBubbleProps) {
     <div
       className={`flex flex-col ${isUser ? "items-end" : "items-start"} gap-x-2`}
       ref={messageRef ?? undefined}
-      data-testid={isUser ? "user-message" : "assistant-message"}
     >
       {message?.parts?.map((part, index) => {
         if (part.type === "text") {

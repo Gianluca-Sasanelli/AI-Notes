@@ -152,7 +152,7 @@ export function NotesList() {
         open={editingNoteId !== null}
         onOpenChange={(open) => !open && setEditingNoteId(null)}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="w-[90dvh]">
           <DialogHeader>
             <DialogTitle>Edit Note</DialogTitle>
           </DialogHeader>
@@ -191,12 +191,12 @@ export function NotesList() {
         open={deletingNoteId !== null}
         onOpenChange={(open) => !open && setDeletingNoteId(null)}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="w-[70dvh]">
           <DialogHeader>
             <DialogTitle>Delete Note</DialogTitle>
             <DialogDescription>This action cannot be undone.</DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-center lg:justify-end gap-2">
             <Button variant="outline" onClick={() => setDeletingNoteId(null)}>
               Cancel
             </Button>
