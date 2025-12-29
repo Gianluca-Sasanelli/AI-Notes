@@ -39,7 +39,7 @@ export default function Chat({
         queryClient.invalidateQueries({
           queryKey: ["chats"]
         })
-      }, 1000)
+      }, 4000)
     }
   }, [messages.length, chatId, queryClient, isLoadingFromSDK])
   if (messages.length === 0) {
@@ -86,7 +86,7 @@ export default function Chat({
         />
       </div>
       <div
-        className="container sticky bottom-0 z-10 mx-auto flex w-full max-w-3xl flex-col bg-background px-4 pb-5 lg:px-8"
+        className="container sticky bottom-0 z-10 mx-auto flex w-full max-w-3xl flex-col bg-background px-4 pb-2 lg:pb-5 lg:px-8"
         ref={inputRef}
         role="region"
         aria-label="Chat input"

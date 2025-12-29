@@ -45,10 +45,7 @@ export default function RecentsPage() {
           {data.data.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-8 text-center">
               <p className="text-muted-foreground">No chat history yet</p>
-              <Link
-                href="/chat/new"
-                className="mt-4 inline-block text-sm text-primary hover:underline"
-              >
+              <Link href="/chat" className="mt-4 inline-block text-sm text-primary hover:underline">
                 Start a new chat
               </Link>
             </div>

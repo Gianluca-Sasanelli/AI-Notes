@@ -93,21 +93,19 @@ export function ChatDropdown({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger data-testid="chat-options-btn">
+        <DropdownMenuTrigger>
           <MoreHorizontal
             className={`${iconsize} shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 ${className}`}
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
-            data-testid="chat-rename"
             onClick={() => setIsRenameOpen(true)}
             className="cursor-pointer text-lg"
           >
             Rename
           </DropdownMenuItem>
           <DropdownMenuItem
-            data-testid="chat-delete"
             className="cursor-pointer text-lg text-destructive"
             onClick={handleDelete}
             disabled={isDeletingChat}

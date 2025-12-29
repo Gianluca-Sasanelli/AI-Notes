@@ -110,7 +110,7 @@ const ChatInput = React.memo(function ChatInput({
   }
 
   return (
-    <div className="flex w-full flex-col rounded-xl border-2 py-2 pl-2 shadow-md">
+    <div className="flex w-full flex-col rounded-xl border-2 pl-1 py-1 lg:py-2 lg:py-2 shadow-md">
       {attachedFiles.length > 0 && (
         <div className="flex flex-wrap gap-2 pr-2">
           {attachedFiles.map((file, index) => (
@@ -148,14 +148,13 @@ const ChatInput = React.memo(function ChatInput({
           className="hidden"
         />
         <Textarea
-          data-testid="chat-input"
           ref={taRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           placeholder="Ask about your notes, or health issues..."
-          className="max-h-[35vh] overflow-y-auto border-none bg-transparent pl-0 text-base focus:outline-none focus:ring-0 "
+          className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0 "
         />
         <div className="flex max-h-[30%] justify-between pr-2">
           <div className="flex items-center gap-2">
@@ -190,7 +189,6 @@ const ChatInput = React.memo(function ChatInput({
                 size="icon"
                 className="hover:bg-primary/10"
                 title={isLoading ? "Generating..." : "Send Message"}
-                data-testid="chat-send-button"
               >
                 {isLoading ? (
                   <Loader2 className="size-6 animate-spin" />

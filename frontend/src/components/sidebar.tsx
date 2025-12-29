@@ -28,7 +28,7 @@ const navigationItems = [
     testId: "nav-new"
   },
   {
-    href: "/chat/new",
+    href: "/chat",
     title: "New Chat",
     icon: <Plus className="size-6" />,
     testId: "nav-chat"
@@ -50,7 +50,6 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 <Link
                   key={item.href}
                   href={item.href}
-                  data-testid={item.testId}
                   onClick={onClose}
                   className={cn(
                     "group inline-flex items-center justify-start whitespace-nowrap rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
@@ -95,7 +94,6 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                data-testid="theme-toggle"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 variant="ghost"
                 className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
@@ -111,7 +109,6 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
           </Tooltip>
         ) : (
           <Button
-            data-testid="theme-toggle"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             variant="ghost"
             className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
@@ -223,10 +220,6 @@ function MobileSidebar() {
 
 export function Sidebar() {
   const isMobile = useIsMobile()
-
-  if (isMobile === undefined) {
-    return null
-  }
 
   return isMobile ? <MobileSidebar /> : <DesktopSidebar />
 }
