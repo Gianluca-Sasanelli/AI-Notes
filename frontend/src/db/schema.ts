@@ -1,5 +1,7 @@
 import { ChatUIMessage } from "@/lib/types/chat-types"
-import { pgTable, integer, timestamp, jsonb, text, index } from "drizzle-orm/pg-core"
+import { pgTable, pgEnum, integer, timestamp, jsonb, text, index } from "drizzle-orm/pg-core"
+
+export const granularityEnum = pgEnum("granularity", ["hour", "day", "month"])
 
 export type NoteMetadata = Record<string, string | number | boolean>
 
@@ -8,13 +10,15 @@ export const notes = pgTable(
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: text().notNull(),
-    timestamp: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    startTimestamp: timestamp({ withTimezone: true }).notNull(),
+    endTimestamp: timestamp({ withTimezone: true }),
+    granularity: granularityEnum().notNull().default("day"),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     content: text().notNull(),
     metadata: jsonb().$type<NoteMetadata>()
   },
-  (table) => [index("notes_timestamp_idx").on(table.timestamp)]
+  (table) => [index("notes_start_timestamp_idx").on(table.startTimestamp)]
 )
 
 export const chats = pgTable(

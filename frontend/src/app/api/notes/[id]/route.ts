@@ -17,8 +17,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const body = (await request.json()) as UpdateNoteData
-  if (body.timestamp) {
-    body.timestamp = new Date(body.timestamp)
+  if (body.startTimestamp) {
+    body.startTimestamp = new Date(body.startTimestamp)
+  }
+  if (body.endTimestamp) {
+    body.endTimestamp = new Date(body.endTimestamp)
   }
 
   try {

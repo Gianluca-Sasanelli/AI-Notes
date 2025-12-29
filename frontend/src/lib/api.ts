@@ -1,17 +1,30 @@
 import {
   ChatHistoryItem,
   NoteData,
+  NoteGranularity,
   PaginatedResponse,
   PaginationOptions,
   UpdateNoteData
 } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 
-export async function createNoteClient(timestamp: Date, content: string, metadata: NoteMetadata) {
+export async function createNoteClient(
+  startTimestamp: Date,
+  content: string,
+  metadata: NoteMetadata,
+  endTimestamp?: Date,
+  granularity?: NoteGranularity
+) {
   const res = await fetch("/api/notes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ timestamp: timestamp.toISOString(), content, metadata })
+    body: JSON.stringify({
+      startTimestamp: startTimestamp.toISOString(),
+      endTimestamp: endTimestamp?.toISOString(),
+      granularity,
+      content,
+      metadata
+    })
   })
   if (!res.ok) {
     const error = await res.json()
@@ -40,7 +53,10 @@ export async function getNotesClient(options: PaginationOptions = {}) {
 export async function updateNoteClient(id: number, data: UpdateNoteData) {
   const body = {
     ...data,
-    timestamp: data.timestamp instanceof Date ? data.timestamp.toISOString() : data.timestamp
+    startTimestamp:
+      data.startTimestamp instanceof Date ? data.startTimestamp.toISOString() : data.startTimestamp,
+    endTimestamp:
+      data.endTimestamp instanceof Date ? data.endTimestamp.toISOString() : data.endTimestamp
   }
   const res = await fetch(`/api/notes/${id}`, {
     method: "PATCH",

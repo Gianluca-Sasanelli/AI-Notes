@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server"
 import { createNote, getNotes } from "@/db/db-functions"
-import { ErrorData } from "@/lib/types/database-types"
+import { ErrorData, NoteGranularity } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import type { NoteMetadata } from "@/db/schema"
 
@@ -29,13 +29,23 @@ export async function POST(request: Request) {
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const { timestamp, content, metadata } = (await request.json()) as {
-    timestamp: string
-    content: string
-    metadata: NoteMetadata
-  }
+  const { startTimestamp, endTimestamp, granularity, content, metadata } =
+    (await request.json()) as {
+      startTimestamp: string
+      endTimestamp?: string
+      granularity?: NoteGranularity
+      content: string
+      metadata: NoteMetadata
+    }
   try {
-    const id = await createNote(userId, content, new Date(timestamp), metadata)
+    const id = await createNote(
+      userId,
+      content,
+      new Date(startTimestamp),
+      metadata,
+      endTimestamp ? new Date(endTimestamp) : undefined,
+      granularity
+    )
     return NextResponse.json(
       { id },
       {

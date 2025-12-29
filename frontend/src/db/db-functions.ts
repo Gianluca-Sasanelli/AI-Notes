@@ -1,7 +1,7 @@
 import { db } from "@/index"
 import { notes, chats, type NoteMetadata } from "@/db/schema"
-import { desc, count, eq, and } from "drizzle-orm"
-import type { UpdateNoteData } from "@/lib/types/database-types"
+import { desc, count, eq, and, sql } from "drizzle-orm"
+import type { UpdateNoteData, NoteGranularity } from "@/lib/types/database-types"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
 import { removeDataPartsFromMessages } from "@/lib/utils"
 import { generateTitle } from "@/lib/agents/title-generations"
@@ -10,12 +10,14 @@ import { ModelMessage } from "ai"
 export const createNote = async (
   userId: string,
   content: string,
-  timestamp: Date,
-  metadata: NoteMetadata
+  startTimestamp: Date,
+  metadata: NoteMetadata,
+  endTimestamp?: Date,
+  granularity?: NoteGranularity
 ) => {
   const [note] = await db
     .insert(notes)
-    .values({ userId, content, timestamp, metadata })
+    .values({ userId, content, startTimestamp, endTimestamp, granularity, metadata })
     .returning({ id: notes.id })
   return note.id
 }
@@ -29,7 +31,9 @@ export const getNotes = async (
   const items = await db
     .select({
       id: notes.id,
-      timestamp: notes.timestamp,
+      startTimestamp: notes.startTimestamp,
+      endTimestamp: notes.endTimestamp,
+      granularity: notes.granularity,
       createdAt: notes.createdAt,
       updatedAt: notes.updatedAt,
       content: notes.content,
@@ -37,7 +41,7 @@ export const getNotes = async (
     })
     .from(notes)
     .where(eq(notes.userId, userId))
-    .orderBy(desc(notes.timestamp))
+    .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
     .limit(limit + 1)
     .offset(skip)
   const hasNext = items.length > limit
