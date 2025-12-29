@@ -14,7 +14,13 @@ interface DateTimePickerProps {
   onStartChange: (date: Date) => void
   onEndChange: (date: Date | null) => void
 }
-
+const isSameDay = (date1: Date, date2: Date) => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  )
+}
 export function DateTimePicker({
   startTimestamp,
   endTimestamp,
@@ -41,25 +47,26 @@ export function DateTimePicker({
   }, [endTimestamp])
 
   const handleRangeSelect = (range: DateRange | undefined) => {
-    console.log("range", range)
     if (!range) return
-    if (range.from) {
-      const newStart = new Date(range.from)
-      newStart.setHours(startTimestamp.getHours(), 0, 0, 0)
-      onStartChange(newStart)
+    const RangeFrom = range?.from ? new Date(range.from) : null
+
+    let RangeTo: Date | null = range?.to ? new Date(range.to) : null
+    if (RangeTo && RangeFrom && isSameDay(RangeTo, RangeFrom)) {
+      RangeTo = null
     }
-    if (range.to) {
-      const newEnd = new Date(range.to)
-      newEnd.setHours(endTimestamp?.getHours() ?? 23, 0, 0, 0)
-      onEndChange(newEnd)
-    } else {
-      onEndChange(null)
+    console.log("RangeTo", RangeTo)
+    console.log("RangeFrom", RangeFrom)
+    if (RangeFrom) {
+      onStartChange(RangeFrom)
     }
+
+    onEndChange(RangeTo)
   }
 
   const formatDisplay = () => {
     const startStr = format(startTimestamp, "MMM d")
     if (endTimestamp) {
+      console.log("endTimestamp", endTimestamp)
       const endStr = format(endTimestamp, "MMM d")
       return `${startStr} → ${endStr}`
     }
@@ -86,6 +93,7 @@ export function DateTimePicker({
           selected={{ from: startTimestamp, to: endTimestamp ?? undefined }}
           onSelect={handleRangeSelect}
           autoFocus
+          captionLayout="dropdown-years"
         />
       </PopoverContent>
     </Popover>
