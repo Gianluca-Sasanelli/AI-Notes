@@ -29,6 +29,13 @@
       "when": 1766853626620,
       "tag": "0003_wooden_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767021222551,
+      "tag": "0004_clear_maggott",
+      "breakpoints": true
     }
   ]
 }

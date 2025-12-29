@@ -10,7 +10,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "format:lint": "bun format && bun lint",
-    "db:reset": "bun scripts/db-reset.ts && bunx drizzle-kit push"
+    "db:reset": "bun scripts/db-reset.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.1",

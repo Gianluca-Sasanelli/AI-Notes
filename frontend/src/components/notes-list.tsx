@@ -1,13 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { format } from "date-fns"
-import { Calendar, Clock, FileText, Tag, Pencil, Trash2 } from "lucide-react"
+import { Calendar, FileText, Tag, Pencil, Trash2, Loader2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
@@ -21,8 +19,9 @@ import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { getNotesClient, updateNoteClient, deleteNoteClient } from "@/lib/api"
 import { toast } from "sonner"
-import type { NoteData } from "@/lib/types/database-types"
+import type { NoteData, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
+import { formatTimestampRange } from "@/lib/notes-utils"
 
 export function NotesList() {
   const [skip, setSkip] = useState(0)
@@ -30,9 +29,18 @@ export function NotesList() {
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
   const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState("")
-  const [editingTimestamp, setEditingTimestamp] = useState(new Date())
+  const [editingStartTimestamp, setEditingStartTimestamp] = useState(new Date())
+  const [editingEndTimestamp, setEditingEndTimestamp] = useState<Date | null>(null)
+  const [editingGranularity, setEditingGranularity] = useState<NoteGranularity>("day")
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    const cached = localStorage.getItem("cached-notes")
+    if (cached) {
+      queryClient.setQueryData(["notes", 0, 10], JSON.parse(cached))
+    }
+  }, [queryClient])
 
   const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit],
@@ -40,6 +48,11 @@ export function NotesList() {
     placeholderData: keepPreviousData
   })
 
+  useEffect(() => {
+    if (data && skip === 0 && limit === 10) {
+      localStorage.setItem("cached-notes", JSON.stringify(data))
+    }
+  }, [data, skip, limit])
   const updateMutation = useMutation({
     mutationFn: () => {
       if (editingNoteId === null) {
@@ -48,7 +61,9 @@ export function NotesList() {
       }
       return updateNoteClient(editingNoteId, {
         content: editingContent.trim(),
-        timestamp: editingTimestamp,
+        startTimestamp: editingStartTimestamp,
+        endTimestamp: editingEndTimestamp,
+        granularity: editingGranularity,
         metadata: editingMetadata
       })
     },
@@ -87,17 +102,23 @@ export function NotesList() {
 
   const handleEditOpen = (note: NoteData) => {
     setEditingContent(note.content)
-    setEditingTimestamp(new Date(note.timestamp))
+    setEditingStartTimestamp(new Date(note.startTimestamp))
+    setEditingEndTimestamp(note.endTimestamp ? new Date(note.endTimestamp) : null)
+    setEditingGranularity(note.granularity)
     setEditingMetadata(note.metadata)
     setEditingNoteId(note.id)
   }
 
-  if (isLoading) {
-    return <NotesListSkeleton />
-  }
-
   const notes = data?.data ?? []
   const hasNext = data?.hasNext ?? false
+
+  if (!data && isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   if (notes.length === 0) {
     return (
@@ -148,7 +169,14 @@ export function NotesList() {
             <DialogTitle>Edit Note</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <DateTimePicker value={editingTimestamp} onChange={setEditingTimestamp} />
+            <DateTimePicker
+              startTimestamp={editingStartTimestamp}
+              endTimestamp={editingEndTimestamp}
+              onStartChange={setEditingStartTimestamp}
+              onEndChange={setEditingEndTimestamp}
+              granularity={editingGranularity}
+              onGranularityChange={setEditingGranularity}
+            />
             <Textarea
               value={editingContent}
               onChange={(e) => setEditingContent(e.target.value)}
@@ -216,11 +244,11 @@ function NoteCard({
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
-              {format(new Date(note.timestamp), "EEE, MMM d, yyyy")}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
-              {format(new Date(note.timestamp), "HH:mm")}
+              {formatTimestampRange(
+                new Date(note.startTimestamp),
+                note.endTimestamp ? new Date(note.endTimestamp) : null,
+                note.granularity
+              )}
             </span>
           </div>
 
@@ -249,40 +277,5 @@ function NoteCard({
         </div>
       </div>
     </Card>
-  )
-}
-function NotesListSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-9 w-[130px]" />
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-16" />
-          <div className="flex gap-2">
-            <Skeleton className="h-9 w-9" />
-            <Skeleton className="h-9 w-9" />
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Card key={i} className="p-4">
-            <div className="space-y-3">
-              <div className="flex gap-4">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <div className="flex gap-2 pt-1">
-                <Skeleton className="h-5 w-20 rounded-full" />
-                <Skeleton className="h-5 w-16 rounded-full" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
   )
 }
