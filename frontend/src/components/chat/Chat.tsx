@@ -75,7 +75,7 @@ export default function Chat({
   }
 
   return (
-    <div className="h-[100dvh]">
+    <>
       <div className="container mx-auto max-w-3xl flex-1 px-4 pt-3 lg:px-8">
         <ChatMessages
           messages={messages}
@@ -97,6 +97,6 @@ export default function Chat({
           onStopGeneration={stop}
         />
       </div>
-    </div>
+    </>
   )
 }

@@ -169,7 +169,7 @@ export function NotesList() {
               value={editingContent}
               onChange={(e) => setEditingContent(e.target.value)}
               rows={5}
-              className="min-h-[120px]"
+              className="min-h-[120px] focus:border-primary focus:outline-none"
             />
             <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
             <div className="flex justify-end gap-2">

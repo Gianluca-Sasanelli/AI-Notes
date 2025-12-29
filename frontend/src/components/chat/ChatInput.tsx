@@ -110,7 +110,7 @@ const ChatInput = React.memo(function ChatInput({
   }
 
   return (
-    <div className="flex w-full flex-col rounded-xl border-2 pl-1 py-1 lg:py-2 lg:py-2 shadow-md">
+    <div className="flex w-full flex-col rounded-xl border-2 pl-1 py-1 lg:py-2 lg:pl-2 shadow-md focus-within:border-primary">
       {attachedFiles.length > 0 && (
         <div className="flex flex-wrap gap-2 pr-2">
           {attachedFiles.map((file, index) => (
