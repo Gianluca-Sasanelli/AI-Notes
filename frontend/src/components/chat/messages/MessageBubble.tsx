@@ -1,14 +1,19 @@
-import type { ChatUIMessage } from "@/lib/types/chat-types"
+import type { ChatUIMessage, ChatUIMessagePart } from "@/lib/types/chat-types"
 import Image from "next/image"
 
 import MessageReasoning from "./parts/messageReasoning"
 import MessageUI from "./parts/messageText"
-
+import ToolCallWidget from "./widgets/messageTool"
 interface MessageBubbleProps {
   message: ChatUIMessage
   messageRef?: React.RefObject<HTMLDivElement | null>
 }
+type ToolTypes<T> = T extends `tool-${string}` ? T : never
+type ToolPartTypes = ToolTypes<ChatUIMessagePart["type"]>
 
+function isToolPart(part: ChatUIMessagePart): part is ChatUIMessagePart & { type: ToolPartTypes } {
+  return part.type.startsWith("tool")
+}
 export function MessageBubble(props: MessageBubbleProps) {
   const { message, messageRef } = props
   const isUser = message.role === "user"
@@ -35,6 +40,23 @@ export function MessageBubble(props: MessageBubbleProps) {
                 width={100}
                 height={100}
                 className="object-cover"
+              />
+            </div>
+          )
+        }
+        if (isToolPart(part)) {
+          const name = part.type.split("-")[1]
+          return (
+            <div key={`${message.id}-${index}-${part.type}`} className="flex w-full justify-center">
+              <ToolCallWidget
+                toolName={name}
+                state={
+                  part.state as
+                    | "input-streaming"
+                    | "input-available"
+                    | "output-available"
+                    | "output-error"
+                }
               />
             </div>
           )

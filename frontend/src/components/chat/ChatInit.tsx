@@ -27,7 +27,7 @@ export default function ChatInit({
 }: ChatInitPropsWithChatId | ChatInitPropsWithoutChatId) {
   return (
     // <ChatProvider initialState={storedState ?? initializeChatState()}>
-    <div className={cn("flex-1 flex flex-col overflow-y-auto h-100dvh", scrollbarClassName)}>
+    <div className={cn("flex-1 flex flex-col overflow-y-auto h-[100dvh]", scrollbarClassName)}>
       <Chat
         storedmessages={storedmessages.length > 0 ? storedmessages : undefined}
         chatId={chatId}
