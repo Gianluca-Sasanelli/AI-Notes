@@ -9,11 +9,13 @@ import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { toast } from "sonner"
 import { createNoteClient } from "@/lib/api"
 import type { NoteMetadata } from "@/db/schema"
+import type { NoteGranularity } from "@/lib/types/database-types"
 
 export default function NewNotePage() {
   const [content, setContent] = useState("")
   const [startTimestamp, setStartTimestamp] = useState<Date>(new Date())
   const [endTimestamp, setEndTimestamp] = useState<Date | null>(null)
+  const [granularity, setGranularity] = useState<NoteGranularity>("day")
   const [metadata, setMetadata] = useState<NoteMetadata>({})
   const queryClient = useQueryClient()
 
@@ -21,12 +23,19 @@ export default function NewNotePage() {
     setContent("")
     setStartTimestamp(new Date())
     setEndTimestamp(null)
+    setGranularity("day")
     setMetadata({})
   }
 
   const mutation = useMutation({
     mutationFn: () =>
-      createNoteClient(startTimestamp, content.trim(), metadata, endTimestamp ?? undefined),
+      createNoteClient(
+        startTimestamp,
+        content.trim(),
+        metadata,
+        endTimestamp ?? undefined,
+        granularity
+      ),
     onSuccess: (id) => {
       toast.success(`Note created with id: ${id}`)
       resetState()
@@ -52,6 +61,8 @@ export default function NewNotePage() {
           endTimestamp={endTimestamp}
           onStartChange={setStartTimestamp}
           onEndChange={setEndTimestamp}
+          granularity={granularity}
+          onGranularityChange={setGranularity}
         />
         <Textarea
           id="content"
