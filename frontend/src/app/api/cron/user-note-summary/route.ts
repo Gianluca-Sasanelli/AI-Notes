@@ -25,16 +25,14 @@ export async function POST() {
 
   if (!existingSummary && latestNotes.length < 5) {
     return NextResponse.json<ErrorData>(
-      { message: "Not enough notes. Notes count: " + latestNotes.length },
+      { message: "There are only " + latestNotes.length + " notes. At least 5 are required." },
       { status: 400 }
     )
-  }
-
-  if (existingSummary && latestNotes.length === 0) {
-    return NextResponse.json({
-      message: "No new notes since last summary",
-      summary: existingSummary.notesSummary
-    })
+  } else if (existingSummary && latestNotes.length === 0) {
+    return NextResponse.json<ErrorData>(
+      { message: "No new notes since last summary" },
+      { status: 400 }
+    )
   }
 
   const notesText = latestNotes

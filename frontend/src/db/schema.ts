@@ -5,14 +5,15 @@ export const granularityEnum = pgEnum("granularity", ["hour", "day", "month"])
 
 export type NoteMetadata = Record<string, string | number | boolean>
 
+// When start timestamp is null the granularity is null. The note is considered timeless in the frontend types.
 export const notes = pgTable(
   "notes",
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: text().notNull(),
-    startTimestamp: timestamp({ withTimezone: true }).notNull(),
+    startTimestamp: timestamp({ withTimezone: true }),
     endTimestamp: timestamp({ withTimezone: true }),
-    granularity: granularityEnum().notNull().default("day"),
+    granularity: granularityEnum(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     content: text().notNull(),

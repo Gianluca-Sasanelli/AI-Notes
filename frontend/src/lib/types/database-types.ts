@@ -19,12 +19,36 @@ export type PaginatedResponse<T> = {
   hasNext: boolean
   total?: number
 }
-export type NoteData = Omit<InferSelectModel<typeof notes>, "userId">
-export type NewNoteData = Omit<InferInsertModel<typeof notes>, "userId">
-export type UpdateNoteData = Partial<Omit<NoteData, "id">> & {
-  content?: Exclude<NoteData["content"], "">
+type BaseNoteData = Omit<InferSelectModel<typeof notes>, "userId">
+
+export type TimeNote = BaseNoteData & {
+  startTimestamp: Date
+  granularity: "hour" | "day" | "month"
 }
-export type NoteGranularity = NoteData["granularity"]
+
+export type TimelessNote = BaseNoteData & {
+  startTimestamp: null
+  granularity: null
+}
+
+export type NoteData = TimeNote | TimelessNote
+export type NewNoteData = Omit<InferInsertModel<typeof notes>, "userId">
+export type UpdateNoteData = Partial<Omit<BaseNoteData, "id">> & {
+  content?: Exclude<BaseNoteData["content"], "">
+}
+export type NoteGranularity = "hour" | "day" | "month"
+export type TimeNoteSummary = Pick<
+  TimeNote,
+  "id" | "content" | "startTimestamp" | "endTimestamp" | "updatedAt"
+>
+
+export const isTimelessNote = (note: NoteData): note is TimelessNote => {
+  return note.startTimestamp === null
+}
+
+export const isTimeNote = (note: NoteData): note is TimeNote => {
+  return note.startTimestamp !== null
+}
 export type ChatData = Omit<InferSelectModel<typeof chats>, "userId">
 export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
 export type UserSummaryData = InferSelectModel<typeof userSummaries>
