@@ -20,8 +20,8 @@ export async function POST() {
   const existingSummary = await getUserSummary(userId)
 
   const latestNotes = existingSummary
-    ? await getNotesAfterDate(userId, existingSummary.updatedAt, 10)
-    : await getLatestNotes(userId, 10)
+    ? await getNotesAfterDate(userId, existingSummary.updatedAt, 50)
+    : await getLatestNotes(userId, 50)
 
   if (!existingSummary && latestNotes.length < 5) {
     return NextResponse.json<ErrorData>(
