@@ -135,3 +135,14 @@ export async function updateUserSummaryClient(notesSummary: string) {
     throw new Error(error.message)
   }
 }
+
+export async function regenerateUserSummaryClient() {
+  const res = await fetch("/api/cron/user-note-summary", {
+    method: "POST"
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+  return res.json()
+}

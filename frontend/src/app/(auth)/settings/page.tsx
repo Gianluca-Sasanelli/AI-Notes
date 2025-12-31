@@ -6,8 +6,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { Loader2, Sun, Moon, Monitor } from "lucide-react"
-import { getUserSummaryClient, updateUserSummaryClient } from "@/lib/api"
+import { Loader2, Sun, Moon, Monitor, RefreshCw } from "lucide-react"
+import {
+  getUserSummaryClient,
+  updateUserSummaryClient,
+  regenerateUserSummaryClient
+} from "@/lib/api"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -33,6 +37,18 @@ export default function SettingsPage() {
     },
     onError: () => {
       toast.error("Failed to save summary")
+    }
+  })
+
+  const { mutate: regenerateSummary, isPending: isRegenerating } = useMutation({
+    mutationFn: regenerateUserSummaryClient,
+    onSuccess: () => {
+      toast.success("Summary regenerated from your notes")
+      queryClient.invalidateQueries({ queryKey: ["userSummary"] })
+      setEditedSummary(null)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to regenerate summary")
     }
   })
 
@@ -108,8 +124,20 @@ export default function SettingsPage() {
                   Last updated: {new Date(summary.updatedAt).toLocaleString()}
                 </p>
               )}
-              <div className="flex justify-end mt-4">
-                <Button onClick={handleSave} disabled={!hasChanges || isSaving}>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => regenerateSummary()}
+                  disabled={isRegenerating || isSaving}
+                >
+                  {isRegenerating ? (
+                    <Loader2 className="size-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="size-4 mr-2" />
+                  )}
+                  Regenerate from Notes
+                </Button>
+                <Button onClick={handleSave} disabled={!hasChanges || isSaving || isRegenerating}>
                   {isSaving && <Loader2 className="size-4 mr-2 animate-spin" />}
                   Save Changes
                 </Button>
