@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,11 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const queryClient = useQueryClient()
   const [editedSummary, setEditedSummary] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true))
+  }, [])
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ["userSummary"],
@@ -35,7 +40,7 @@ export default function SettingsPage() {
   const hasChanges = editedSummary !== null && editedSummary !== (summary?.notesSummary ?? "")
 
   const handleSave = () => {
-    if (editedSummary !== null) {
+    if (editedSummary !== null && editedSummary.trim() !== "") {
       updateSummary(editedSummary)
     }
   }
@@ -53,7 +58,7 @@ export default function SettingsPage() {
           <p className="text-sm text-muted-foreground mb-4">Choose your preferred color scheme.</p>
           <div className="flex gap-2">
             <Button
-              variant={theme === "light" ? "default" : "outline"}
+              variant={mounted && theme === "light" ? "default" : "outline"}
               onClick={() => setTheme("light")}
               className="flex-1"
             >
@@ -61,7 +66,7 @@ export default function SettingsPage() {
               Light
             </Button>
             <Button
-              variant={theme === "dark" ? "default" : "outline"}
+              variant={mounted && theme === "dark" ? "default" : "outline"}
               onClick={() => setTheme("dark")}
               className="flex-1"
             >
@@ -69,7 +74,7 @@ export default function SettingsPage() {
               Dark
             </Button>
             <Button
-              variant={theme === "system" ? "default" : "outline"}
+              variant={mounted && theme === "system" ? "default" : "outline"}
               onClick={() => setTheme("system")}
               className="flex-1"
             >
