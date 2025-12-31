@@ -1,12 +1,15 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { db } from "@/index"
-import { notes, userSummaries } from "@/db/schema"
 import { generateText } from "ai"
 import { GOOGLE_MODEL, getModelInstance } from "@/lib/agents/models"
 import { buildUserNotesSummaryPrompt } from "@/lib/agents/system-prompts/prompts"
 import { ErrorData } from "@/lib/types/database-types"
-import { eq, and, gt, desc, sql } from "drizzle-orm"
+import {
+  getUserSummary,
+  upsertUserSummary,
+  getNotesAfterDate,
+  getLatestNotes
+} from "@/db/db-functions"
 
 export async function POST() {
   const { userId } = await auth()
@@ -14,29 +17,11 @@ export async function POST() {
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const [existingSummary] = await db
-    .select()
-    .from(userSummaries)
-    .where(eq(userSummaries.userId, userId))
-    .limit(1)
+  const existingSummary = await getUserSummary(userId)
 
-  const notesQuery = db
-    .select({
-      id: notes.id,
-      content: notes.content,
-      startTimestamp: notes.startTimestamp,
-      updatedAt: notes.updatedAt
-    })
-    .from(notes)
-    .where(
-      existingSummary
-        ? and(eq(notes.userId, userId), gt(notes.updatedAt, existingSummary.updatedAt))
-        : eq(notes.userId, userId)
-    )
-    .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
-    .limit(10)
-
-  const latestNotes = await notesQuery
+  const latestNotes = existingSummary
+    ? await getNotesAfterDate(userId, existingSummary.updatedAt, 10)
+    : await getLatestNotes(userId, 10)
 
   if (!existingSummary && latestNotes.length < 5) {
     return NextResponse.json<ErrorData>(
@@ -76,13 +61,7 @@ export async function POST() {
     return NextResponse.json<ErrorData>({ message: errorMessage }, { status: 500 })
   }
 
-  await db
-    .insert(userSummaries)
-    .values({ userId, notesSummary: summary })
-    .onConflictDoUpdate({
-      target: userSummaries.userId,
-      set: { notesSummary: summary, updatedAt: new Date() }
-    })
+  await upsertUserSummary(userId, summary)
 
   return NextResponse.json({
     message: existingSummary ? "Summary updated" : "Summary created",

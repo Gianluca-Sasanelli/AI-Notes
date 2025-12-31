@@ -1,6 +1,6 @@
 import { db } from "@/index"
-import { notes, chats, type NoteMetadata } from "@/db/schema"
-import { desc, count, eq, and, sql } from "drizzle-orm"
+import { notes, chats, userSummaries, type NoteMetadata } from "@/db/schema"
+import { desc, count, eq, and, gt, sql } from "drizzle-orm"
 import type { UpdateNoteData, NoteGranularity } from "@/lib/types/database-types"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
 import { removeDataPartsFromMessages } from "@/lib/utils"
@@ -161,5 +161,60 @@ export const deleteChat = async (userId: string, id: string) => {
   logger.debug("db", "Deleting chat", { chatId: id })
   return withTiming("db", "deleteChat", async () => {
     await db.delete(chats).where(and(eq(chats.id, id), eq(chats.userId, userId)))
+  })
+}
+
+export const getUserSummary = async (userId: string) => {
+  logger.debug("db", "Fetching user summary", { userId })
+  return withTiming("db", "getUserSummary", async () => {
+    const [summary] = await db.select().from(userSummaries).where(eq(userSummaries.userId, userId))
+    return summary ?? null
+  })
+}
+
+export const upsertUserSummary = async (userId: string, notesSummary: string) => {
+  logger.debug("db", "Upserting user summary", { userId })
+  return withTiming("db", "upsertUserSummary", async () => {
+    await db
+      .insert(userSummaries)
+      .values({ userId, notesSummary })
+      .onConflictDoUpdate({
+        target: userSummaries.userId,
+        set: { notesSummary, updatedAt: new Date() }
+      })
+  })
+}
+
+export const getNotesAfterDate = async (userId: string, afterDate: Date, limit: number = 10) => {
+  logger.debug("db", "Fetching notes after date", { userId, afterDate, limit })
+  return withTiming("db", "getNotesAfterDate", async () => {
+    return db
+      .select({
+        id: notes.id,
+        content: notes.content,
+        startTimestamp: notes.startTimestamp,
+        updatedAt: notes.updatedAt
+      })
+      .from(notes)
+      .where(and(eq(notes.userId, userId), gt(notes.updatedAt, afterDate)))
+      .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
+      .limit(limit)
+  })
+}
+
+export const getLatestNotes = async (userId: string, limit: number = 10) => {
+  logger.debug("db", "Fetching latest notes", { userId, limit })
+  return withTiming("db", "getLatestNotes", async () => {
+    return db
+      .select({
+        id: notes.id,
+        content: notes.content,
+        startTimestamp: notes.startTimestamp,
+        updatedAt: notes.updatedAt
+      })
+      .from(notes)
+      .where(eq(notes.userId, userId))
+      .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
+      .limit(limit)
   })
 }
