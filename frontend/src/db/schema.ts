@@ -33,3 +33,10 @@ export const chats = pgTable(
   },
   (table) => [index("chats_updatedAt_idx").on(table.updatedAt)]
 )
+
+export const userSummaries = pgTable("user_summaries", {
+  userId: text().primaryKey(),
+  notesSummary: text().notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
+})
