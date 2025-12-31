@@ -38,7 +38,10 @@ export async function POST() {
   }
 
   const notesText = latestNotes
-    .map((n, i) => `Note ${i + 1} (${n.startTimestamp.toISOString()}):\n${n.content}`)
+    .map(
+      (n, i) =>
+        `Note ${i + 1} (${n.startTimestamp.toISOString()} - ${n.endTimestamp?.toISOString?.() || "N/A"}):\n${n.content}`
+    )
     .join("\n\n")
 
   const prompt = buildUserNotesSummaryPrompt(
