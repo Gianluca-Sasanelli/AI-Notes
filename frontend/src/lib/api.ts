@@ -1,25 +1,27 @@
 import {
   ChatHistoryItem,
-  NoteData,
   NoteGranularity,
   PaginatedResponse,
   PaginationOptions,
+  TimeNote,
+  TimelessNote,
   UpdateNoteData,
   UserSummaryData
 } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 
-export async function createNoteClient(
-  startTimestamp: Date,
+export async function createTimeNoteClient(
   content: string,
   metadata: NoteMetadata,
-  endTimestamp?: Date,
-  granularity?: NoteGranularity
+  startTimestamp: Date,
+  granularity: NoteGranularity,
+  endTimestamp?: Date
 ) {
   const res = await fetch("/api/notes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      timeless: false,
       startTimestamp: startTimestamp.toISOString(),
       endTimestamp: endTimestamp?.toISOString(),
       granularity,
@@ -31,16 +33,45 @@ export async function createNoteClient(
     const error = await res.json()
     throw new Error(error.message)
   }
-  const data = (await res.json()) as NoteData
+  const data = (await res.json()) as { id: number }
   return data.id
 }
 
-export async function getNotesClient(options: PaginationOptions = {}) {
-  const { skip, limit, includeTotal } = options
+export async function createTimelessNoteClient(content: string, metadata: NoteMetadata) {
+  const res = await fetch("/api/notes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      timeless: true,
+      content,
+      metadata
+    })
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+  const data = (await res.json()) as { id: number }
+  return data.id
+}
+
+type GetNotesOptions<T extends boolean> = PaginationOptions & { timeless?: T }
+
+export async function getNotesClient(
+  options: GetNotesOptions<true>
+): Promise<PaginatedResponse<TimelessNote>>
+export async function getNotesClient(
+  options?: GetNotesOptions<false>
+): Promise<PaginatedResponse<TimeNote>>
+export async function getNotesClient(
+  options: GetNotesOptions<boolean> = {}
+): Promise<PaginatedResponse<TimeNote | TimelessNote>> {
+  const { skip, limit, includeTotal, timeless } = options
   const params = new URLSearchParams()
   if (skip !== undefined) params.set("skip", skip.toString())
   if (limit !== undefined) params.set("limit", limit.toString())
   if (includeTotal) params.set("total", "true")
+  if (timeless) params.set("timeless", "true")
 
   const url = params.toString() ? `/api/notes?${params.toString()}` : "/api/notes"
   const res = await fetch(url)
@@ -48,7 +79,7 @@ export async function getNotesClient(options: PaginationOptions = {}) {
     const error = await res.json()
     throw new Error(error.message)
   }
-  return (await res.json()) as PaginatedResponse<NoteData>
+  return await res.json()
 }
 
 export async function updateNoteClient(id: number, data: UpdateNoteData) {

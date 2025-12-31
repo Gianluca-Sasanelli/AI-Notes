@@ -5,6 +5,23 @@ import { NextResponse } from "next/server"
 import type { NoteMetadata } from "@/db/schema"
 import { logger, withTiming } from "@/lib/logger"
 
+type TimeNoteBody = {
+  timeless: false
+  startTimestamp: string
+  endTimestamp?: string
+  granularity: NoteGranularity
+  content: string
+  metadata: NoteMetadata
+}
+
+type TimelessNoteBody = {
+  timeless: true
+  content: string
+  metadata: NoteMetadata
+}
+
+type CreateNoteBody = TimeNoteBody | TimelessNoteBody
+
 export async function GET(request: Request) {
   const { userId } = await auth()
   if (!userId) {
@@ -15,11 +32,12 @@ export async function GET(request: Request) {
   const skip = parseInt(searchParams.get("skip") || "0", 10)
   const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50)
   const includeTotal = searchParams.get("total") === "true"
+  const timeless = searchParams.get("timeless") === "true"
 
-  logger.info("api", "GET /api/notes", { skip, limit, includeTotal })
+  logger.info("api", "GET /api/notes", { skip, limit, includeTotal, timeless })
   try {
     const result = await withTiming("api", "GET /api/notes", async () => {
-      return getNotes(userId, skip, limit, includeTotal)
+      return getNotes(userId, skip, limit, includeTotal, timeless)
     })
     return NextResponse.json({
       data: result.data,
@@ -41,25 +59,21 @@ export async function POST(request: Request) {
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const { startTimestamp, endTimestamp, granularity, content, metadata } =
-    (await request.json()) as {
-      startTimestamp: string
-      endTimestamp?: string
-      granularity?: NoteGranularity
-      content: string
-      metadata: NoteMetadata
-    }
+  const body = (await request.json()) as CreateNoteBody
 
-  logger.info("api", "POST /api/notes", { granularity, hasEndTimestamp: !!endTimestamp })
+  logger.info("api", "POST /api/notes", { timeless: body.timeless })
   try {
     const id = await withTiming("api", "POST /api/notes", async () => {
+      if (body.timeless) {
+        return createNote(userId, body.content, body.metadata, null, null, null)
+      }
       return createNote(
         userId,
-        content,
-        new Date(startTimestamp),
-        metadata,
-        endTimestamp ? new Date(endTimestamp) : undefined,
-        granularity
+        body.content,
+        body.metadata,
+        new Date(body.startTimestamp),
+        body.endTimestamp ? new Date(body.endTimestamp) : null,
+        body.granularity
       )
     })
     return NextResponse.json(
