@@ -4,13 +4,12 @@ import { UserButton, useUser } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks"
-import { Notebook, Plus, Pencil, PanelLeft, Moon, Sun } from "lucide-react"
+import { Notebook, Plus, Pencil, PanelLeft, Settings } from "lucide-react"
 import { ChatHistory } from "@/components/chat/ChatHistory"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 
@@ -37,7 +36,6 @@ const navigationItems = [
 
 function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClose?: () => void }) {
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
   const { isLoaded } = useUser()
 
   return (
@@ -93,31 +91,33 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         {isCollapsed ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                variant="ghost"
-                className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+              <Link
+                href="/settings"
+                onClick={onClose}
+                className={cn(
+                  "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
+                  pathname === "/settings" && "bg-accent text-accent-foreground"
+                )}
               >
-                <div className="flex size-6 items-center justify-start">
-                  {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
-                </div>
-              </Button>
+                <Settings className="size-6" />
+              </Link>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-secondary-foreground">
-              {theme === "dark" ? "Light mode" : "Dark mode"}
+              Settings
             </TooltipContent>
           </Tooltip>
         ) : (
-          <Button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            variant="ghost"
-            className="group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+          <Link
+            href="/settings"
+            onClick={onClose}
+            className={cn(
+              "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
+              pathname === "/settings" && "bg-accent text-accent-foreground"
+            )}
           >
-            <div className="flex size-6 items-center justify-start">
-              {theme === "dark" ? <Sun className="size-6" /> : <Moon className="size-6" />}
-            </div>
-            <span className="ml-2">{theme === "dark" ? "Light" : "Dark"}</span>
-          </Button>
+            <Settings className="size-6" />
+            <span className="ml-2">Settings</span>
+          </Link>
         )}
 
         <div className="h-[50px] flex-none justify-start border-t">

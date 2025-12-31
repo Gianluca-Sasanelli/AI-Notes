@@ -4,7 +4,8 @@ import {
   NoteGranularity,
   PaginatedResponse,
   PaginationOptions,
-  UpdateNoteData
+  UpdateNoteData,
+  UserSummaryData
 } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 
@@ -106,6 +107,28 @@ export async function updateChatClient(chatId: string, title: string) {
 export async function deleteChatClient(chatId: string) {
   const res = await fetch(`/api/chats/${chatId}`, {
     method: "DELETE"
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+}
+
+export async function getUserSummaryClient(): Promise<UserSummaryData | null> {
+  const res = await fetch("/api/user-summary")
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+  const data = await res.json()
+  return data.summary
+}
+
+export async function updateUserSummaryClient(notesSummary: string) {
+  const res = await fetch("/api/user-summary", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notesSummary })
   })
   if (!res.ok) {
     const error = await res.json()
