@@ -193,6 +193,7 @@ export const getNotesAfterDate = async (userId: string, afterDate: Date, limit: 
         id: notes.id,
         content: notes.content,
         startTimestamp: notes.startTimestamp,
+        endTimestamp: notes.endTimestamp,
         updatedAt: notes.updatedAt
       })
       .from(notes)
@@ -210,6 +211,7 @@ export const getLatestNotes = async (userId: string, limit: number = 10) => {
         id: notes.id,
         content: notes.content,
         startTimestamp: notes.startTimestamp,
+        endTimestamp: notes.endTimestamp,
         updatedAt: notes.updatedAt
       })
       .from(notes)
