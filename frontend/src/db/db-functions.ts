@@ -27,22 +27,14 @@ export const createNote = async (
   })
 }
 
-export const getNotes = async (
+export const getTimeNotes = async (
   userId: string,
   skip: number = 0,
   limit: number = 10,
-  includeTotal: boolean = false,
-  timeless: boolean = false
+  includeTotal: boolean = false
 ) => {
-  logger.debug("db", "Fetching notes", { userId, skip, limit, includeTotal, timeless })
-  return withTiming("db", "getNotes", async () => {
-    const timelessCondition = timeless
-      ? sql`${notes.startTimestamp} IS NULL`
-      : sql`${notes.startTimestamp} IS NOT NULL`
-    const orderBy = timeless
-      ? desc(notes.createdAt)
-      : desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`)
-
+  logger.debug("db", "Fetching time notes", { userId, skip, limit, includeTotal })
+  return withTiming("db", "getTimeNotes", async () => {
     const items = await db
       .select({
         id: notes.id,
@@ -55,8 +47,8 @@ export const getNotes = async (
         metadata: notes.metadata
       })
       .from(notes)
-      .where(and(eq(notes.userId, userId), timelessCondition))
-      .orderBy(orderBy)
+      .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NOT NULL`))
+      .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
       .limit(limit + 1)
       .offset(skip)
     const hasNext = items.length > limit
@@ -67,11 +59,52 @@ export const getNotes = async (
       const [result] = await db
         .select({ count: count() })
         .from(notes)
-        .where(and(eq(notes.userId, userId), timelessCondition))
+        .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NOT NULL`))
       total = result.count
     }
 
-    logger.debug("db", "Notes fetched", { count: data.length, hasNext })
+    logger.debug("db", "Time notes fetched", { count: data.length, hasNext })
+    return { data, hasNext, total }
+  })
+}
+
+export const getTimelessNotes = async (
+  userId: string,
+  skip: number = 0,
+  limit: number = 10,
+  includeTotal: boolean = false
+) => {
+  logger.debug("db", "Fetching timeless notes", { userId, skip, limit, includeTotal })
+  return withTiming("db", "getTimelessNotes", async () => {
+    const items = await db
+      .select({
+        id: notes.id,
+        startTimestamp: notes.startTimestamp,
+        endTimestamp: notes.endTimestamp,
+        granularity: notes.granularity,
+        createdAt: notes.createdAt,
+        updatedAt: notes.updatedAt,
+        content: notes.content,
+        metadata: notes.metadata
+      })
+      .from(notes)
+      .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NULL`))
+      .orderBy(desc(notes.createdAt))
+      .limit(limit + 1)
+      .offset(skip)
+    const hasNext = items.length > limit
+    const data = hasNext ? items.slice(0, limit) : items
+
+    let total: number | undefined
+    if (includeTotal) {
+      const [result] = await db
+        .select({ count: count() })
+        .from(notes)
+        .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NULL`))
+      total = result.count
+    }
+
+    logger.debug("db", "Timeless notes fetched", { count: data.length, hasNext })
     return { data, hasNext, total }
   })
 }
@@ -241,5 +274,20 @@ export const getLatestNotes = async (
       .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
       .limit(limit)
     return result as TimeNoteSummary[]
+  })
+}
+
+export const getLatestTimelessNotes = async (userId: string, limit: number = 20) => {
+  logger.debug("db", "Fetching latest timeless notes", { userId, limit })
+  return withTiming("db", "getLatestTimelessNotes", async () => {
+    return db
+      .select({
+        id: notes.id,
+        content: notes.content
+      })
+      .from(notes)
+      .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NULL`))
+      .orderBy(desc(notes.createdAt))
+      .limit(limit)
   })
 }
