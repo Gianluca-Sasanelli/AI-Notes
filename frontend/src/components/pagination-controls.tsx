@@ -23,8 +23,6 @@ export function PaginationControls({
   hasNext,
   onParamsChange
 }: PaginationControlsProps) {
-  const currentPage = Math.floor(skip / limit) + 1
-
   return (
     <div className="flex items-center justify-between">
       <Select
@@ -42,7 +40,6 @@ export function PaginationControls({
       </Select>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground">Page {currentPage}</span>
         <div className="flex gap-2">
           <Button
             variant="outline"

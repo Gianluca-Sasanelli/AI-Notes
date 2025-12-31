@@ -1,13 +1,13 @@
+import type { LanguageModelV3 } from "@ai-sdk/provider"
 import type { ModelMessage } from "ai"
 import { stepCountIs, streamText } from "ai"
 import { handleAgentError } from "@/lib/utils"
-import { GOOGLE_MODEL, getModelInstance } from "./models"
 import { NotesTools } from "./tools/notes-tools"
 import { buildAssistantSystemPrompt } from "./system-prompts/prompts"
 import { getUserSummary, getLatestTimelessNotes } from "@/db/db-functions"
 import { auth } from "@clerk/nextjs/server"
 
-export async function runAssistantAgent(messages: ModelMessage[]) {
+export async function runAssistantAgent(messages: ModelMessage[], model: LanguageModelV3) {
   const { userId } = await auth()
   if (!userId) {
     throw new Error("User not authenticated")
@@ -22,7 +22,7 @@ export async function runAssistantAgent(messages: ModelMessage[]) {
 
   const tools = NotesTools(userId)
   return streamText({
-    model: getModelInstance(GOOGLE_MODEL.GEMINI_2_5_FLASH),
+    model,
     system: systemPrompt,
     messages,
     tools,

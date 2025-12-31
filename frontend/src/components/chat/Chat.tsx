@@ -9,6 +9,7 @@ import ChatMessages from "./messages/ChatMessages"
 import { ChatUIMessage } from "@/lib/types/chat-types"
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { useModelStore } from "@/lib/stores/model-store"
 
 export default function Chat({
   chatId,
@@ -20,6 +21,7 @@ export default function Chat({
   const backupChatId = useMemo(() => crypto.randomUUID(), [])
   const inputRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
+  const selectedModel = useModelStore((s) => s.selectedModel)
   const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>({
     ...(storedmessages && { messages: storedmessages }),
     id: chatId ?? backupChatId,
@@ -59,7 +61,8 @@ export default function Chat({
                   { text, files },
                   {
                     body: {
-                      id: backupChatId
+                      id: backupChatId,
+                      model: selectedModel
                     }
                   }
                 )
@@ -92,7 +95,9 @@ export default function Chat({
         aria-label="Chat input"
       >
         <ChatInput
-          onSendMessage={(text: string, files?: FileList) => sendMessage({ text, files })}
+          onSendMessage={(text: string, files?: FileList) =>
+            sendMessage({ text, files }, { body: { model: selectedModel } })
+          }
           isLoading={isLoadingFromSDK}
           onStopGeneration={stop}
         />

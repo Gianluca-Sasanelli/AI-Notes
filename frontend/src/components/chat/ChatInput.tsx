@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent as KeyboardEventReact }
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { handleGlobalKeyDown } from "@/lib/hooks"
+import { ModelSelector } from "./ModelSelector"
 import Image from "next/image"
 import React from "react"
 interface ChatInputProps {
@@ -158,6 +159,7 @@ const ChatInput = React.memo(function ChatInput({
         />
         <div className="flex max-h-[30%] justify-between pr-2">
           <div className="flex items-center gap-2">
+            <ModelSelector />
             <Button
               type="button"
               variant="ghost"
