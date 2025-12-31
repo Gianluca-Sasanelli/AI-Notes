@@ -120,7 +120,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
           </Link>
         )}
 
-        <div className="h-[50px] flex-none justify-start border-t">
+        <div className="h-[50px] flex-none justify-start border-t" suppressHydrationWarning>
           {!isLoaded ? (
             <div
               className={cn(
