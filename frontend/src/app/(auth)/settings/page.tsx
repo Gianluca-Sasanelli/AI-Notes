@@ -12,10 +12,12 @@ import {
   updateUserSummaryClient,
   regenerateUserSummaryClient
 } from "@/lib/api"
+import { useIsMobile } from "@/lib/hooks"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const queryClient = useQueryClient()
+  const isMobile = useIsMobile()
   const [editedSummary, setEditedSummary] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -77,25 +79,28 @@ export default function SettingsPage() {
               variant={mounted && theme === "light" ? "default" : "outline"}
               onClick={() => setTheme("light")}
               className="flex-1"
+              size={isMobile ? "icon" : "default"}
             >
-              <Sun className="size-4 mr-2" />
-              Light
+              <Sun className={isMobile ? "size-4" : "size-4 mr-2"} />
+              {!isMobile && "Light"}
             </Button>
             <Button
               variant={mounted && theme === "dark" ? "default" : "outline"}
               onClick={() => setTheme("dark")}
               className="flex-1"
+              size={isMobile ? "icon" : "default"}
             >
-              <Moon className="size-4 mr-2" />
-              Dark
+              <Moon className={isMobile ? "size-4" : "size-4 mr-2"} />
+              {!isMobile && "Dark"}
             </Button>
             <Button
               variant={mounted && theme === "system" ? "default" : "outline"}
               onClick={() => setTheme("system")}
               className="flex-1"
+              size={isMobile ? "icon" : "default"}
             >
-              <Monitor className="size-4 mr-2" />
-              System
+              <Monitor className={isMobile ? "size-4" : "size-4 mr-2"} />
+              {!isMobile && "System"}
             </Button>
           </div>
         </div>
@@ -124,20 +129,25 @@ export default function SettingsPage() {
                   Last updated: {new Date(summary.updatedAt).toLocaleString()}
                 </p>
               )}
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
                 <Button
                   variant="outline"
                   onClick={() => regenerateSummary()}
                   disabled={isRegenerating || isSaving}
+                  size={isMobile ? "sm" : "default"}
                 >
                   {isRegenerating ? (
                     <Loader2 className="size-4 mr-2 animate-spin" />
                   ) : (
                     <RefreshCw className="size-4 mr-2" />
                   )}
-                  Regenerate from Notes
+                  {isMobile ? "Regenerate" : "Regenerate from Notes"}
                 </Button>
-                <Button onClick={handleSave} disabled={!hasChanges || isSaving || isRegenerating}>
+                <Button
+                  onClick={handleSave}
+                  disabled={!hasChanges || isSaving || isRegenerating}
+                  size={isMobile ? "sm" : "default"}
+                >
                   {isSaving && <Loader2 className="size-4 mr-2 animate-spin" />}
                   Save Changes
                 </Button>
