@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { createNote, getNotes } from "@/db/db-functions"
+import { createNote, getTimeNotes, getTimelessNotes } from "@/db/db-functions"
 import { ErrorData, NoteGranularity } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import type { NoteMetadata } from "@/db/schema"
@@ -37,7 +37,9 @@ export async function GET(request: Request) {
   logger.info("api", "GET /api/notes", { skip, limit, includeTotal, timeless })
   try {
     const result = await withTiming("api", "GET /api/notes", async () => {
-      return getNotes(userId, skip, limit, includeTotal, timeless)
+      return timeless
+        ? getTimelessNotes(userId, skip, limit, includeTotal)
+        : getTimeNotes(userId, skip, limit, includeTotal)
     })
     return NextResponse.json({
       data: result.data,

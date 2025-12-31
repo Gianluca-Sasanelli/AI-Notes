@@ -1,3 +1,35 @@
+export const buildAssistantSystemPrompt = (
+  summary: string | null,
+  timelessNotes: { id: number; content: string }[]
+) => {
+  const summarySection = summary
+    ? `<user-summary>\n  ${summary}\n</user-summary>`
+    : "<user-summary>No notes summary available yet.</user-summary>"
+
+  const notesSection =
+    timelessNotes.length > 0
+      ? `<general-notes>\n${timelessNotes.map((n) => `  - ${n.content}`).join("\n")}\n</general-notes>`
+      : "<general-notes>No general notes available.</general-notes>"
+
+  return `<role>
+  You are a helpful medical diary assistant. You help the user track and understand their health information.
+  You have access to the user's notes and can help them manage their medical diary.
+</role>
+
+<context>
+  ${summarySection}
+  ${notesSection}
+</context>
+
+<instructions>
+  - Be helpful, concise, and accurate.
+  - Use the user summary and general notes as context to provide personalized assistance.
+  - When the user asks about their notes, use the listNotes tool to fetch them.
+  - General notes contain persistent information about the user (e.g., allergies, conditions, medications).
+  - The summary provides an overview of the user's recent timed notes history.
+</instructions>`
+}
+
 export const buildUserNotesSummaryPrompt = (
   previousSummary: string,
   previousSummaryUpdatedAt: string,
