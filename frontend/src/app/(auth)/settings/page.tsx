@@ -1,12 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTheme } from "next-themes"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Loader2, Sun, Moon, Monitor, RefreshCw, Plus, Pencil, Trash2 } from "lucide-react"
+import {
+  Loader2,
+  Sun,
+  Moon,
+  Monitor,
+  RefreshCw,
+  Plus,
+  Pencil,
+  Trash2,
+  RotateCcw,
+  X,
+  Tag
+} from "lucide-react"
 import {
   getUserSummaryClient,
   updateUserSummaryClient,
@@ -25,6 +38,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog"
 import type { TimelessNote } from "@/lib/types/database-types"
+import { useQuickTagsStore } from "@/lib/stores/metadata-store"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -37,6 +51,11 @@ export default function SettingsPage() {
   const [editingNote, setEditingNote] = useState<TimelessNote | null>(null)
   const [editingContent, setEditingContent] = useState("")
   const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
+
+  const { tags, addTag, removeTag, updateTag, resetToDefaults } = useQuickTagsStore()
+  const [newTag, setNewTag] = useState("")
+  const [editingTagNewName, setEditingTagNewName] = useState<string | null>(null)
+  const editingTagOldName = useRef<string | null>(null)
 
   useEffect(() => {
     queueMicrotask(() => setMounted(true))
@@ -135,6 +154,28 @@ export default function SettingsPage() {
     setEditingNote(note)
   }
 
+  const handleAddTag = () => {
+    if (!newTag.trim()) return
+    addTag(newTag.trim().toLowerCase())
+    setNewTag("")
+  }
+  const handleEditTagOpen = (tag: string) => {
+    if (!tag) {
+      toast.error("No tag selected")
+      return
+    }
+    setEditingTagNewName(tag)
+    editingTagOldName.current = tag
+  }
+  const OnEditTagSave = () => {
+    if (!editingTagNewName || !editingTagOldName.current) {
+      toast.error("There is an error in the tag editing")
+      return
+    }
+    updateTag(editingTagOldName.current, editingTagNewName)
+    setEditingTagNewName(null)
+    editingTagOldName.current = null
+  }
   return (
     <div className="w-full max-w-3xl mx-auto py-10 px-4 min-dvh-screen overflow-y-auto">
       <div className="mb-8">
@@ -297,6 +338,68 @@ export default function SettingsPage() {
             </>
           )}
         </div>
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold">Quick Tags</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetToDefaults}
+              className="text-muted-foreground"
+            >
+              <RotateCcw className="size-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Tags you can quickly add to your notes.
+          </p>
+
+          <div className="space-y-2 mb-4">
+            {tags.map((tag, index) => (
+              <div
+                key={typeof tag === "string" ? tag : index}
+                className="flex items-center gap-2 p-3 rounded-md bg-secondary"
+              >
+                <Tag className="size-4 text-primary" />
+                <span className="font-medium text-sm">{tag}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={() => handleEditTagOpen(tag)}
+                >
+                  <Pencil className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={() => removeTag(tag)}
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+            ))}
+            {tags.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No quick tags configured
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <Input
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              placeholder="Tag name"
+              className="flex-1"
+            />
+            <Button onClick={handleAddTag} disabled={!newTag.trim()} size="icon">
+              <Plus className="size-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
@@ -345,6 +448,28 @@ export default function SettingsPage() {
               disabled={deleteNoteMutation.isPending}
             >
               {deleteNoteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={editingTagNewName !== null}
+        onOpenChange={(open) => !open && setEditingTagNewName(null)}
+      >
+        <DialogContent className="w-[90dvh]">
+          <DialogHeader>
+            <DialogTitle>Edit Tag</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={editingTagNewName ?? ""}
+              onChange={(e) => setEditingTagNewName(e.target.value)}
+              placeholder="Tag name"
+              className="flex-1"
+            />
+            <Button onClick={OnEditTagSave} disabled={!editingTagNewName?.trim()}>
+              Save
             </Button>
           </div>
         </DialogContent>

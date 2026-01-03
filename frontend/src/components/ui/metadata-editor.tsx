@@ -7,22 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import type { NoteMetadata } from "@/db/schema"
+import { useQuickTagsStore } from "@/lib/stores/metadata-store"
 
 interface MetadataEditorProps {
   value: NoteMetadata
   onChange: (value: NoteMetadata) => void
 }
 
-const SUGGESTIONS = [
-  { key: "symptom", placeholder: "e.g., headache, nausea" },
-  { key: "severity", placeholder: "1-10" },
-  { key: "medication", placeholder: "e.g., ibuprofen" },
-  { key: "dosage", placeholder: "e.g., 400mg" },
-  { key: "mood", placeholder: "e.g., anxious, calm" },
-  { key: "temperature", placeholder: "e.g., 37.5" }
-]
-
 export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
+  const { tags } = useQuickTagsStore()
   const [isOpen, setIsOpen] = React.useState(false)
   const [newKey, setNewKey] = React.useState("")
   const [newValue, setNewValue] = React.useState("")
@@ -47,10 +40,6 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
       e.preventDefault()
       handleAdd()
     }
-  }
-
-  const handleSuggestionClick = (suggestion: string) => {
-    setNewKey(suggestion)
   }
 
   return (
@@ -115,20 +104,22 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            {SUGGESTIONS.filter((s) => !value[s.key]).map((suggestion) => (
-              <button
-                key={suggestion.key}
-                type="button"
-                onClick={() => handleSuggestionClick(suggestion.key)}
-                className={cn(
-                  "px-2.5 py-1 text-xs rounded-full transition-colors",
-                  "bg-background border hover:bg-accent hover:text-accent-foreground",
-                  newKey === suggestion.key && "bg-primary/10 border-primary text-primary"
-                )}
-              >
-                {suggestion.key}
-              </button>
-            ))}
+            {tags
+              .filter((t) => !value[t])
+              .map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setNewKey(tag)}
+                  className={cn(
+                    "px-2.5 py-1 text-xs rounded-full transition-colors",
+                    "bg-background border hover:bg-accent hover:text-accent-foreground",
+                    newKey === tag && "bg-primary/10 border-primary text-primary"
+                  )}
+                >
+                  {tag}
+                </button>
+              ))}
           </div>
 
           <Button
