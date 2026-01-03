@@ -3,7 +3,7 @@ import { type NextRequest } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 
 import { runAssistantAgent } from "@/lib/agents/basic-agent"
-import { getModelInstance, type AIModel } from "@/lib/agents/models"
+import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
 import { createChat, updateChat } from "@/db/db-functions"
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { messages, id: chatId, model } = parseResult.data
-  const modelInstance = getModelInstance(model as AIModel)
+  const modelInstance = getModelInstance(model)
   const isFirstUserMessage = messages.length === 1 && messages[0].role === "user"
 
   const ServerMessages = await convertToModelMessages(messages, {

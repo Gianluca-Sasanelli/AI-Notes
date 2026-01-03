@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Infinity } from "lucide-react"
+import { Calendar, FileText, Tag, Pencil, Trash2, Loader2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,18 +19,14 @@ import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { getNotesClient, updateNoteClient, deleteNoteClient } from "@/lib/api"
 import { toast } from "sonner"
-import { TimeNote, TimelessNote, NoteGranularity, isTimeNote } from "@/lib/types/database-types"
+import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
-import { cn } from "@/lib/utils"
-
-type ViewMode = "timed" | "general"
 
 export function NotesList() {
-  const [viewMode, setViewMode] = useState<ViewMode>("timed")
   const [skip, setSkip] = useState(0)
   const [limit, setLimit] = useState(10)
-  const [editingNote, setEditingNote] = useState<TimeNote | TimelessNote | null>(null)
+  const [editingNote, setEditingNote] = useState<TimeNote | null>(null)
   const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState("")
   const [editingStartTimestamp, setEditingStartTimestamp] = useState(new Date())
@@ -39,24 +35,11 @@ export function NotesList() {
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const queryClient = useQueryClient()
 
-  const isTimeless = viewMode === "general"
-
-  const { data: timeNotesData, isLoading: timeNotesLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit],
     queryFn: () => getNotesClient({ skip, limit, timeless: false }),
-    placeholderData: keepPreviousData,
-    enabled: !isTimeless
+    placeholderData: keepPreviousData
   })
-
-  const { data: timelessNotesData, isLoading: timelessNotesLoading } = useQuery({
-    queryKey: ["timelessNotes", skip, limit],
-    queryFn: () => getNotesClient({ skip, limit, timeless: true }),
-    placeholderData: keepPreviousData,
-    enabled: isTimeless
-  })
-
-  const data = isTimeless ? timelessNotesData : timeNotesData
-  const isLoading = isTimeless ? timelessNotesLoading : timeNotesLoading
 
   const updateMutation = useMutation({
     mutationFn: () => {
@@ -64,17 +47,11 @@ export function NotesList() {
         toast.error("No note selected")
         return Promise.reject()
       }
-      if (isTimeNote(editingNote)) {
-        return updateNoteClient(editingNote.id, {
-          content: editingContent.trim(),
-          startTimestamp: editingStartTimestamp,
-          endTimestamp: editingEndTimestamp,
-          granularity: editingGranularity,
-          metadata: editingMetadata
-        })
-      }
       return updateNoteClient(editingNote.id, {
         content: editingContent.trim(),
+        startTimestamp: editingStartTimestamp,
+        endTimestamp: editingEndTimestamp,
+        granularity: editingGranularity,
         metadata: editingMetadata
       })
     },
@@ -82,7 +59,6 @@ export function NotesList() {
       toast.success("Note updated")
       setEditingNote(null)
       queryClient.invalidateQueries({ queryKey: ["notes"] })
-      queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to update")
@@ -101,7 +77,6 @@ export function NotesList() {
       toast.success("Note deleted")
       setDeletingNoteId(null)
       queryClient.invalidateQueries({ queryKey: ["notes"] })
-      queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to delete")
@@ -113,18 +88,11 @@ export function NotesList() {
     if (params.limit !== undefined) setLimit(params.limit)
   }
 
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode)
-    setSkip(0)
-  }
-
-  const handleEditOpen = (note: TimeNote | TimelessNote) => {
+  const handleEditOpen = (note: TimeNote) => {
     setEditingContent(note.content)
-    if (isTimeNote(note)) {
-      setEditingStartTimestamp(new Date(note.startTimestamp))
-      setEditingEndTimestamp(note.endTimestamp ? new Date(note.endTimestamp) : null)
-      setEditingGranularity(note.granularity)
-    }
+    setEditingStartTimestamp(new Date(note.startTimestamp))
+    setEditingEndTimestamp(note.endTimestamp ? new Date(note.endTimestamp) : null)
+    setEditingGranularity(note.granularity)
     setEditingMetadata(note.metadata)
     setEditingNote(note)
   }
@@ -134,31 +102,6 @@ export function NotesList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex rounded-md border border-input overflow-hidden w-fit">
-        <button
-          type="button"
-          onClick={() => handleViewModeChange("general")}
-          className={cn(
-            "px-4 py-2 text-sm transition-colors flex items-center gap-2",
-            viewMode === "general" ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-          )}
-        >
-          <Infinity className="h-4 w-4" />
-          General
-        </button>
-        <button
-          type="button"
-          onClick={() => handleViewModeChange("timed")}
-          className={cn(
-            "px-4 py-2 text-sm transition-colors flex items-center gap-2",
-            viewMode === "timed" ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-          )}
-        >
-          <Calendar className="h-4 w-4" />
-          Timed
-        </button>
-      </div>
-
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -167,9 +110,7 @@ export function NotesList() {
         <Card className="p-12">
           <div className="text-center">
             <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              No {viewMode === "general" ? "general" : "timed"} notes yet
-            </p>
+            <p className="text-muted-foreground">No notes yet</p>
           </div>
         </Card>
       ) : (
@@ -182,23 +123,14 @@ export function NotesList() {
           />
 
           <div className="space-y-3">
-            {isTimeless
-              ? (timelessNotesData?.data ?? []).map((note) => (
-                  <TimelessNoteCard
-                    key={note.id}
-                    note={note}
-                    onEdit={handleEditOpen}
-                    onDelete={setDeletingNoteId}
-                  />
-                ))
-              : (timeNotesData?.data ?? []).map((note) => (
-                  <TimeNoteCard
-                    key={note.id}
-                    note={note}
-                    onEdit={handleEditOpen}
-                    onDelete={setDeletingNoteId}
-                  />
-                ))}
+            {notes.map((note) => (
+              <TimeNoteCard
+                key={note.id}
+                note={note}
+                onEdit={handleEditOpen}
+                onDelete={setDeletingNoteId}
+              />
+            ))}
           </div>
 
           {notes.length >= 5 && (
@@ -218,16 +150,14 @@ export function NotesList() {
             <DialogTitle>Edit Note</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {editingNote && isTimeNote(editingNote) && (
-              <DateTimePicker
-                startTimestamp={editingStartTimestamp}
-                endTimestamp={editingEndTimestamp}
-                onStartChange={setEditingStartTimestamp}
-                onEndChange={setEditingEndTimestamp}
-                granularity={editingGranularity}
-                onGranularityChange={setEditingGranularity}
-              />
-            )}
+            <DateTimePicker
+              startTimestamp={editingStartTimestamp}
+              endTimestamp={editingEndTimestamp}
+              onStartChange={setEditingStartTimestamp}
+              onEndChange={setEditingEndTimestamp}
+              granularity={editingGranularity}
+              onGranularityChange={setEditingGranularity}
+            />
             <Textarea
               value={editingContent}
               onChange={(e) => setEditingContent(e.target.value)}
@@ -303,49 +233,6 @@ function TimeNoteCard({
             </span>
           </div>
 
-          <p className="text-sm leading-relaxed">{note.content}</p>
-
-          {noteMetadata && Object.keys(noteMetadata).length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {Object.entries(noteMetadata).map(([key, val]) => (
-                <Badge key={key} variant="secondary" className="gap-1 py-0.5 text-xs font-normal">
-                  <Tag className="h-3 w-3" />
-                  <span className="font-medium">{key}:</span>
-                  <span>{String(val)}</span>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={() => onEdit(note)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(note.id)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-function TimelessNoteCard({
-  note,
-  onEdit,
-  onDelete
-}: {
-  note: TimelessNote
-  onEdit: (note: TimelessNote) => void
-  onDelete: (id: number) => void
-}) {
-  const noteMetadata = note.metadata as Record<string, string | number | boolean> | null
-
-  return (
-    <Card className="p-4 transition-colors hover:bg-accent/30 border-l-4 border-l-primary/50">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1 space-y-2">
           <p className="text-sm leading-relaxed">{note.content}</p>
 
           {noteMetadata && Object.keys(noteMetadata).length > 0 && (

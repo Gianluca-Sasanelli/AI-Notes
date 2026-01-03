@@ -1,6 +1,6 @@
 import "./global.css"
 import { Plus_Jakarta_Sans } from "next/font/google"
-// import { ClerkProvider } from "@clerk/nextjs";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/app/providers"
 import { Toaster } from "@/components/toaster"
 import { ClerkProvider } from "@clerk/nextjs"
@@ -29,7 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             enableSystem
             disableTransitionOnChange
           >
-            <main className="min-h-screen flex-1 bg-background">{children}</main>
+            <main className="min-h-screen flex-1 bg-background">
+              <SpeedInsights />
+              {children}
+            </main>
             <Toaster />
           </ThemeProvider>
         </body>

@@ -6,13 +6,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { Loader2, Sun, Moon, Monitor, RefreshCw } from "lucide-react"
+import { Loader2, Sun, Moon, Monitor, RefreshCw, Plus, Pencil, Trash2 } from "lucide-react"
 import {
   getUserSummaryClient,
   updateUserSummaryClient,
-  regenerateUserSummaryClient
+  regenerateUserSummaryClient,
+  getNotesClient,
+  createTimelessNoteClient,
+  updateNoteClient,
+  deleteNoteClient
 } from "@/lib/api"
 import { useIsMobile } from "@/lib/hooks"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog"
+import type { TimelessNote } from "@/lib/types/database-types"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -21,6 +33,11 @@ export default function SettingsPage() {
   const [editedSummary, setEditedSummary] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
+  const [newNoteContent, setNewNoteContent] = useState("")
+  const [editingNote, setEditingNote] = useState<TimelessNote | null>(null)
+  const [editingContent, setEditingContent] = useState("")
+  const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
+
   useEffect(() => {
     queueMicrotask(() => setMounted(true))
   }, [])
@@ -28,6 +45,11 @@ export default function SettingsPage() {
   const { data: summary, isLoading } = useQuery({
     queryKey: ["userSummary"],
     queryFn: getUserSummaryClient
+  })
+
+  const { data: contextNotes, isLoading: notesLoading } = useQuery({
+    queryKey: ["timelessNotes"],
+    queryFn: () => getNotesClient({ skip: 0, limit: 100, timeless: true })
   })
 
   const { mutate: updateSummary, isPending: isSaving } = useMutation({
@@ -54,6 +76,51 @@ export default function SettingsPage() {
     }
   })
 
+  const createNoteMutation = useMutation({
+    mutationFn: () => createTimelessNoteClient(newNoteContent.trim(), {}),
+    onSuccess: () => {
+      toast.success("Note added")
+      setNewNoteContent("")
+      queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
+    },
+    onError: () => {
+      toast.error("Failed to add note")
+    }
+  })
+
+  const updateNoteMutation = useMutation({
+    mutationFn: () => {
+      if (!editingNote) return Promise.reject()
+      return updateNoteClient(editingNote.id, {
+        content: editingContent.trim(),
+        metadata: editingNote.metadata
+      })
+    },
+    onSuccess: () => {
+      toast.success("Note updated")
+      setEditingNote(null)
+      queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
+    },
+    onError: () => {
+      toast.error("Failed to update note")
+    }
+  })
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: () => {
+      if (!deletingNoteId) return Promise.reject()
+      return deleteNoteClient(deletingNoteId)
+    },
+    onSuccess: () => {
+      toast.success("Note deleted")
+      setDeletingNoteId(null)
+      queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
+    },
+    onError: () => {
+      toast.error("Failed to delete note")
+    }
+  })
+
   const currentValue = editedSummary ?? summary?.notesSummary ?? ""
   const hasChanges = editedSummary !== null && editedSummary !== (summary?.notesSummary ?? "")
 
@@ -61,6 +128,11 @@ export default function SettingsPage() {
     if (editedSummary !== null && editedSummary.trim() !== "") {
       updateSummary(editedSummary)
     }
+  }
+
+  const handleEditOpen = (note: TimelessNote) => {
+    setEditingContent(note.content)
+    setEditingNote(note)
   }
 
   return (
@@ -103,6 +175,76 @@ export default function SettingsPage() {
               {!isMobile && "System"}
             </Button>
           </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-2">Context Notes</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            These notes are always available to the AI as context about you.
+          </p>
+
+          {notesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2 mb-4">
+                {(contextNotes?.data ?? []).map((note) => (
+                  <div
+                    key={note.id}
+                    className="flex items-start gap-2 p-3 rounded-md bg-secondary border-l-4 border-l-primary/50"
+                  >
+                    <p className="flex-1 text-sm">{note.content}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => handleEditOpen(note)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => setDeletingNoteId(note.id)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+                {(contextNotes?.data ?? []).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No context notes yet
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Textarea
+                  value={newNoteContent}
+                  onChange={(e) => setNewNoteContent(e.target.value)}
+                  placeholder="Add a note about yourself..."
+                  className="min-h-[80px] resize-y bg-secondary focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div className="flex justify-end mt-2">
+                <Button
+                  onClick={() => createNoteMutation.mutate()}
+                  disabled={!newNoteContent.trim() || createNoteMutation.isPending}
+                  size="sm"
+                >
+                  {createNoteMutation.isPending ? (
+                    <Loader2 className="size-4 mr-2 animate-spin" />
+                  ) : (
+                    <Plus className="size-4 mr-2" />
+                  )}
+                  Add Note
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="rounded-lg border bg-card p-6">
@@ -156,6 +298,57 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
+        <DialogContent className="w-[90dvh]">
+          <DialogHeader>
+            <DialogTitle>Edit Note</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={editingContent}
+              onChange={(e) => setEditingContent(e.target.value)}
+              rows={5}
+              className="min-h-[120px] focus:border-primary focus:outline-none"
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingNote(null)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => updateNoteMutation.mutate()}
+                disabled={!editingContent.trim() || updateNoteMutation.isPending}
+              >
+                {updateNoteMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deletingNoteId !== null}
+        onOpenChange={(open) => !open && setDeletingNoteId(null)}
+      >
+        <DialogContent className="w-[70dvh]">
+          <DialogHeader>
+            <DialogTitle>Delete Note</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center lg:justify-end gap-2">
+            <Button variant="outline" onClick={() => setDeletingNoteId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteNoteMutation.mutate()}
+              disabled={deleteNoteMutation.isPending}
+            >
+              {deleteNoteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
