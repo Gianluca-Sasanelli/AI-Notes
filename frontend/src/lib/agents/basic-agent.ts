@@ -6,6 +6,7 @@ import { NotesTools } from "./tools/notes-tools"
 import { buildAssistantSystemPrompt } from "./system-prompts/prompts"
 import { getUserSummary, getLatestTimelessNotes } from "@/db/db-functions"
 import { auth } from "@clerk/nextjs/server"
+import { WebSearchTools } from "./tools/web-search"
 
 export async function runAssistantAgent(messages: ModelMessage[], model: LanguageModelV3) {
   const { userId } = await auth()
@@ -21,11 +22,12 @@ export async function runAssistantAgent(messages: ModelMessage[], model: Languag
   const systemPrompt = buildAssistantSystemPrompt(summary?.notesSummary ?? null, timelessNotes)
 
   const tools = NotesTools(userId)
+  const webSearchTools = WebSearchTools()
   return streamText({
     model,
     system: systemPrompt,
     messages,
-    tools,
+    tools: { ...tools, ...webSearchTools },
     stopWhen: stepCountIs(5),
     onError: (error) => {
       throw handleAgentError(error, "ASSISTANT AGENT")
