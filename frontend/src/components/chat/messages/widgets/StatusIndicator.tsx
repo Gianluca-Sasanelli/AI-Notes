@@ -6,7 +6,7 @@ import { useMemo } from "react"
 export function RoutingIndicator() {
   return (
     <>
-      <span className="mr-2 text-sm font-semibold">Sending the message to the provider</span>
+      <span className="mr-2 text-sm font-semibold">Sending</span>
       <span className="flex space-x-1">
         <span className="inline-block animate-bounce text-xl font-bold">.</span>
         <span className="inline-block animate-bounce text-xl font-bold delay-150">.</span>

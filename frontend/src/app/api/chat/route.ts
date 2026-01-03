@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         writer.write({
           type: "data-ai-status",
           data: {
-            frontend_message: "Running assistant agent..."
+            frontend_message: "Thinking..."
           }
         })
         const streamAssistant = await runAssistantAgent(ServerMessages, modelInstance)
