@@ -22,9 +22,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex dvh-screen">
+      <div className="flex h-screen">
         <Sidebar />
-        <div className="flex-1 overflow-hidden dvh-screen">{children}</div>
+        <div className="flex-1 overflow-y-auto bg-background h-screen">{children}</div>
       </div>
     </QueryClientProvider>
   )
