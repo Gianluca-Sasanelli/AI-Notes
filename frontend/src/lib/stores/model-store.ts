@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { GOOGLE_MODEL, type AIModel } from "@/lib/agents/models"
+import {GROQ_MODEL, type AIModel } from "@/lib/agents/models"
 
 interface ModelStore {
   selectedModel: AIModel
@@ -10,7 +10,7 @@ interface ModelStore {
 export const useModelStore = create<ModelStore>()(
   persist(
     (set) => ({
-      selectedModel: GOOGLE_MODEL.GEMINI_2_5_FLASH,
+      selectedModel: GROQ_MODEL.GPT_OSS_120B,
       setSelectedModel: (model) => set({ selectedModel: model })
     }),
     {
