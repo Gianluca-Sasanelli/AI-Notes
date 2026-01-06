@@ -51,6 +51,11 @@ export function FileUpload(props: FileUploadProps) {
     const files = Array.from(fileList)
     const validFiles: File[] = []
     for (const file of files) {
+      console.log("File selected:", { name: file.name, size: file.size, type: file.type })
+      if (!file.size || file.size === 0) {
+        toast.error(`Cannot read file: ${file.name}`)
+        continue
+      }
       if (file.size > MAX_FILE_SIZE) {
         toast.error(`${file.name} exceeds ${MAX_FILE_SIZE_MB}MB limit`)
         continue
