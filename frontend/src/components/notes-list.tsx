@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { Calendar, FileText, Tag, Pencil, Trash2, Loader2 } from "lucide-react"
+import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Paperclip } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,8 @@ import {
 import { PaginationControls } from "@/components/pagination-controls"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
-import { getNotesClient, updateNoteClient, deleteNoteClient } from "@/lib/api"
+import { FileUpload } from "@/components/ui/file-upload"
+import { getNotesClient, updateNoteClient, deleteNoteClient, uploadFileClient } from "@/lib/api"
 import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
@@ -33,6 +34,7 @@ export function NotesList() {
   const [editingEndTimestamp, setEditingEndTimestamp] = useState<Date | null>(null)
   const [editingGranularity, setEditingGranularity] = useState<NoteGranularity>("day")
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -42,22 +44,26 @@ export function NotesList() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (editingNote === null) {
         toast.error("No note selected")
         return Promise.reject()
       }
-      return updateNoteClient(editingNote.id, {
+      await updateNoteClient(editingNote.id, {
         content: editingContent.trim(),
         startTimestamp: editingStartTimestamp,
         endTimestamp: editingEndTimestamp,
         granularity: editingGranularity,
         metadata: editingMetadata
       })
+      for (const file of pendingFiles) {
+        await uploadFileClient(editingNote.id, file)
+      }
     },
     onSuccess: () => {
       toast.success("Note updated")
       setEditingNote(null)
+      setPendingFiles([])
       queryClient.invalidateQueries({ queryKey: ["notes"] })
     },
     onError: (error) => {
@@ -165,6 +171,13 @@ export function NotesList() {
               className="min-h-[120px] focus:border-primary focus:outline-none"
             />
             <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
+            {editingNote && (
+              <FileUpload
+                noteId={editingNote.id}
+                pendingFiles={pendingFiles}
+                onFilesChange={setPendingFiles}
+              />
+            )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditingNote(null)}>
                 Cancel
@@ -173,7 +186,7 @@ export function NotesList() {
                 onClick={() => updateMutation.mutate()}
                 disabled={!editingContent.trim() || updateMutation.isPending}
               >
-                {updateMutation.isPending ? "Saving..." : "Save"}
+                {updateMutation.isPending ? "Editing..." : "Edit"}
               </Button>
             </div>
           </div>
@@ -244,6 +257,17 @@ function TimeNoteCard({
                   <span>{String(val)}</span>
                 </Badge>
               ))}
+            </div>
+          )}
+
+          {note.files && note.files.length > 0 && (
+            <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">
+              <Paperclip className="h-3 w-3" />
+              {note.files.length <= 2 ? (
+                <span>{note.files.join(", ")}</span>
+              ) : (
+                <span>{note.files.length} files</span>
+              )}
             </div>
           )}
         </div>

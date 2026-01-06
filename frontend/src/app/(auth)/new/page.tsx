@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
+import { FileUpload } from "@/components/ui/file-upload"
 import { toast } from "sonner"
-import { createTimeNoteClient } from "@/lib/api"
+import { createTimeNoteClient, uploadFileClient } from "@/lib/api"
 import type { NoteMetadata } from "@/db/schema"
 import type { NoteGranularity } from "@/lib/types/database-types"
 
@@ -17,6 +18,7 @@ export default function NewNotePage() {
   const [endTimestamp, setEndTimestamp] = useState<Date | null>(null)
   const [granularity, setGranularity] = useState<NoteGranularity>("day")
   const [metadata, setMetadata] = useState<NoteMetadata>({})
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const queryClient = useQueryClient()
 
   const resetState = () => {
@@ -25,19 +27,25 @@ export default function NewNotePage() {
     setEndTimestamp(null)
     setGranularity("day")
     setMetadata({})
+    setPendingFiles([])
   }
 
   const mutation = useMutation({
-    mutationFn: () =>
-      createTimeNoteClient(
+    mutationFn: async () => {
+      const noteId = await createTimeNoteClient(
         content.trim(),
         metadata,
         startTimestamp,
         granularity,
         endTimestamp ?? undefined
-      ),
-    onSuccess: (id) => {
-      toast.success(`Note created with id: ${id}`)
+      )
+      for (const file of pendingFiles) {
+        await uploadFileClient(noteId, file)
+      }
+      return noteId
+    },
+    onSuccess: () => {
+      toast.success("Note created!")
       resetState()
       queryClient.invalidateQueries({ queryKey: ["notes"] })
     },
@@ -75,6 +83,9 @@ export default function NewNotePage() {
           className="min-h-[200px] w-full bg-secondary focus:border-primary focus:outline-none"
           required
         />
+
+        <FileUpload pendingFiles={pendingFiles} onFilesChange={setPendingFiles} />
+
         <MetadataEditor value={metadata} onChange={setMetadata} />
         <Button
           className="text-lg font-semibold w-fit cursor-pointer"

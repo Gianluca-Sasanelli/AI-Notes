@@ -44,7 +44,8 @@ export const getTimeNotes = async (
         createdAt: notes.createdAt,
         updatedAt: notes.updatedAt,
         content: notes.content,
-        metadata: notes.metadata
+        metadata: notes.metadata,
+        files: notes.files
       })
       .from(notes)
       .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NOT NULL`))
@@ -85,7 +86,8 @@ export const getTimelessNotes = async (
         createdAt: notes.createdAt,
         updatedAt: notes.updatedAt,
         content: notes.content,
-        metadata: notes.metadata
+        metadata: notes.metadata,
+        files: notes.files
       })
       .from(notes)
       .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NULL`))
@@ -289,5 +291,42 @@ export const getLatestTimelessNotes = async (userId: string, limit: number = 20)
       .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NULL`))
       .orderBy(desc(notes.createdAt))
       .limit(limit)
+  })
+}
+
+export const addFileToNote = async (userId: string, noteId: number, filename: string) => {
+  logger.debug("db", "Adding file to note", { noteId, filename })
+  return withTiming("db", "addFileToNote", async () => {
+    await db
+      .update(notes)
+      .set({
+        files: sql`array_append(${notes.files}, ${filename})`,
+        updatedAt: new Date()
+      })
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+  })
+}
+
+export const removeFileFromNote = async (userId: string, noteId: number, filename: string) => {
+  logger.debug("db", "Removing file from note", { noteId, filename })
+  return withTiming("db", "removeFileFromNote", async () => {
+    await db
+      .update(notes)
+      .set({
+        files: sql`array_remove(${notes.files}, ${filename})`,
+        updatedAt: new Date()
+      })
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+  })
+}
+
+export const getNoteFiles = async (userId: string, noteId: number) => {
+  logger.debug("db", "Getting note files", { noteId })
+  return withTiming("db", "getNoteFiles", async () => {
+    const [result] = await db
+      .select({ files: notes.files })
+      .from(notes)
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+    return result?.files ?? []
   })
 }

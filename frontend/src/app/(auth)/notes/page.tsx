@@ -7,7 +7,7 @@ import Link from "next/link"
 
 export default function NotesPage() {
   return (
-    <div className="w-full max-w-3xl mx-auto py-10 px-4 overflow-y-auto h-screen">
+    <div className="w-full max-w-3xl mx-auto py-10 px-4 overflow-y-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-primary">Your Notes</h1>
