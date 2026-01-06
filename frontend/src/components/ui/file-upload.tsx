@@ -12,12 +12,14 @@ type FileUploadProps = {
   noteId?: number
   pendingFiles: File[]
   onFilesChange: (files: File[]) => void
+  compact?: boolean
 }
 
 export function FileUpload(props: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
+  const { compact = false } = props
 
   const hasNoteId = props.noteId !== undefined
 
@@ -75,32 +77,45 @@ export function FileUpload(props: FileUploadProps) {
   const existingFiles = data?.files ?? []
 
   return (
-    <div className="space-y-3 w-full">
-      <div
-        className={cn(
-          "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-          isDragging
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 hover:border-muted-foreground/50"
-        )}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setIsDragging(true)
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
-        <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-        <p className="mt-2 text-sm text-muted-foreground">Drop files here or click to upload</p>
-      </div>
+    <div className={cn("w-full", compact ? "" : "space-y-3")}>
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files)}
+      />
+      {compact ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => inputRef.current?.click()}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <Upload className="h-4 w-4" />
+          Add File
+        </Button>
+      ) : (
+        <div
+          className={cn(
+            "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-muted-foreground/25 hover:border-muted-foreground/50"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setIsDragging(true)
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+          <p className="mt-2 text-sm text-muted-foreground">Drop files here or click to upload</p>
+        </div>
+      )}
 
       {hasNoteId && isLoading ? (
         <div className="flex justify-center py-4">
@@ -109,17 +124,19 @@ export function FileUpload(props: FileUploadProps) {
       ) : null}
 
       {existingFiles.length > 0 && (
-        <ul className="space-y-2">
+        <ul className={cn("space-y-2 w-full", compact && "mt-3")}>
           {existingFiles.map((filename) => (
             <li
               key={filename}
-              className="flex items-center justify-between gap-2 rounded-md border p-2"
+              className="flex items-center justify-between gap-2 rounded-md border p-2 w-full"
             >
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-sm truncate">{filename}</span>
+                <span className="text-xs sm:text-sm truncate max-w-[10rem] sm:max-w-none">
+                  {filename}
+                </span>
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1 shrink-0">
                 <Button variant="ghost" size="icon-sm" onClick={() => handleDownload(filename)}>
                   <Download className="h-4 w-4" />
                 </Button>
@@ -138,17 +155,24 @@ export function FileUpload(props: FileUploadProps) {
       )}
 
       {props.pendingFiles.length > 0 && (
-        <ul className="space-y-2">
+        <ul className={cn("space-y-2 w-full", compact && existingFiles.length === 0 && "mt-3")}>
           {props.pendingFiles.map((file, index) => (
             <li
               key={`${file.name}-${index}`}
-              className="flex items-center justify-between gap-2 rounded-md border p-2"
+              className="flex items-center justify-between gap-2 rounded-md border p-2 w-full"
             >
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-sm truncate">{file.name}</span>
+                <span className="text-xs sm:text-sm truncate max-w-[10rem] sm:max-w-none">
+                  {file.name}
+                </span>
               </div>
-              <Button variant="ghost" size="icon-sm" onClick={() => handleRemove(index)}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+                onClick={() => handleRemove(index)}
+              >
                 <X className="h-4 w-4" />
               </Button>
             </li>

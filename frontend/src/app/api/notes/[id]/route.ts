@@ -1,8 +1,37 @@
 import { auth } from "@clerk/nextjs/server"
-import { updateNote, deleteNote } from "@/db/db-functions"
+import { getNote, updateNote, deleteNote } from "@/db/db-functions"
 import { ErrorData, UpdateNoteData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
+
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await params
+  const noteId = parseInt(id, 10)
+
+  if (isNaN(noteId)) {
+    return NextResponse.json<ErrorData>({ message: "Invalid note ID" }, { status: 400 })
+  }
+
+  logger.info("api", `GET /api/notes/${noteId}`)
+  try {
+    const note = await withTiming("api", `GET /api/notes/${noteId}`, async () => {
+      return getNote(userId, noteId)
+    })
+    if (!note) {
+      return NextResponse.json<ErrorData>({ message: "Note not found" }, { status: 404 })
+    }
+    return NextResponse.json(note)
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to fetch note"
+    logger.error("api", `GET /api/notes/${noteId} failed`, { error: errorMessage })
+    return NextResponse.json<ErrorData>({ message: errorMessage }, { status: 500 })
+  }
+}
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()

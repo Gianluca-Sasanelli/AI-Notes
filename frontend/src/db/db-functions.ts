@@ -111,6 +111,27 @@ export const getTimelessNotes = async (
   })
 }
 
+export const getNote = async (userId: string, id: number) => {
+  logger.debug("db", "Fetching note", { noteId: id })
+  return withTiming("db", "getNote", async () => {
+    const [note] = await db
+      .select({
+        id: notes.id,
+        startTimestamp: notes.startTimestamp,
+        endTimestamp: notes.endTimestamp,
+        granularity: notes.granularity,
+        createdAt: notes.createdAt,
+        updatedAt: notes.updatedAt,
+        content: notes.content,
+        metadata: notes.metadata,
+        files: notes.files
+      })
+      .from(notes)
+      .where(and(eq(notes.id, id), eq(notes.userId, userId)))
+    return note ?? null
+  })
+}
+
 export const updateNote = async (userId: string, id: number, data: UpdateNoteData) => {
   logger.debug("db", "Updating note", { noteId: id })
   return withTiming("db", "updateNote", async () => {
