@@ -1,0 +1,1 @@
+ALTER TABLE "notes" ADD COLUMN "files" varchar(255)[] DEFAULT '{}' NOT NULL;
