@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server"
 import { ErrorData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
-import { uploadFile, deleteFile, getFileUrl } from "@/lib/storage"
+import { uploadFile, deleteFile, getFileUrl, sanitizeFilename } from "@/lib/storage"
 import { addFileToNote, removeFileFromNote, getNoteFiles } from "@/db/db-functions"
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -25,14 +25,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json<ErrorData>({ message: "No file provided" }, { status: 400 })
   }
 
-  logger.info("api", `POST /api/notes/${noteId}/files`, { filename: file.name })
+  const filename = sanitizeFilename(file.name)
+  logger.info("api", `POST /api/notes/${noteId}/files`, { original: file.name, filename })
   try {
     const buffer = Buffer.from(await file.arrayBuffer())
     await withTiming("api", `POST /api/notes/${noteId}/files`, async () => {
-      await uploadFile(userId, noteId, file.name, buffer, file.type)
-      await addFileToNote(userId, noteId, file.name)
+      await uploadFile(userId, noteId, filename, buffer, file.type)
+      await addFileToNote(userId, noteId, filename)
     })
-    return NextResponse.json({ filename: file.name }, { status: 201 })
+    return NextResponse.json({ filename }, { status: 201 })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to upload file"
     logger.error("api", `POST /api/notes/${noteId}/files failed`, { error: errorMessage })

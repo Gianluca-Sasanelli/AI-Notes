@@ -8,6 +8,9 @@ import { getNoteFilesClient, deleteFileClient, getFileUrlClient } from "@/lib/ap
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
+const MAX_FILE_SIZE_MB = 10
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
+
 type FileUploadProps = {
   noteId?: number
   pendingFiles: File[]
@@ -45,7 +48,18 @@ export function FileUpload(props: FileUploadProps) {
 
   const handleFiles = (fileList: FileList | null) => {
     if (!fileList) return
-    props.onFilesChange([...props.pendingFiles, ...Array.from(fileList)])
+    const files = Array.from(fileList)
+    const validFiles: File[] = []
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`${file.name} exceeds ${MAX_FILE_SIZE_MB}MB limit`)
+        continue
+      }
+      validFiles.push(file)
+    }
+    if (validFiles.length > 0) {
+      props.onFilesChange([...props.pendingFiles, ...validFiles])
+    }
   }
 
   const handleRemove = (index: number) => {
