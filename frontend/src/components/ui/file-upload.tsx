@@ -111,7 +111,7 @@ export function FileUpload(props: FileUploadProps) {
           variant="outline"
           size="sm"
           onClick={() => inputRef.current?.click()}
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="gap-2 text-muted-foreground hover:text-foreground w-full justify-center"
         >
           <Upload className="h-4 w-4" />
           Add File

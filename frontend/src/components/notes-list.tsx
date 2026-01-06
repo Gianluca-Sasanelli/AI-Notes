@@ -151,7 +151,7 @@ export function NotesList() {
       )}
 
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
-        <DialogContent className="w-full h-full max-w-full max-h-full sm:max-w-lg sm:max-h-[95dvh] flex flex-col overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[95dvh] flex flex-col overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Note</DialogTitle>
           </DialogHeader>
@@ -170,10 +170,10 @@ export function NotesList() {
               rows={5}
               className="min-h-[120px] focus:border-primary focus:outline-none"
             />
-            <div className="flex flex-col items-start gap-2 w-full">
+            <div className="flex flex-col gap-3 w-full">
               <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
               {editingNote && (
-                <div className="sm:hidden">
+                <div className="sm:hidden w-full">
                   <FileUpload
                     noteId={editingNote.id}
                     pendingFiles={pendingFiles}
