@@ -43,7 +43,7 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
   }
 
   return (
-    <div className={cn((isOpen || entries.length > 0) && "w-full")}>
+    <div className="w-full">
       {entries.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {entries.map(([key, val]) => (
@@ -71,13 +71,22 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
           variant="outline"
           size="sm"
           onClick={() => setIsOpen(true)}
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="gap-2 text-muted-foreground hover:text-foreground w-full justify-center"
         >
           <Tag className="h-4 w-4" />
           Add Tag
         </Button>
       ) : (
-        <div className="border rounded-lg p-4 bg-muted/30 space-y-4">
+        <div className="border rounded-lg p-4 pt-10 bg-muted/30 space-y-4 relative">
+          <Button
+            type="button"
+            size="icon"
+            onClick={() => setIsOpen(false)}
+            variant="ghost"
+            className="absolute top-2 right-2 h-6 w-6"
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <div className="flex gap-2">
             <Input
               placeholder="Key"
@@ -121,16 +130,6 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
                 </button>
               ))}
           </div>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="w-full text-muted-foreground"
-          >
-            Done
-          </Button>
         </div>
       )}
     </div>

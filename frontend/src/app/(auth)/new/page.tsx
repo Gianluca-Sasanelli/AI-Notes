@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -11,7 +12,7 @@ import { toast } from "sonner"
 import { createTimeNoteClient, uploadFileClient } from "@/lib/api"
 import type { NoteMetadata } from "@/db/schema"
 import type { NoteGranularity } from "@/lib/types/database-types"
-
+import { useIsMobile } from "@/lib/hooks"
 export default function NewNotePage() {
   const [content, setContent] = useState("")
   const [startTimestamp, setStartTimestamp] = useState<Date>(new Date())
@@ -20,15 +21,8 @@ export default function NewNotePage() {
   const [metadata, setMetadata] = useState<NoteMetadata>({})
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const queryClient = useQueryClient()
-
-  const resetState = () => {
-    setContent("")
-    setStartTimestamp(new Date())
-    setEndTimestamp(null)
-    setGranularity("day")
-    setMetadata({})
-    setPendingFiles([])
-  }
+  const router = useRouter()
+  const isMobile = useIsMobile()
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -46,8 +40,8 @@ export default function NewNotePage() {
     },
     onSuccess: () => {
       toast.success("Note created!")
-      resetState()
       queryClient.invalidateQueries({ queryKey: ["notes"] })
+      router.push("/notes")
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to create note")
@@ -61,9 +55,9 @@ export default function NewNotePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center w-full mt-10 px-10">
-      <h1 className="text-2xl font-bold mb-7 text-primary text-center">Add New Note</h1>
-      <div className="flex flex-col items-center gap-6 w-full max-w-md">
+    <div className="flex flex-col w-full mt-6 md:mt-10 mb-4 px-4 md:px-10">
+      <h1 className="text-2xl font-bold mb-5 md:mb-7 text-primary text-center">Add New Note</h1>
+      <div className="flex flex-col gap-4 md:gap-6 w-full max-w-2xl mx-auto">
         <DateTimePicker
           startTimestamp={startTimestamp}
           endTimestamp={endTimestamp}
@@ -80,15 +74,21 @@ export default function NewNotePage() {
           onKeyDown={handleKeyDown}
           placeholder="Write your note here..."
           rows={6}
-          className="min-h-[200px] w-full bg-secondary focus:border-primary focus:outline-none"
+          className="min-h-[180px] md:min-h-[200px] w-full bg-secondary focus:border-primary focus:outline-none"
           required
         />
 
-        <FileUpload pendingFiles={pendingFiles} onFilesChange={setPendingFiles} />
+        <div className="flex flex-col gap-3 w-full">
+          <FileUpload
+            pendingFiles={pendingFiles}
+            onFilesChange={setPendingFiles}
+            compact={isMobile}
+          />
+          <MetadataEditor value={metadata} onChange={setMetadata} />
+        </div>
 
-        <MetadataEditor value={metadata} onChange={setMetadata} />
         <Button
-          className="text-lg font-semibold w-fit cursor-pointer"
+          className="text-lg font-semibold w-full md:w-fit md:self-center cursor-pointer"
           onClick={() => mutation.mutate()}
           disabled={!content.trim() || mutation.isPending}
         >

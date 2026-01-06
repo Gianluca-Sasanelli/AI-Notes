@@ -115,13 +115,13 @@ export function DateTimePicker({
 
   if (isMobile) {
     return (
-      <div className="flex flex-col gap-2 w-full">
-        {granularityToggle}
+      <div className="w-full">
         <Sheet>
           <SheetTrigger asChild>{triggerButton}</SheetTrigger>
           <SheetContent side="bottom" className="px-0 pb-8">
             <SheetTitle className="sr-only">Select date</SheetTitle>
             <div className="flex flex-col items-center overflow-auto max-h-[70vh]">
+              <div className="py-3">{granularityToggle}</div>
               <Calendar
                 mode="range"
                 selected={{ from: startTimestamp, to: endTimestamp ?? undefined }}
@@ -183,14 +183,14 @@ export function DateTimePicker({
   }
 
   return (
-    <div className="flex flex-col gap-2 w-full">
-      {granularityToggle}
+    <div className="w-full">
       <Popover>
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
         <PopoverContent
           className="bg-secondary text-secondary-foreground w-auto shadow-lg p-0"
           align="center"
         >
+          <div className="flex justify-center py-3 border-b">{granularityToggle}</div>
           <div className="flex">
             <Calendar
               mode="range"
