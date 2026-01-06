@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Paperclip } from "lucide-react"
+import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,7 +24,6 @@ import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
-
 export function NotesList() {
   const [skip, setSkip] = useState(0)
   const [limit, setLimit] = useState(10)
@@ -36,7 +36,6 @@ export function NotesList() {
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const queryClient = useQueryClient()
-
   const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit],
     queryFn: () => getNotesClient({ skip, limit, timeless: false }),
@@ -151,11 +150,11 @@ export function NotesList() {
       )}
 
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
-        <DialogContent className="w-[90dvh]">
+        <DialogContent className="w-full h-full max-w-full max-h-full sm:max-w-lg sm:max-h-[95dvh] flex flex-col overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Note</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 w-full min-w-0 flex-1">
             <DateTimePicker
               startTimestamp={editingStartTimestamp}
               endTimestamp={editingEndTimestamp}
@@ -170,13 +169,27 @@ export function NotesList() {
               rows={5}
               className="min-h-[120px] focus:border-primary focus:outline-none"
             />
-            <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
+            <div className="flex flex-col items-start gap-2 w-full">
+              <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
+              {editingNote && (
+                <div className="sm:hidden">
+                  <FileUpload
+                    noteId={editingNote.id}
+                    pendingFiles={pendingFiles}
+                    onFilesChange={setPendingFiles}
+                    compact
+                  />
+                </div>
+              )}
+            </div>
             {editingNote && (
-              <FileUpload
-                noteId={editingNote.id}
-                pendingFiles={pendingFiles}
-                onFilesChange={setPendingFiles}
-              />
+              <div className="hidden sm:block">
+                <FileUpload
+                  noteId={editingNote.id}
+                  pendingFiles={pendingFiles}
+                  onFilesChange={setPendingFiles}
+                />
+              </div>
             )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditingNote(null)}>
@@ -197,7 +210,7 @@ export function NotesList() {
         open={deletingNoteId !== null}
         onOpenChange={(open) => !open && setDeletingNoteId(null)}
       >
-        <DialogContent className="w-[70dvh]">
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Delete Note</DialogTitle>
             <DialogDescription>This action cannot be undone.</DialogDescription>
@@ -234,7 +247,7 @@ function TimeNoteCard({
   return (
     <Card className="p-4 transition-colors hover:bg-accent/30">
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1 space-y-2">
+        <Link href={`/note/${note.id}`} className="min-w-0 flex-1 space-y-2">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
@@ -270,7 +283,7 @@ function TimeNoteCard({
               )}
             </div>
           )}
-        </div>
+        </Link>
 
         <div className="flex gap-1">
           <Button variant="ghost" size="icon" onClick={() => onEdit(note)}>

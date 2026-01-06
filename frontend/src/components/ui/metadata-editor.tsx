@@ -43,7 +43,7 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className={cn((isOpen || entries.length > 0) && "w-full")}>
       {entries.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {entries.map(([key, val]) => (

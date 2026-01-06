@@ -82,6 +82,15 @@ export async function getNotesClient(
   return await res.json()
 }
 
+export async function getNoteClient(id: number) {
+  const res = await fetch(`/api/notes/${id}`)
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+  return (await res.json()) as TimeNote | TimelessNote
+}
+
 export async function updateNoteClient(id: number, data: UpdateNoteData) {
   const body = {
     ...data,
