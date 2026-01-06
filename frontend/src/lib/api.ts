@@ -190,13 +190,24 @@ export async function regenerateUserSummaryClient() {
 export async function uploadFileClient(noteId: number, file: File) {
   const formData = new FormData()
   formData.append("file", file)
-  const res = await fetch(`/api/notes/${noteId}/files`, {
-    method: "POST",
-    body: formData
-  })
+  let res: Response
+  try {
+    res = await fetch(`/api/notes/${noteId}/files`, {
+      method: "POST",
+      body: formData
+    })
+  } catch (err) {
+    throw new Error(`Network error: ${err instanceof Error ? err.message : "Failed to connect"}`)
+  }
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.message)
+    let message = "Upload failed"
+    try {
+      const error = await res.json()
+      message = error.message || message
+    } catch {
+      message = `Upload failed: ${res.status} ${res.statusText}`
+    }
+    throw new Error(message)
   }
   return (await res.json()) as { filename: string }
 }
