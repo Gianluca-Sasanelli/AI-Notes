@@ -40,6 +40,7 @@ export function FileUpload(props: FileUploadProps) {
     onSuccess: () => {
       toast.success("File deleted")
       queryClient.invalidateQueries({ queryKey: ["note-files", props.noteId] })
+      queryClient.invalidateQueries({ queryKey: ["notes"] })
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Delete failed")
