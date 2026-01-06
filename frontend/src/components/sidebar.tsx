@@ -123,17 +123,17 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         <div className="h-[50px] flex-none justify-start border-t" suppressHydrationWarning>
           {!isLoaded ? (
             <div
-              className={cn(
-                "animate-pulse rounded-md bg-muted",
-                isCollapsed ? "mx-auto size-6" : "h-[40px] w-full"
-              )}
-            />
+              className={
+                "flex items-center size-full bg-muted animate-pulse rounded-md"
+              }
+            >
+            </div>
           ) : (
             <UserButton
               appearance={{
                 elements: {
                   rootBox:
-                    "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 py-2 text-sm font-medium text-secondary-foreground",
+                    "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
                   userButtonTrigger: "size-full cursor-pointer",
                   userButtonBox: "size-full",
                   userButtonAvatarBox: cn("order-first size-6"),
@@ -154,8 +154,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         </div>
       </div>
     </>
-  )
-}
+  )}
 
 function DesktopSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true)
