@@ -6,6 +6,18 @@ import {
 } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
+export const sanitizeFilename = (filename: string): string => {
+  const ext = filename.split(".").pop() || ""
+  const name = filename.slice(0, filename.length - ext.length - 1)
+  const sanitized = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "")
+  return sanitized ? `${sanitized}.${ext}` : `file_${Date.now()}.${ext}`
+}
+
 const S3_ENDPOINT = process.env.S3_ENDPOINT
 const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY
 const S3_SECRET_KEY = process.env.S3_SECRET_KEY
