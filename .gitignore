@@ -4,3 +4,4 @@
 *.env
 TODO.md
 *.tsbuildinfo
+/minio-data
