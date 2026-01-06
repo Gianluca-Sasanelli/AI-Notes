@@ -64,6 +64,7 @@ export function NotesList() {
       setEditingNote(null)
       setPendingFiles([])
       queryClient.invalidateQueries({ queryKey: ["notes"] })
+      queryClient.invalidateQueries({ queryKey: ["note-files", editingNote?.id] })
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to update")
