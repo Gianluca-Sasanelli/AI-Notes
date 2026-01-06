@@ -74,7 +74,7 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
           className="gap-2 text-muted-foreground hover:text-foreground"
         >
           <Tag className="h-4 w-4" />
-          Add Metadata
+          Add Tag
         </Button>
       ) : (
         <div className="border rounded-lg p-4 bg-muted/30 space-y-4">
