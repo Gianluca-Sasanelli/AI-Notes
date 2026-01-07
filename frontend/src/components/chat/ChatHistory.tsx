@@ -11,8 +11,8 @@ import { ChatDropdown } from "./ChatDropdown"
 
 export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   const { data, isLoading } = useQuery({
-    queryKey: ["chats", 0, 10],
-    queryFn: () => getChatsClient(0, 10),
+    queryKey: ["chats", 0, 20],
+    queryFn: () => getChatsClient(0, 20),
     staleTime: 2 * 60 * 1000,
     gcTime: 60 * 60 * 1000
   })
@@ -37,7 +37,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                   href={`/chat/${chat.id}`}
                   onClick={onNavigate}
                   className={cn(
-                    "flex-1 flex items-center gap-2 px-2 py-1.5 text-sm  rounded-md",
+                    "flex-1 flex items-center gap-2 px-2 py-1.5 text-base rounded-md",
                     isActive && "bg-accent "
                   )}
                 >

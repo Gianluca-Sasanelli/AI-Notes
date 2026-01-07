@@ -50,7 +50,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "group inline-flex items-center justify-start whitespace-nowrap rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    "group inline-flex items-center justify-start whitespace-nowrap rounded-md p-2 text-base font-medium hover:bg-accent hover:text-accent-foreground",
                     pathname === item.href ? "bg-accent text-accent-foreground" : "bg-transparent"
                   )}
                 >
@@ -79,7 +79,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
         {!isCollapsed && (
           <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap pb-2">
-            <span className="flex-none px-4 pt-4 text-md">Chat History</span>
+            <span className="flex-none px-4 pt-4 text-lg font-medium">Chat History</span>
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin">
               <ChatHistory onNavigate={onClose} />
             </div>
