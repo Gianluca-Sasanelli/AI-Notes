@@ -96,15 +96,13 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 onClick={onClose}
                 className={cn(
                   "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
-                  pathname === "/settings" && "bg-accent text-accent-foreground"
+                  pathname === "/settings" && "bg-accent text-foreground"
                 )}
               >
                 <Settings className="size-6" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right" className="text-secondary-foreground">
-              Settings
-            </TooltipContent>
+            <TooltipContent side="right">Settings</TooltipContent>
           </Tooltip>
         ) : (
           <Link
