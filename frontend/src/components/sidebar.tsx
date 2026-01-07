@@ -79,7 +79,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
         {!isCollapsed && (
           <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap pb-2">
-            <span className="text-foreground/80 flex-none px-4 pt-4 font-medium">Chat History</span>
+            <span className="flex-none px-4 pt-4 text-md">Chat History</span>
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin">
               <ChatHistory onNavigate={onClose} />
             </div>
@@ -122,12 +122,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
         <div className="h-[50px] flex-none justify-start border-t" suppressHydrationWarning>
           {!isLoaded ? (
-            <div
-              className={
-                "flex items-center size-full bg-muted animate-pulse rounded-md"
-              }
-            >
-            </div>
+            <div className={"flex items-center size-full bg-muted animate-pulse rounded-md"}></div>
           ) : (
             <UserButton
               appearance={{
@@ -154,7 +149,8 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         </div>
       </div>
     </>
-  )}
+  )
+}
 
 function DesktopSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true)
