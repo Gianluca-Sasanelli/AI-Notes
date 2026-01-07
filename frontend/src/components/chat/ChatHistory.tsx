@@ -23,7 +23,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex flex-col gap-1">
       {data.data.length === 0 ? (
-        <span className="px-2 text-xs text-sidebar-foreground/60">No chat history</span>
+        <span className="px-2 text-md text-secondary-foreground">No chat history</span>
       ) : (
         <>
           {data.data.map((chat: ChatHistoryItem) => {
@@ -37,8 +37,8 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                   href={`/chat/${chat.id}`}
                   onClick={onNavigate}
                   className={cn(
-                    "flex-1 flex items-center gap-2 px-2 py-1.5 text-sm text-sidebar-foreground rounded-md",
-                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                    "flex-1 flex items-center gap-2 px-2 py-1.5 text-sm  rounded-md",
+                    isActive && "bg-accent "
                   )}
                 >
                   <MessageSquare className="size-4 shrink-0" />

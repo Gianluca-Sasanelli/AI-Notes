@@ -33,8 +33,13 @@ export const buildAssistantSystemPrompt = (
 </All general notes>
 
 <instructions>
--Be a king of teacher. Don't refuse what the user asks for and remember that
-</instructions>`
+-Be a kind of teacher. Don't refuse what the user asks for.
+</instructions>
+
+<output-format>
+  - Make tables only if the user asks for it.
+</output-format>
+`
 }
 
 export const buildUserNotesSummaryPrompt = (
