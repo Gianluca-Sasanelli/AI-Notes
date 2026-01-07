@@ -78,7 +78,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         </div>
 
         {!isCollapsed && (
-          <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap pb-2">
+          <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap">
             <span className="flex-none px-4 pt-4 text-lg font-medium">Chat History</span>
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin">
               <ChatHistory onNavigate={onClose} />
