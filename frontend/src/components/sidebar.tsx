@@ -121,6 +121,32 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         <div className="h-[50px] flex-none justify-start border-t" suppressHydrationWarning>
           {!isLoaded ? (
             <div className={"flex items-center size-full bg-muted animate-pulse rounded-md"}></div>
+          ) : isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="size-full">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        rootBox:
+                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
+                        userButtonTrigger: "size-full cursor-pointer",
+                        userButtonBox: "size-full",
+                        userButtonAvatarBox: "order-first size-6",
+                        userButtonOuterIdentifier: "hidden",
+                        card: "bg-popover border-border",
+                        profileSectionTitle: "!text-secondary-foreground",
+                        accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
+                        accordionContent: "bg-background",
+                        profileSectionContent: "text-secondary-foreground"
+                      }
+                    }}
+                    showName={false}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right">Profile</TooltipContent>
+            </Tooltip>
           ) : (
             <UserButton
               appearance={{
@@ -129,11 +155,9 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                     "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
                   userButtonTrigger: "size-full cursor-pointer",
                   userButtonBox: "size-full",
-                  userButtonAvatarBox: cn("order-first size-6"),
-                  userButtonOuterIdentifier: cn(
+                  userButtonAvatarBox: "order-first size-6",
+                  userButtonOuterIdentifier:
                     "flex-1 cursor-pointer whitespace-nowrap text-left text-sm !text-secondary-foreground",
-                    isCollapsed && "hidden"
-                  ),
                   card: "bg-popover border-border",
                   profileSectionTitle: "!text-secondary-foreground",
                   accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
@@ -141,7 +165,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                   profileSectionContent: "text-secondary-foreground"
                 }
               }}
-              showName={!isCollapsed}
+              showName
             />
           )}
         </div>

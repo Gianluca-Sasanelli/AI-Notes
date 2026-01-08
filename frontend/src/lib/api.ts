@@ -187,9 +187,10 @@ export async function regenerateUserSummaryClient() {
   return res.json()
 }
 
-export async function uploadFileClient(noteId: number, file: File) {
+export async function uploadFileClient(noteId: number, file: File, filename: string) {
   const formData = new FormData()
   formData.append("file", file)
+  formData.append("filename", filename)
   let res: Response
   try {
     res = await fetch(`/api/notes/${noteId}/files`, {
