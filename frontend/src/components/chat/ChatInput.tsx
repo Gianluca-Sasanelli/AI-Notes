@@ -157,9 +157,9 @@ const ChatInput = React.memo(function ChatInput({
           placeholder="Ask about your notes, or health issues..."
           className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0"
         />
-        <div className="flex max-h-[30%] justify-between pr-2">
+        <div className="flex max-h-[30%] items-center justify-between pr-2">
+          <ModelSelector />
           <div className="flex items-center gap-2">
-            <ModelSelector />
             <Button
               type="button"
               variant="ghost"

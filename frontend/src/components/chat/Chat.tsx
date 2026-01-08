@@ -48,9 +48,7 @@ export default function Chat({
     return (
       <>
         <div className="flex h-[100dvh] flex-col items-center justify-center gap-6 bg-background mx-10">
-          <h1 className="text-center text-4xl font-bold tracking-tight text-primary">
-            Medical History AI
-          </h1>
+          <h1 className="text-center text-4xl font-bold tracking-tight text-primary">Ai Notes</h1>
           <p className="text-base text-muted-foreground">
             Ask about your medical notes and general questions.
           </p>

@@ -186,9 +186,7 @@ function DesktopSidebar() {
     >
       <div className="flex items-center px-2">
         {!isCollapsed && (
-          <span className="px-2 font-semibold text-foreground whitespace-nowrap">
-            Medical Notes
-          </span>
+          <span className="px-2 font-semibold text-foreground whitespace-nowrap">Ai Notes</span>
         )}
         <Tooltip>
           <TooltipTrigger asChild>
@@ -227,7 +225,7 @@ function MobileSidebar() {
           <SheetTitle>Navigation Menu</SheetTitle>
         </VisuallyHidden.Root>
         <div className="flex items-center px-4 pb-2">
-          <span className="font-semibold text-foreground">Medical Notes</span>
+          <span className="font-semibold text-foreground">Ai Notes</span>
         </div>
         <SidebarContent isCollapsed={false} onClose={() => setOpen(false)} />
       </SheetContent>
