@@ -3,7 +3,7 @@ import { tool } from "ai"
 import { getTimeNotes, getNoteFiles } from "@/db/db-functions"
 import { getFileContent } from "@/lib/storage"
 import { z } from "zod"
-import { PDFParse } from "pdf-parse"
+import { extractText } from "unpdf"
 
 export const NotesTools = (userId: string) => {
   return {
@@ -35,10 +35,8 @@ export const NotesTools = (userId: string) => {
         const ext = filename.split(".").pop()?.toLowerCase()
 
         if (ext === "pdf") {
-          const parser = new PDFParse({ data: new Uint8Array(buffer) })
-          const result = await parser.getText()
-          await parser.destroy()
-          return { type: "pdf", filename, text: result.text, pages: result.pages.length }
+          const { text, totalPages } = await extractText(new Uint8Array(buffer))
+          return { type: "pdf", filename, text, pages: totalPages }
         }
 
         if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext || "")) {
