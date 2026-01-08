@@ -155,7 +155,7 @@ const ChatInput = React.memo(function ChatInput({
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           placeholder="Ask about your notes, or health issues..."
-          className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0 "
+          className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0"
         />
         <div className="flex max-h-[30%] justify-between pr-2">
           <div className="flex items-center gap-2">

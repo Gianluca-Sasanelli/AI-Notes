@@ -83,3 +83,16 @@ export const getFileUrl = async (userId: string, noteId: number, filename: strin
   })
   return getSignedUrl(s3Client, command, { expiresIn: 3600 })
 }
+
+export const getFileContent = async (userId: string, noteId: number, filename: string) => {
+  const key = `${userId}/notes/${noteId}/${filename}`
+  const response = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: S3_BUCKET,
+      Key: key
+    })
+  )
+  const byteArray = await response.Body?.transformToByteArray()
+  if (!byteArray) throw new Error("Failed to read file content")
+  return Buffer.from(byteArray)
+}

@@ -23,5 +23,6 @@ export const chatRequestSchema = z.object({
 })
 export const AiFrontendTools: Record<string, { title: string; icon?: string }> = {
   listNotes: { title: "List Notes", icon: "📋" },
+  getNoteFile: { title: "Read File", icon: "📄" },
   webSearch: { title: "Web Search", icon: "🌐" }
 }
