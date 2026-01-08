@@ -1,6 +1,6 @@
 import { db } from "@/index"
 import { notes, chats, userSummaries, type NoteMetadata } from "@/db/schema"
-import { desc, count, eq, and, gt, sql } from "drizzle-orm"
+import { desc, count, eq, and, gt, gte, lte, sql } from "drizzle-orm"
 import type { UpdateNoteData, NoteGranularity, TimeNoteSummary } from "@/lib/types/database-types"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
 import { removeDataPartsFromMessages } from "@/lib/utils"
@@ -349,5 +349,34 @@ export const getNoteFiles = async (userId: string, noteId: number) => {
       .from(notes)
       .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
     return result?.files ?? []
+  })
+}
+
+export const getTimeNotesByDateRange = async (
+  userId: string,
+  from: Date,
+  to: Date
+): Promise<TimeNoteSummary[]> => {
+  logger.debug("db", "Fetching notes by date range", { userId, from, to })
+  return withTiming("db", "getTimeNotesByDateRange", async () => {
+    const result = await db
+      .select({
+        id: notes.id,
+        content: notes.content,
+        startTimestamp: notes.startTimestamp,
+        endTimestamp: notes.endTimestamp,
+        updatedAt: notes.updatedAt
+      })
+      .from(notes)
+      .where(
+        and(
+          eq(notes.userId, userId),
+          sql`${notes.startTimestamp} IS NOT NULL`,
+          gte(notes.startTimestamp, from),
+          lte(notes.startTimestamp, to)
+        )
+      )
+      .orderBy(desc(notes.startTimestamp))
+    return result as TimeNoteSummary[]
   })
 }
