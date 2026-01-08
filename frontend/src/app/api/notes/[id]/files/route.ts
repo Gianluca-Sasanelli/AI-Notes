@@ -20,13 +20,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const formData = await request.formData()
   const file = formData.get("file") as File | null
+  const customFilename = formData.get("filename") as string | null
 
   if (!file) {
     return NextResponse.json<ErrorData>({ message: "No file provided" }, { status: 400 })
   }
 
-  const filename = sanitizeFilename(file.name)
-  logger.info("api", `POST /api/notes/${noteId}/files`, { original: file.name, filename })
+  const filename = sanitizeFilename(customFilename || file.name)
+  logger.info("api", `POST /api/notes/${noteId}/files`, {
+    original: file.name,
+    custom: customFilename,
+    filename
+  })
   try {
     const buffer = Buffer.from(await file.arrayBuffer())
     await withTiming("api", `POST /api/notes/${noteId}/files`, async () => {

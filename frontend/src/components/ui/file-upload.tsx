@@ -2,8 +2,9 @@
 
 import { useRef, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Upload, X, FileIcon, Loader2, Download } from "lucide-react"
+import { Upload, X, FileIcon, Loader2, Download, Pencil, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { getNoteFilesClient, deleteFileClient, getFileUrlClient } from "@/lib/api"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -11,15 +12,22 @@ import { cn } from "@/lib/utils"
 const MAX_FILE_SIZE_MB = 10
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
 
+export type PendingFile = {
+  file: File
+  filename: string
+}
+
 type FileUploadProps = {
   noteId?: number
-  pendingFiles: File[]
-  onFilesChange: (files: File[]) => void
+  pendingFiles: PendingFile[]
+  onFilesChange: (files: PendingFile[]) => void
   compact?: boolean
 }
 
 export function FileUpload(props: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingName, setEditingName] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { compact = false } = props
@@ -64,12 +72,36 @@ export function FileUpload(props: FileUploadProps) {
       validFiles.push(file)
     }
     if (validFiles.length > 0) {
-      props.onFilesChange([...props.pendingFiles, ...validFiles])
+      props.onFilesChange([
+        ...props.pendingFiles,
+        ...validFiles.map((file) => ({ file, filename: file.name }))
+      ])
     }
   }
 
   const handleRemove = (index: number) => {
     props.onFilesChange(props.pendingFiles.filter((_, i) => i !== index))
+  }
+
+  const startEditing = (index: number) => {
+    const current = props.pendingFiles[index].filename
+    const ext = current.split(".").pop() || ""
+    const nameWithoutExt = current.slice(0, current.length - ext.length - 1)
+    setEditingIndex(index)
+    setEditingName(nameWithoutExt)
+  }
+
+  const saveEditing = () => {
+    if (editingIndex === null) return
+    const original = props.pendingFiles[editingIndex].filename
+    const ext = original.split(".").pop() || ""
+    const newFilename = editingName.trim() ? `${editingName.trim()}.${ext}` : original
+    const updated = props.pendingFiles.map((pf, i) =>
+      i === editingIndex ? { ...pf, filename: newFilename } : pf
+    )
+    props.onFilesChange(updated)
+    setEditingIndex(null)
+    setEditingName("")
   }
 
   const handleDelete = (filename: string) => {
@@ -176,25 +208,41 @@ export function FileUpload(props: FileUploadProps) {
 
       {props.pendingFiles.length > 0 && (
         <ul className={cn("space-y-2 w-full", compact && existingFiles.length === 0 && "mt-3")}>
-          {props.pendingFiles.map((file, index) => (
+          {props.pendingFiles.map((pf, index) => (
             <li
-              key={`${file.name}-${index}`}
+              key={`${pf.filename}-${index}`}
               className="flex items-center justify-between gap-2 rounded-md border p-2 w-full"
             >
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-xs sm:text-sm truncate max-w-[10rem] sm:max-w-none">
-                  {file.name}
-                </span>
+                {editingIndex === index ? (
+                  <Input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveEditing()}
+                    className="h-6 text-xs sm:text-sm"
+                    autoFocus
+                  />
+                ) : (
+                  <span className="text-xs sm:text-sm truncate max-w-[10rem] sm:max-w-none">
+                    {pf.filename}
+                  </span>
+                )}
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0"
-                onClick={() => handleRemove(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-1 shrink-0">
+                {editingIndex === index ? (
+                  <Button variant="ghost" size="icon-sm" onClick={saveEditing}>
+                    <Check className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="icon-sm" onClick={() => startEditing(index)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button variant="ghost" size="icon-sm" onClick={() => handleRemove(index)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

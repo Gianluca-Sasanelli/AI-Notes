@@ -18,7 +18,7 @@ import {
 import { PaginationControls } from "@/components/pagination-controls"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
-import { FileUpload } from "@/components/ui/file-upload"
+import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
 import { getNotesClient, updateNoteClient, deleteNoteClient, uploadFileClient } from "@/lib/api"
 import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
@@ -34,7 +34,7 @@ export function NotesList() {
   const [editingEndTimestamp, setEditingEndTimestamp] = useState<Date | null>(null)
   const [editingGranularity, setEditingGranularity] = useState<NoteGranularity>("day")
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
-  const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const queryClient = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit],
@@ -55,8 +55,8 @@ export function NotesList() {
         granularity: editingGranularity,
         metadata: editingMetadata
       })
-      for (const file of pendingFiles) {
-        await uploadFileClient(editingNote.id, file)
+      for (const pf of pendingFiles) {
+        await uploadFileClient(editingNote.id, pf.file, pf.filename)
       }
     },
     onSuccess: () => {
@@ -200,7 +200,7 @@ export function NotesList() {
                 onClick={() => updateMutation.mutate()}
                 disabled={!editingContent.trim() || updateMutation.isPending}
               >
-                {updateMutation.isPending ? "Editing..." : "Edit"}
+                {updateMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>

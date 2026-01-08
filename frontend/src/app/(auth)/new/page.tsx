@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
-import { FileUpload } from "@/components/ui/file-upload"
+import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
 import { toast } from "sonner"
 import { createTimeNoteClient, uploadFileClient } from "@/lib/api"
 import type { NoteMetadata } from "@/db/schema"
@@ -19,7 +19,7 @@ export default function NewNotePage() {
   const [endTimestamp, setEndTimestamp] = useState<Date | null>(null)
   const [granularity, setGranularity] = useState<NoteGranularity>("day")
   const [metadata, setMetadata] = useState<NoteMetadata>({})
-  const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const queryClient = useQueryClient()
   const router = useRouter()
   const isMobile = useIsMobile()
@@ -33,8 +33,8 @@ export default function NewNotePage() {
         granularity,
         endTimestamp ?? undefined
       )
-      for (const file of pendingFiles) {
-        await uploadFileClient(noteId, file)
+      for (const pf of pendingFiles) {
+        await uploadFileClient(noteId, pf.file, pf.filename)
       }
       return noteId
     },
