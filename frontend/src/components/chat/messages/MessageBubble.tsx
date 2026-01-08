@@ -46,6 +46,8 @@ export function MessageBubble(props: MessageBubbleProps) {
         }
         if (isToolPart(part)) {
           const name = part.type.split("-")[1]
+          console.log("The name of the tool is", name)
+
           return (
             <div key={`${message.id}-${index}-${part.type}`} className="flex w-full justify-center">
               <ToolCallWidget

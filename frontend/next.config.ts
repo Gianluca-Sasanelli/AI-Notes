@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  serverExternalPackages: ["@aws-sdk/client-s3", "@aws-sdk/s3-request-presigner"],
+  serverExternalPackages: ["@aws-sdk/client-s3", "@aws-sdk/s3-request-presigner", "pdf-parse"],
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
