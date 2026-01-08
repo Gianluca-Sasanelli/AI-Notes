@@ -40,6 +40,7 @@ export const buildAssistantSystemPrompt = (
 <output-format>
   - Markdown text is supported by the frontend.
   - Don't output markdown tables or stuff like this. The user is on mobile which doesn't have support for tables. If writing tables, max 2 columns.
+  - This is true even for comparative summary or a side-by-side analysis.
 </output-format>
 `
 }
