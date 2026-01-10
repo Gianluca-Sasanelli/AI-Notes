@@ -7,19 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import {
-  Loader2,
-  Sun,
-  Moon,
-  Monitor,
-  RefreshCw,
-  Plus,
-  Pencil,
-  Trash2,
-  RotateCcw,
-  X,
-  Tag
-} from "lucide-react"
+import { Loader2, Sun, Moon, Monitor, RefreshCw, Plus, Pencil, Trash2, X, Tag } from "lucide-react"
 import {
   getUserSummaryClient,
   updateUserSummaryClient,
@@ -52,7 +40,7 @@ export default function SettingsPage() {
   const [editingContent, setEditingContent] = useState("")
   const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
 
-  const { tags, addTag, removeTag, updateTag, resetToDefaults } = useQuickTagsStore()
+  const { tags, addTag, removeTag, updateTag } = useQuickTagsStore()
   const [newTag, setNewTag] = useState("")
   const [editingTagNewName, setEditingTagNewName] = useState<string | null>(null)
   const editingTagOldName = useRef<string | null>(null)
@@ -339,18 +327,6 @@ export default function SettingsPage() {
           )}
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Quick Tags</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetToDefaults}
-              className="text-muted-foreground"
-            >
-              <RotateCcw className="size-4 mr-2" />
-              Reset
-            </Button>
-          </div>
           <p className="text-sm text-muted-foreground mb-4">
             Tags you can quickly add to your notes.
           </p>
