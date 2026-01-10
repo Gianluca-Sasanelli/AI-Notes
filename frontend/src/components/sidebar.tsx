@@ -88,35 +88,30 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
       </div>
 
       <div className="h-[100px] min-h-0 flex-none mt-auto">
-        {isCollapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/settings"
-                onClick={onClose}
-                className={cn(
-                  "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
-                  pathname === "/settings" && "bg-accent text-foreground"
-                )}
-              >
-                <Settings className="size-6" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
-        ) : (
-          <Link
-            href="/settings"
-            onClick={onClose}
-            className={cn(
-              "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
-              pathname === "/settings" && "bg-accent text-accent-foreground"
-            )}
-          >
-            <Settings className="size-6" />
-            <span className="ml-2">Settings</span>
-          </Link>
-        )}
+        {(() => {
+          const SettingsLink = (
+            <Link
+              href="/settings"
+              onClick={onClose}
+              className={cn(
+                "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
+                pathname === "/settings" && "bg-accent text-accent-foreground"
+              )}
+            >
+              <div className="size-6 justify-start"><Settings/></div>
+              {!isCollapsed && <span className="ml-2">Settings</span>}
+            </Link>
+          )
+
+          return isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>{SettingsLink}</TooltipTrigger>
+              <TooltipContent side="right">Settings</TooltipContent>
+            </Tooltip>
+          ) : (
+            SettingsLink
+          )
+        })()}
 
         <div className="h-[50px] flex-none justify-start border-t" suppressHydrationWarning>
           {!isLoaded ? (
