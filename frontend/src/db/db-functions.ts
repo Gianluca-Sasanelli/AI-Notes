@@ -156,15 +156,20 @@ export const createChat = async (
   serverMessages: ModelMessage[]
 ) => {
   logger.info("db", "Creating chat", { chatId: id })
+  let title: string | undefined = undefined
+  try {
+    title = await generateTitle(serverMessages)
+  } catch (error) {
+    logger.warn("db", "Error generating title", { chatId: id, error: String(error) })
+  }
   await withTiming("db", "createChat", async () => {
-    await db.insert(chats).values({ id, userId, messages: removeDataPartsFromMessages(messages) })
-  })
-  logger.debug("db", "Generating title for chat", { chatId: id })
-  void generateTitle(serverMessages)
-    .then((title) => db.update(chats).set({ title }).where(eq(chats.id, id)))
-    .catch((error) => {
-      logger.error("db", "Error generating title", { chatId: id, error: String(error) })
+    await db.insert(chats).values({
+      id,
+      userId,
+      messages: removeDataPartsFromMessages(messages),
+      ...(title !== undefined ? { title } : {})
     })
+  })
 }
 
 export const updateChat = async (userId: string, id: string, messages: ChatUIMessage[]) => {

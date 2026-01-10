@@ -98,7 +98,9 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 pathname === "/settings" && "bg-accent text-accent-foreground"
               )}
             >
-              <div className="size-6 justify-start"><Settings/></div>
+              <div className="size-6 justify-start">
+                <Settings />
+              </div>
               {!isCollapsed && <span className="ml-2">Settings</span>}
             </Link>
           )
