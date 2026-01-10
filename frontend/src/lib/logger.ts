@@ -1,17 +1,4 @@
-const isDev = process.env.NODE_ENV === "development"
-// Colors only in local terminal
-const useColors = !isDev
-console.log("useColors", useColors)
 type LogLevel = "debug" | "info" | "warn" | "error"
-
-const colors = {
-  debug: "\x1b[36m",
-  info: "\x1b[32m",
-  warn: "\x1b[33m",
-  error: "\x1b[31m",
-  reset: "\x1b[0m",
-  dim: "\x1b[2m"
-}
 
 const formatDuration = (ms: number) => {
   if (ms < 1) return `${(ms * 1000).toFixed(0)}μs`
@@ -21,10 +8,8 @@ const formatDuration = (ms: number) => {
 
 const log = (level: LogLevel, context: string, message: string, meta?: Record<string, unknown>) => {
   const timestamp = new Date().toISOString().slice(11, 23)
-  const color = useColors ? colors[level] : ""
-  const prefix = `${colors.dim}${timestamp}${colors.reset} ${color}[${level.toUpperCase()}]${colors.reset}`
-  const ctx = `${colors.dim}[${context}]${colors.reset}`
-
+  const prefix = `${timestamp} [${level.toUpperCase()}]`
+  const ctx = `[${context}]`
   if (meta) {
     console.log(`${prefix} ${ctx} ${message}`, meta)
   } else {
