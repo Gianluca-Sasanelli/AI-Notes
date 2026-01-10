@@ -1,5 +1,6 @@
 // const isDev = process.env.NODE_ENV === "development"
-
+const isVercel = process.env.VERCEL === "1"
+const useColors = !isVercel
 type LogLevel = "debug" | "info" | "warn" | "error"
 
 const colors = {
@@ -19,7 +20,7 @@ const formatDuration = (ms: number) => {
 
 const log = (level: LogLevel, context: string, message: string, meta?: Record<string, unknown>) => {
   const timestamp = new Date().toISOString().slice(11, 23)
-  const color = colors[level]
+  const color = useColors ? colors[level] : ""
   const prefix = `${colors.dim}${timestamp}${colors.reset} ${color}[${level.toUpperCase()}]${colors.reset}`
   const ctx = `${colors.dim}[${context}]${colors.reset}`
 
