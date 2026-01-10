@@ -23,6 +23,7 @@ type TimelessNoteBody = {
 type CreateNoteBody = TimeNoteBody | TimelessNoteBody
 
 export async function GET(request: Request) {
+  console.log("Test log")
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })

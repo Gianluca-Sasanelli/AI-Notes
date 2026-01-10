@@ -179,7 +179,7 @@ const ChatInput = React.memo(function ChatInput({
                 className="hover:bg-destructive/10"
                 title="Stop Generation"
               >
-                <StopCircle className="size-6"/>
+                <StopCircle className="size-6" />
               </Button>
             ) : (
               <Button
