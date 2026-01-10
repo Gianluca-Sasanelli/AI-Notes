@@ -1,5 +1,6 @@
 // const isDev = process.env.NODE_ENV === "development"
 const isVercel = process.env.VERCEL === "1"
+// Colors only in local terminal
 const useColors = !isVercel
 type LogLevel = "debug" | "info" | "warn" | "error"
 
