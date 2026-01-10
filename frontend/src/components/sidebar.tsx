@@ -180,7 +180,7 @@ function DesktopSidebar() {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground py-2 transition-all duration-200 overflow-hidden",
+        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground pt-2 transition-all duration-200 overflow-hidden",
         isCollapsed ? "w-14" : "w-56"
       )}
     >

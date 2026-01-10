@@ -89,7 +89,7 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
           </Button>
           <div className="flex gap-2">
             <Input
-              placeholder="Key"
+              placeholder="Name"
               value={newKey}
               onChange={(e) => setNewKey(e.target.value)}
               onKeyDown={handleKeyDown}

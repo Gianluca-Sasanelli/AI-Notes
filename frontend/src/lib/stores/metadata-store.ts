@@ -8,7 +8,6 @@ interface QuickTagsStore {
   addTag: (tag: string) => void
   removeTag: (name: string) => void
   updateTag: (oldName: string, newName: string) => void
-  resetToDefaults: () => void
 }
 
 export const useQuickTagsStore = create<QuickTagsStore>()(
@@ -26,8 +25,7 @@ export const useQuickTagsStore = create<QuickTagsStore>()(
       updateTag: (oldName, newName) =>
         set((state) => ({
           tags: state.tags.map((t) => (t === oldName ? newName : t))
-        })),
-      resetToDefaults: () => set({ tags: defaultTags })
+        }))
     }),
     {
       name: "quick-tags-storage"
