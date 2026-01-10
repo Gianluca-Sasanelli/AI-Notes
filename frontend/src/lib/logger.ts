@@ -1,4 +1,4 @@
-const isDev = process.env.NODE_ENV === "development"
+// const isDev = process.env.NODE_ENV === "development"
 
 type LogLevel = "debug" | "info" | "warn" | "error"
 
@@ -18,8 +18,6 @@ const formatDuration = (ms: number) => {
 }
 
 const log = (level: LogLevel, context: string, message: string, meta?: Record<string, unknown>) => {
-  if (!isDev && level === "debug") return
-
   const timestamp = new Date().toISOString().slice(11, 23)
   const color = colors[level]
   const prefix = `${colors.dim}${timestamp}${colors.reset} ${color}[${level.toUpperCase()}]${colors.reset}`
