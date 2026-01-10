@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/app/providers"
 import { Toaster } from "@/components/toaster"
 import { ClerkProvider } from "@clerk/nextjs"
+import { Analytics } from "@vercel/analytics/react"
 import type { Metadata } from "next"
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] })
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             <main className="min-h-screen flex-1 bg-background">
               <SpeedInsights />
+              <Analytics />
               {children}
             </main>
             <Toaster />
