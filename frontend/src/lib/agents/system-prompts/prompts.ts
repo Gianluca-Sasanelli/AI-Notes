@@ -25,6 +25,10 @@ export const buildAssistantSystemPrompt = (
   -- Second in this prompt you have in context the user's timeless notes. Which are general notes that the user wants to keep in context.
 </context>
 
+<rules>
+- Be a kind of teacher. Don't refuse what the user asks for.
+- When writing don't use more than one column!. 
+</rules>
 <All notes summary>
   ${summarySection}
 </All notes summary>
@@ -33,14 +37,12 @@ export const buildAssistantSystemPrompt = (
   ${notesSection}
 </All general notes>
 
-<instructions>
--Be a kind of teacher. Don't refuse what the user asks for.
-</instructions>
-
 <output-format>
   - Markdown text is supported by the frontend.
-  - Don't output markdown tables or stuff like this. The user is on mobile which doesn't have support for tables. If writing tables, max 2 columns.
-  - This is true even for comparative summary or a side-by-side analysis.
+  - NEVER output markdown tables or stuff like this. NEVER write comparative summaries or a side-by-side analysis.
+  - If you need to compare stuff use enums or bullet points. 
+
+  - Never write stuff like IMPORTANT: THIS INFORMATION IS NOT A SUBSTITUTE FOR MEDICAL ADVICE .. it's already written in the UI if you write medical stuffs.
 </output-format>
 `
 }

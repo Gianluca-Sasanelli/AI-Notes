@@ -18,7 +18,7 @@ export default function ToolCallWidget({
     )
   }
   return (
-    <div className="flex h-20 w-[50%] items-center justify-center rounded-md bg-secondary p-4 text-secondary-foreground">
+    <div className="flex h-20 w-[50%] items-center justify-center rounded-md bg-secondary p-4 text-secondary-foreground my-2">
       <span>{toolName}</span>
       {state === "output-error" && <span className="ml-2">There was an error using the tool</span>}
       {icon}

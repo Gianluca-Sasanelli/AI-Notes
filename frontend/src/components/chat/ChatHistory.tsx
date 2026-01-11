@@ -11,8 +11,8 @@ import { ChatDropdown } from "./ChatDropdown"
 
 export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   const { data, isLoading } = useQuery({
-    queryKey: ["chats", 0, 20],
-    queryFn: () => getChatsClient(0, 20),
+    queryKey: ["chats", 0, 10],
+    queryFn: () => getChatsClient(0, 10),
     staleTime: 2 * 60 * 1000,
     gcTime: 60 * 60 * 1000
   })
@@ -54,10 +54,10 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
             <Link
               href="/recents"
               onClick={onNavigate}
-              className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:border-sidebar-border hover:bg-sidebar-accent text-xs text-sidebar-foreground"
+              className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:bg-accent"
             >
               <Settings className="mr-2 size-4 shrink-0 text-sidebar-foreground/60" />
-              <span className="block font-medium">All Chats</span>
+              <span className="block text-lg">All Chats</span>
             </Link>
           )}
         </>
