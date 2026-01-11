@@ -10,9 +10,9 @@ const markdownOptions = {
       }
     },
     p: { props: { className: "mb-5 break-words" } },
-    ul: { props: { className: "list-disc ml-6 space-y-2 max-w-full" } },
-    ol: { props: { className: "list-decimal ml-6 space-y-2 max-w-full" } },
-    li: { props: { className: "ml-4 list-disc break-words" } },
+    ul: { props: { className: "list-disc my-6 space-y-2 max-w-full" } },
+    ol: { props: { className: "list-decimal my-6 space-y-2 max-w-full" } },
+    li: { props: { className: "my-2 list-disc break-words" } },
     strong: { props: { className: "font-semibold break-words" } },
     em: { props: { className: "italic break-words" } },
     code: {
@@ -33,7 +33,24 @@ const markdownOptions = {
         className:
           "pl-6 pr-4 border-l-4 border-primary bg-primary/5 py-3 italic my-6 rounded-r-md text-muted-foreground"
       }
-    }
+    },
+    table: {
+      props: {
+        className: "my-6 w-full border-collapse overflow-hidden rounded-lg border border-border"
+      }
+    },
+    thead: { props: { className: "bg-muted" } },
+    th: {
+      props: {
+        className: "border border-border px-4 py-2 text-left text-sm font-semibold"
+      }
+    },
+    td: {
+      props: {
+        className: "border border-border px-4 py-2 text-sm"
+      }
+    },
+    tr: { props: { className: "even:bg-muted/50" } }
   }
 }
 
