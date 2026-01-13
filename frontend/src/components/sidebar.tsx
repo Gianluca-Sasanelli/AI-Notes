@@ -41,7 +41,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col transition-all duration-200">
-        <div className="flex-none p-2">
+        <div className="flex-none p-1">
           <nav className="flex flex-col space-y-1">
             {navigationItems.map((item) => {
               const LinkContent = (
@@ -78,9 +78,8 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         </div>
 
         {!isCollapsed && (
-          <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap">
-            <span className="flex-none px-4 pt-4 text-lg font-medium">Chat History</span>
-            <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin">
+          <div className="flex min-h-0 flex-1 flex-col whitespace-nowrap pt-4">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin text-secondary-foreground">
               <ChatHistory onNavigate={onClose} />
             </div>
           </div>
@@ -145,25 +144,27 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
               <TooltipContent side="right">Profile</TooltipContent>
             </Tooltip>
           ) : (
-            <UserButton
-              appearance={{
-                elements: {
-                  rootBox:
-                    "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
-                  userButtonTrigger: "size-full cursor-pointer",
-                  userButtonBox: "size-full",
-                  userButtonAvatarBox: "order-first size-6",
-                  userButtonOuterIdentifier:
-                    "flex-1 cursor-pointer whitespace-nowrap text-left text-sm !text-secondary-foreground",
-                  card: "bg-popover border-border",
-                  profileSectionTitle: "!text-secondary-foreground",
-                  accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
-                  accordionContent: "bg-background",
-                  profileSectionContent: "text-secondary-foreground"
-                }
-              }}
-              showName
-            />
+            <div className="size-full cursor-pointer">
+              <UserButton
+                appearance={{
+                  elements: {
+                    rootBox:
+                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
+                    userButtonTrigger: "hidden",
+                    userButtonBox: "size-full",
+                    userButtonAvatarBox: "order-first size-6",
+                    userButtonOuterIdentifier:
+                      "flex-1 cursor-pointer whitespace-nowrap text-left text-sm !text-secondary-foreground",
+                    card: "bg-popover border-border",
+                    profileSectionTitle: "!text-secondary-foreground",
+                    accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
+                    accordionContent: "bg-background",
+                    profileSectionContent: "text-secondary-foreground"
+                  }
+                }}
+                showName
+              />
+            </div>
           )}
         </div>
       </div>
@@ -177,13 +178,13 @@ function DesktopSidebar() {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground pt-2 transition-all duration-200 overflow-hidden",
+        "flex h-screen flex-col border-r border-border bg-secondary text-secondary-foreground p-1 transition-all duration-200 overflow-hidden",
         isCollapsed ? "w-14" : "w-56"
       )}
     >
-      <div className="flex items-center px-2">
+      <div className={cn("flex items-center px-2", isCollapsed && "px-1")}>
         {!isCollapsed && (
-          <span className="px-2 font-semibold text-foreground whitespace-nowrap">Ai Notes</span>
+          <span className="font-semibold  whitespace-nowrap text-2xl text-primary">AI Notes</span>
         )}
         <Tooltip>
           <TooltipTrigger asChild>
@@ -222,7 +223,7 @@ function MobileSidebar() {
           <SheetTitle>Navigation Menu</SheetTitle>
         </VisuallyHidden.Root>
         <div className="flex items-center px-4 pb-2">
-          <span className="font-semibold text-foreground">Ai Notes</span>
+          <span className="font-semibold text-foreground text-xl text-primary">AI Notes</span>
         </div>
         <SidebarContent isCollapsed={false} onClose={() => setOpen(false)} />
       </SheetContent>

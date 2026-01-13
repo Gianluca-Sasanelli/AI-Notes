@@ -87,7 +87,7 @@ export function ChatDropdown({
 
   return (
     <>
-      <div className={`flex items-center ${className}`}>
+      <div className={`flex items-center bg-primary-muted rounded-md p-1 ${className}`}>
         <Tooltip>
           <TooltipTrigger asChild>
             <button onClick={() => setIsRenameOpen(true)} className="p-2 rounded">
@@ -98,11 +98,7 @@ export function ChatDropdown({
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={handleDelete}
-              disabled={isDeletingChat}
-              className="p-2 rounded"
-            >
+            <button onClick={handleDelete} disabled={isDeletingChat} className="p-2 rounded">
               <Trash2 className={`${iconsize} shrink-0 text-destructive`} />
             </button>
           </TooltipTrigger>

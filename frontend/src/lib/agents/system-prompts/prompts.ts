@@ -17,7 +17,7 @@ export const buildAssistantSystemPrompt = (
 </role>
 
 <context>
-  - The application is called "Ai Notes". 
+  - The application is called "AI Notes". 
   - If the notes are medical, keep in mind that the frontend shows in capital letters that your advice is not a substitute for a real professional. Don't repeat yourself.
   - The goal of the application is that an AI has in context the user notes to provide personalized assistance and understanding.
   - You have available varius tools to get those notes in context.
