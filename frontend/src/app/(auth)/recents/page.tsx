@@ -4,7 +4,7 @@ import { getChatsClient } from "@/lib/api"
 import type { ChatHistoryItem } from "@/lib/types/database-types"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Loader2 } from "lucide-react"
 import { ChatDropdown } from "@/components/chat/ChatDropdown"
 
 export default function RecentsPage() {
@@ -17,8 +17,8 @@ export default function RecentsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <div className="text-muted-foreground">Loading chats...</div>
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -32,7 +32,7 @@ export default function RecentsPage() {
   }
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 my-10">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 border-b border-border px-4 py-6 sm:px-6">
           <h1 className="text-2xl font-semibold">Chat History</h1>

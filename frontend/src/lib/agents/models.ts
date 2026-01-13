@@ -7,7 +7,8 @@ export enum GOOGLE_MODEL {
 
 export enum GROQ_MODEL {
   GPT_OSS_120B = "openai/gpt-oss-120b",
-  GPT_OSS_20B = "openai/gpt-oss-20b"
+  GPT_OSS_20B = "openai/gpt-oss-20b",
+  KIMI_K2 = "moonshotai/kimi-k2-instruct-0905"
 }
 export type AIModel = GOOGLE_MODEL | GROQ_MODEL
 
@@ -32,5 +33,6 @@ export function getModelInstance(model: AIModel): LanguageModelV3 {
 export const USER_MODELS: Record<AIModel, string> = {
   [GOOGLE_MODEL.GEMINI_2_5_FLASH]: "Gemini Flash",
   [GROQ_MODEL.GPT_OSS_120B]: "GPT OSS 120B",
-  [GROQ_MODEL.GPT_OSS_20B]: "GPT OSS 20B"
+  [GROQ_MODEL.GPT_OSS_20B]: "GPT OSS 20B",
+  [GROQ_MODEL.KIMI_K2]: "Kimi K2"
 }

@@ -4,15 +4,15 @@ import { getChatsClient } from "@/lib/api"
 import type { ChatHistoryItem } from "@/lib/types/database-types"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
-import { MessageSquare, Settings } from "lucide-react"
+import { History, MessageSquare } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChatDropdown } from "./ChatDropdown"
 
 export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   const { data, isLoading } = useQuery({
-    queryKey: ["chats", 0, 10],
-    queryFn: () => getChatsClient(0, 10),
+    queryKey: ["chats", 0, 20],
+    queryFn: () => getChatsClient(0, 20),
     staleTime: 2 * 60 * 1000,
     gcTime: 60 * 60 * 1000
   })
@@ -37,14 +37,16 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                   href={`/chat/${chat.id}`}
                   onClick={onNavigate}
                   className={cn(
-                    "flex-1 flex items-center gap-2 px-2 py-1.5 text-base rounded-md",
+                    "flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 text-base rounded-md",
                     isActive && "bg-accent "
                   )}
                 >
                   <MessageSquare className="size-4 shrink-0" />
-                  <span className="truncate">{chat.title || "Untitled"}</span>
+                  <span className="truncate" title={chat.title || "Untitled"}>
+                    {chat.title || "Untitled"}
+                  </span>
                 </Link>
-                <div className="absolute right-1 flex items-center opacity-0 transition-opacity group-hover:opacity-100 group-hover:border group-hover:border-sidebar-border group-hover:rounded-md group-hover:bg-card group-hover:hover:border-secondary">
+                <div className="absolute right-1 flex items-center opacity-0 group-hover:opacity-100">
                   <ChatDropdown chatId={chat.id} currentTitle={chat.title || "Untitled"} />
                 </div>
               </div>
@@ -56,7 +58,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
               onClick={onNavigate}
               className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:bg-accent"
             >
-              <Settings className="mr-2 size-4 shrink-0 text-sidebar-foreground/60" />
+              <History className="mr-2 size-4 shrink-0 text-sidebar-foreground/60" />
               <span className="block text-lg">All Chats</span>
             </Link>
           )}

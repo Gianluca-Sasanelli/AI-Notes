@@ -10,7 +10,7 @@ interface ModelStore {
 export const useModelStore = create<ModelStore>()(
   persist(
     (set) => ({
-      selectedModel: GROQ_MODEL.GPT_OSS_120B,
+      selectedModel: GROQ_MODEL.KIMI_K2,
       setSelectedModel: (model) => set({ selectedModel: model })
     }),
     {
