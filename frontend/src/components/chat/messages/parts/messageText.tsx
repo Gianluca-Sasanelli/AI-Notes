@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import Markdown from "markdown-to-jsx"
 
 const markdownOptions = {
@@ -9,10 +10,10 @@ const markdownOptions = {
         rel: "noopener noreferrer"
       }
     },
-    p: { props: { className: "mb-5 break-words" } },
-    ul: { props: { className: "list-disc my-6 space-y-2 max-w-full" } },
-    ol: { props: { className: "list-decimal my-6 space-y-2 max-w-full" } },
-    li: { props: { className: "my-2 list-disc break-words" } },
+    p: { props: { className: "whitespace-normal break-words" } },
+    ul: { props: { className: "list-disc my-2 pl-6 max-w-full" } },
+    ol: { props: { className: "list-decimal my-2 pl-6 max-w-full" } },
+    li: { props: { className: "whitespace-normal break-words" } },
     strong: { props: { className: "font-semibold break-words" } },
     em: { props: { className: "italic break-words" } },
     code: {
@@ -28,6 +29,7 @@ const markdownOptions = {
     h1: { props: { className: "text-2xl font-bold mb-2 mt-4" } },
     h2: { props: { className: "text-xl font-bold mb-2 mt-4" } },
     h3: { props: { className: "text-lg font-semibold mb-2 mt-4" } },
+    hr: { props: { className: "hidden" } },
     blockquote: {
       props: {
         className:
@@ -35,22 +37,26 @@ const markdownOptions = {
       }
     },
     table: {
-      props: {
-        className: "my-6 w-full border-collapse overflow-hidden rounded-lg border border-border"
-      }
+      component: ({ children }: { children: ReactNode }) => (
+        <div className="my-4 w-0 min-w-full overflow-x-auto rounded-lg border border-border/80">
+          <table className="w-max text-sm">{children}</table>
+        </div>
+      )
     },
-    thead: { props: { className: "bg-muted" } },
+    thead: {
+      props: { className: "bg-secondary text-secondary-foreground px-2 whitespace-nowrap" }
+    },
     th: {
       props: {
-        className: "border border-border px-4 py-2 text-left text-sm font-semibold"
+        className: "border-b border-border/60 py-2 px-2 align-top font-bold whitespace-nowrap"
       }
     },
     td: {
       props: {
-        className: "border border-border px-4 py-2 text-sm"
+        className: "border-b border-border/30 py-2 px-2 align-top whitespace-nowrap"
       }
     },
-    tr: { props: { className: "even:bg-muted/50" } }
+    tr: { props: {} }
   }
 }
 
@@ -64,8 +70,8 @@ export default function MessageUI({ message, isUser }: { message: string; isUser
           {message}
         </div>
       ) : (
-        <div className="min-w-0 max-w-full overflow-hidden rounded-2xl p-4 text-base leading-relaxed tracking-wide text-foreground">
-          <div className="break-words [word-break:break-word]">
+        <div className="min-w-0 w-full overflow-hidden rounded-2xl p-4 text-base leading-relaxed tracking-wide text-foreground">
+          <div className="min-w-0 max-w-full break-words [word-break:break-word]">
             <Markdown options={markdownOptions}>{message}</Markdown>
           </div>
         </div>
