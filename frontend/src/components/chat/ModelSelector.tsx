@@ -16,10 +16,10 @@ export function ModelSelector() {
 
   return (
     <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value as AIModel)}>
-      <SelectTrigger className="h-8 w-auto min-w-[120px] rounded-full border-none bg-transparent px-3 text-sm shadow-none focus:ring-0 focus-visible:ring-0 dark:bg-transparent">
+      <SelectTrigger className="h-8 w-auto min-w-[120px] rounded-full border-none bg-transparent px-3 text-sm shadow-none focus:ring-0 focus-visible:ring-0 dark:bg-transparent hover:bg-accent">
         <SelectValue className="text-muted-foreground">{USER_MODELS[selectedModel]}</SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent position="popper" side="top">
         {Object.entries(USER_MODELS).map(([modelId, displayName]) => (
           <SelectItem key={modelId} value={modelId} className="text-sm">
             {displayName}
