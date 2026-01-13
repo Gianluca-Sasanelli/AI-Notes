@@ -1,17 +1,10 @@
-import { Avatar } from "@/components/ui/avatar"
 import type { AgentStatusData, ChatUIMessage } from "@/lib/types/chat-types"
 import type { ChatStatus, DataUIPart } from "ai"
-import { Bot } from "lucide-react"
 import { useMemo } from "react"
 export function RoutingIndicator() {
   return (
     <>
       <span className="mr-2 text-sm font-semibold">Sending</span>
-      <span className="flex space-x-1">
-        <span className="inline-block animate-bounce text-xl font-bold">.</span>
-        <span className="inline-block animate-bounce text-xl font-bold delay-150">.</span>
-        <span className="inline-block animate-bounce text-xl font-bold delay-300">.</span>
-      </span>
     </>
   )
 }
@@ -54,9 +47,6 @@ export function StatusIndicator({ lastAssistantMessage, chatStatus, error }: Sta
   return (
     <div className="flex h-[70px] animate-fade-in justify-start">
       <div className="flex items-start gap-3">
-        <Avatar className="size-8 animate-pulse bg-secondary">
-          <Bot className="m-auto size-5" />
-        </Avatar>
         <div className="min-w-[120px] animate-pulse rounded-2xl rounded-tl-sm bg-secondary p-3 text-secondary-foreground shadow-md">
           <div className="flex items-center">
             {latestDataStatus ? (

@@ -1,6 +1,6 @@
 "use client"
 
-import { MoreHorizontal } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -12,13 +12,8 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { deleteChatClient, updateChatClient } from "@/lib/api"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -27,7 +22,7 @@ interface ChatDropdownProps {
   chatId: string
   currentTitle: string
   dropdownsize?: "md" | "lg"
-  iconsize?: "size-6" | "size-8"
+  iconsize?: "size-4" | "size-5"
   className?: string
 }
 
@@ -35,7 +30,7 @@ export function ChatDropdown({
   chatId,
   currentTitle,
   dropdownsize = "md",
-  iconsize = "size-6",
+  iconsize = "size-4",
   className
 }: ChatDropdownProps) {
   const [isRenameOpen, setIsRenameOpen] = useState(false)
@@ -92,28 +87,28 @@ export function ChatDropdown({
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <MoreHorizontal
-            className={`${iconsize} shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 ${className}`}
-          />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            onClick={() => setIsRenameOpen(true)}
-            className="cursor-pointer text-lg"
-          >
-            Rename
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer text-lg text-destructive"
-            onClick={handleDelete}
-            disabled={isDeletingChat}
-          >
-            {isDeletingChat ? "Deleting..." : "Delete"}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className={`flex items-center ${className}`}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button onClick={() => setIsRenameOpen(true)} className="p-2 rounded hover:bg-accent">
+              <Pencil className={`${iconsize} shrink-0 text-muted-foreground`} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Rename</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={handleDelete}
+              disabled={isDeletingChat}
+              className="p-2 rounded hover:bg-accent"
+            >
+              <Trash2 className={`${iconsize} shrink-0 text-destructive`} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Delete</TooltipContent>
+        </Tooltip>
+      </div>
 
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogContent className="max-w-[50vw]">
