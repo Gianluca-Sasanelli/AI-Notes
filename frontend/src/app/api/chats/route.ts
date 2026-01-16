@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { getChats } from "@/db/db-functions"
+import { getChats } from "@/db"
 import { ErrorData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 

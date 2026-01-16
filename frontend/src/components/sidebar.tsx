@@ -127,8 +127,8 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                         rootBox:
                           "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
                         userButtonTrigger: "size-full cursor-pointer",
-                        userButtonBox: "size-full",
-                        userButtonAvatarBox: "order-first size-6",
+                        userButtonBox: "size-full ",
+                        userButtonAvatarBox: "order-first !size-6 justify-start",
                         userButtonOuterIdentifier: "hidden",
                         card: "bg-popover border-border",
                         profileSectionTitle: "!text-secondary-foreground",

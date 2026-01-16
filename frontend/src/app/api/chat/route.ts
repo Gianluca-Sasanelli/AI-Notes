@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server"
 import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
-import { createChat, updateChat } from "@/db/db-functions"
+import { createChat, updateChat } from "@/db"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {

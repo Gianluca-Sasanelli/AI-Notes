@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { createNote, getTimeNotes, getTimelessNotes } from "@/db/db-functions"
+import { createNote, getTimeNotes, getTimelessNotes } from "@/db"
 import { ErrorData, NoteGranularity } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import type { NoteMetadata } from "@/db/schema"

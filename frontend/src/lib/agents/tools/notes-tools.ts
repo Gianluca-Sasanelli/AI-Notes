@@ -1,6 +1,6 @@
 import type { InferUITools } from "ai"
 import { tool } from "ai"
-import { getTimeNotes, getNoteFiles, getTimeNotesByDateRange } from "@/db/db-functions"
+import { getTimeNotes, getNoteFiles, getTimeNotesByDateRange } from "@/db"
 import { getFileContent } from "@/lib/storage"
 import { z } from "zod"
 import { extractText } from "unpdf"

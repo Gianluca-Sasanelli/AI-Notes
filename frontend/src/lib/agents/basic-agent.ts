@@ -4,7 +4,7 @@ import { stepCountIs, streamText } from "ai"
 import { handleAgentError } from "@/lib/utils"
 import { NotesTools } from "./tools/notes-tools"
 import { buildAssistantSystemPrompt } from "./system-prompts/prompts"
-import { getUserSummary, getLatestTimelessNotes } from "@/db/db-functions"
+import { getUserSummary, getLatestTimelessNotes } from "@/db"
 import { auth } from "@clerk/nextjs/server"
 import { WebSearchTools } from "./tools/web-search"
 
