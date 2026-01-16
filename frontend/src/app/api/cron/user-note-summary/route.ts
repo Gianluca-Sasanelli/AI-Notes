@@ -4,12 +4,7 @@ import { generateText } from "ai"
 import { GOOGLE_MODEL, getModelInstance } from "@/lib/agents/models"
 import { buildUserNotesSummaryPrompt } from "@/lib/agents/system-prompts/prompts"
 import { ErrorData } from "@/lib/types/database-types"
-import {
-  getUserSummary,
-  upsertUserSummary,
-  getNotesAfterDate,
-  getLatestNotes
-} from "@/db/db-functions"
+import { getUserSummary, upsertUserSummary, getNotesAfterDate, getLatestNotes } from "@/db"
 
 export async function POST() {
   const { userId } = await auth()

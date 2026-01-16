@@ -1,5 +1,5 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm"
-import { notes, chats, userSummaries } from "@/db/schema"
+import { notes, chats, userSummaries, topics } from "@/db/schema"
 
 export type ErrorData = {
   message: string
@@ -52,3 +52,5 @@ export const isTimeNote = (note: NoteData): note is TimeNote => {
 export type ChatData = Omit<InferSelectModel<typeof chats>, "userId">
 export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
 export type UserSummaryData = InferSelectModel<typeof userSummaries>
+
+export type TopicData = Omit<InferSelectModel<typeof topics>, "userId">

@@ -3,7 +3,7 @@ import { ErrorData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
 import { uploadFile, deleteFile, getFileUrl, sanitizeFilename } from "@/lib/storage"
-import { addFileToNote, removeFileFromNote, getNoteFiles } from "@/db/db-functions"
+import { addFileToNote, removeFileFromNote, getNoteFiles } from "@/db"
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()

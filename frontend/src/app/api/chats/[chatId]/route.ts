@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { updateChatTitle, deleteChat } from "@/db/db-functions"
+import { updateChatTitle, deleteChat } from "@/db"
 import { ErrorData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 

@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import ChatInit from "@/components/chat/ChatInit"
-import { getChat } from "@/db/db-functions"
+import { getChat } from "@/db"
 import ChatErrorPage from "./error"
 
 export const dynamic = "force-dynamic"

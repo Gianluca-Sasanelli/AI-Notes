@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { getUserSummary, upsertUserSummary } from "@/db/db-functions"
+import { getUserSummary, upsertUserSummary } from "@/db"
 import { ErrorData } from "@/lib/types/database-types"
 
 export async function GET() {

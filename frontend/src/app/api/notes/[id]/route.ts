@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { getNote, updateNote, deleteNote } from "@/db/db-functions"
+import { getNote, updateNote, deleteNote } from "@/db"
 import { ErrorData, UpdateNoteData } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
