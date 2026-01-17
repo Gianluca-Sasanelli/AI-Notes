@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Paperclip } from "lucide-react"
+import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Paperclip, Circle } from "lucide-react"
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +24,8 @@ import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
+import { TopicEditor, type TopicEdit } from "@/components/ui/topic-editor"
+
 export function NotesList() {
   const [skip, setSkip] = useState(0)
   const [limit, setLimit] = useState(10)
@@ -35,7 +37,9 @@ export function NotesList() {
   const [editingGranularity, setEditingGranularity] = useState<NoteGranularity>("day")
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+  const [topicEdit, setTopicEdit] = useState<TopicEdit>(null)
   const queryClient = useQueryClient()
+
   const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit],
     queryFn: () => getNotesClient({ skip, limit, timeless: false }),
@@ -48,13 +52,22 @@ export function NotesList() {
         toast.error("No note selected")
         return Promise.reject()
       }
-      await updateNoteClient(editingNote.id, {
-        content: editingContent.trim(),
-        startTimestamp: editingStartTimestamp,
-        endTimestamp: editingEndTimestamp,
-        granularity: editingGranularity,
-        metadata: editingMetadata
-      })
+      const topic = topicEdit
+        ? topicEdit.id === null
+          ? { new: { name: topicEdit.name, color: topicEdit.color } }
+          : { [topicEdit.id]: { name: topicEdit.name, color: topicEdit.color } }
+        : undefined
+      await updateNoteClient(
+        editingNote.id,
+        {
+          content: editingContent.trim(),
+          startTimestamp: editingStartTimestamp,
+          endTimestamp: editingEndTimestamp,
+          granularity: editingGranularity,
+          metadata: editingMetadata
+        },
+        topic
+      )
       for (const pf of pendingFiles) {
         await uploadFileClient(editingNote.id, pf.file, pf.filename)
       }
@@ -63,6 +76,7 @@ export function NotesList() {
       toast.success("Note updated")
       setEditingNote(null)
       setPendingFiles([])
+      setTopicEdit(null)
       queryClient.invalidateQueries({ queryKey: ["notes"] })
       queryClient.invalidateQueries({ queryKey: ["note-files", editingNote?.id] })
     },
@@ -100,6 +114,9 @@ export function NotesList() {
     setEditingEndTimestamp(note.endTimestamp ? new Date(note.endTimestamp) : null)
     setEditingGranularity(note.granularity)
     setEditingMetadata(note.metadata)
+    setTopicEdit(
+      note.topic ? { id: note.topic.id, name: note.topic.name, color: note.topic.color } : null
+    )
     setEditingNote(note)
   }
 
@@ -150,7 +167,15 @@ export function NotesList() {
         </>
       )}
 
-      <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
+      <Dialog
+        open={editingNote !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingNote(null)
+            setTopicEdit(null)
+          }
+        }}
+      >
         <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[95dvh] flex flex-col overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Note</DialogTitle>
@@ -167,31 +192,20 @@ export function NotesList() {
             <Textarea
               value={editingContent}
               onChange={(e) => setEditingContent(e.target.value)}
-              rows={5}
-              className="min-h-[120px] focus:border-primary focus:outline-none"
+              rows={4}
+              className="min-h-[100px] focus:border-primary focus:outline-none"
             />
-            <div className="flex flex-col gap-3 w-full">
+            <div className="flex flex-wrap items-center gap-2">
               <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
-              {editingNote && (
-                <div className="sm:hidden w-full">
-                  <FileUpload
-                    noteId={editingNote.id}
-                    pendingFiles={pendingFiles}
-                    onFilesChange={setPendingFiles}
-                    compact
-                  />
-                </div>
-              )}
+              <TopicEditor value={topicEdit} onChange={setTopicEdit} />
+              <FileUpload
+                noteId={editingNote?.id}
+                pendingFiles={pendingFiles}
+                onFilesChange={setPendingFiles}
+                compact
+              />
             </div>
-            {editingNote && (
-              <div className="hidden sm:block">
-                <FileUpload
-                  noteId={editingNote.id}
-                  pendingFiles={pendingFiles}
-                  onFilesChange={setPendingFiles}
-                />
-              </div>
-            )}
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditingNote(null)}>
                 Cancel
@@ -246,7 +260,10 @@ function TimeNoteCard({
   const noteMetadata = note.metadata as Record<string, string | number | boolean> | null
 
   return (
-    <Card className="p-4 transition-colors hover:bg-accent/30">
+    <Card
+      className="p-4 transition-colors hover:brightness-110"
+      style={note.topic ? { backgroundColor: `${note.topic.color}20` } : undefined}
+    >
       <div className="flex items-start justify-between gap-4">
         <Link href={`/note/${note.id}`} className="min-w-0 flex-1 space-y-2">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -258,6 +275,12 @@ function TimeNoteCard({
                 note.granularity
               )}
             </span>
+            {note.topic && (
+              <span className="flex items-center gap-1.5">
+                <Circle className="h-3 w-3" fill={note.topic.color} stroke={note.topic.color} />
+                {note.topic.name}
+              </span>
+            )}
           </div>
 
           <p className="text-sm leading-relaxed">{note.content}</p>

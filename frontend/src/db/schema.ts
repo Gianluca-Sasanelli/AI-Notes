@@ -7,21 +7,26 @@ import {
   jsonb,
   text,
   index,
-  varchar
+  varchar,
+  unique
 } from "drizzle-orm/pg-core"
 
 export const granularityEnum = pgEnum("granularity", ["hour", "day", "month"])
 
 export type NoteMetadata = Record<string, string | number | boolean>
 
-export const topics = pgTable("topics", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  userId: text().notNull(),
-  name: text().notNull(),
-  color: varchar({ length: 7 }),
-  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
-})
+export const topics = pgTable(
+  "topics",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    userId: text().notNull(),
+    name: text().notNull(),
+    color: varchar({ length: 7 }),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => [unique().on(table.userId, table.name)]
+)
 
 // When start timestamp is null the granularity is null. The note is considered timeless in the frontend types.
 export const notes = pgTable(

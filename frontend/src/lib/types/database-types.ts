@@ -21,20 +21,30 @@ export type PaginatedResponse<T> = {
 }
 type BaseNoteData = Omit<InferSelectModel<typeof notes>, "userId">
 
-export type TimeNote = BaseNoteData & {
+export type DbTimeNote = BaseNoteData & {
   startTimestamp: Date
   granularity: "hour" | "day" | "month"
 }
-
+export type TimeNote = DbTimeNote & {
+  topic: {
+    id: number
+    name: string
+    color: string
+  } | null
+}
 export type TimelessNote = BaseNoteData & {
   startTimestamp: null
   granularity: null
+  topicId: null
 }
 
 export type NoteData = TimeNote | TimelessNote
 export type NewNoteData = Omit<InferInsertModel<typeof notes>, "userId">
 export type UpdateNoteData = Partial<Omit<BaseNoteData, "id">> & {
   content?: Exclude<BaseNoteData["content"], "">
+}
+export type UpdateNoteBody = Partial<Omit<UpdateNoteData, "topicId">> & {
+  topic?: { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
 }
 export type NoteGranularity = "hour" | "day" | "month"
 export type TimeNoteSummary = Pick<
@@ -54,3 +64,4 @@ export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
 export type UserSummaryData = InferSelectModel<typeof userSummaries>
 
 export type TopicData = Omit<InferSelectModel<typeof topics>, "userId">
+export type TopicDbData = Omit<TopicData, "id" | "createdAt" | "updatedAt">
