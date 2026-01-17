@@ -1,5 +1,5 @@
 import { db } from "@/index"
-import { notes, type NoteMetadata } from "@/db/schema"
+import { notes, type NoteMetadata, topics } from "@/db/schema"
 import { desc, count, eq, and, gt, gte, lte, sql } from "drizzle-orm"
 import type { UpdateNoteData, NoteGranularity, TimeNoteSummary } from "@/lib/types/database-types"
 import { logger, withTiming } from "@/lib/logger"
@@ -41,9 +41,15 @@ export const getTimeNotes = async (
         updatedAt: notes.updatedAt,
         content: notes.content,
         metadata: notes.metadata,
-        files: notes.files
+        files: notes.files,
+        topic: {
+          id: topics.id,
+          name: topics.name,
+          color: topics.color
+        }
       })
       .from(notes)
+      .leftJoin(topics, eq(notes.topicId, topics.id))
       .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NOT NULL`))
       .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
       .limit(limit + 1)

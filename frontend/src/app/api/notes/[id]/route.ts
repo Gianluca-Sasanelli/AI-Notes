@@ -1,8 +1,11 @@
 import { auth } from "@clerk/nextjs/server"
 import { getNote, updateNote, deleteNote } from "@/db"
-import { ErrorData, UpdateNoteData } from "@/lib/types/database-types"
+import { ErrorData, UpdateNoteBody } from "@/lib/types/database-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
+import { createTopic } from "@/db/db-topic"
+import { updateTopic } from "@/db/db-topic"
+import { TopicDbData } from "@/lib/types/database-types"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()
@@ -46,18 +49,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json<ErrorData>({ message: "Invalid note ID" }, { status: 400 })
   }
 
-  const body = (await request.json()) as UpdateNoteData
+  const body = (await request.json()) as UpdateNoteBody
   if (body.startTimestamp) {
     body.startTimestamp = new Date(body.startTimestamp)
   }
   if (body.endTimestamp) {
     body.endTimestamp = new Date(body.endTimestamp)
   }
-
+  const createdId = await handleTopicOnPatch(userId, body.topic)
   logger.info("api", `PATCH /api/notes/${noteId}`)
   try {
     await withTiming("api", `PATCH /api/notes/${noteId}`, async () => {
-      await updateNote(userId, noteId, body)
+      await updateNote(userId, noteId, { ...body, topicId: createdId })
     })
     return new NextResponse(null, { status: 201 })
   } catch (error) {
@@ -91,4 +94,30 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     logger.error("api", `DELETE /api/notes/${noteId} failed`, { error: errorMessage })
     return NextResponse.json<ErrorData>({ message: errorMessage }, { status: 500 })
   }
+}
+
+async function handleTopicOnPatch(
+  userId: string,
+  topicEntry: { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
+) {
+  let output: number | undefined = undefined
+  if (!topicEntry) {
+    return output
+  }
+  if ("new" in topicEntry) {
+    output = await createTopic(userId, topicEntry.new)
+  } else {
+    for (const [id, data] of Object.entries(topicEntry)) {
+      try {
+        await updateTopic(userId, parseInt(id, 10), data)
+      } catch (error) {
+        logger.error(
+          "api",
+          `Failed to update topic with id ${id}: ${error instanceof Error ? error.message : String(error)}`
+        )
+        throw new Error("An error occurred while processing the topic update.")
+      }
+    }
+  }
+  return output
 }

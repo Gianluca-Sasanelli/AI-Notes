@@ -5,11 +5,13 @@ import {
   PaginationOptions,
   TimeNote,
   TimelessNote,
-  UpdateNoteData,
+  TopicDbData,
+  UpdateNoteBody,
   UserSummaryData
 } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 
+type UpdateNoteFront = Omit<UpdateNoteBody, "topic">
 export async function createTimeNoteClient(
   content: string,
   metadata: NoteMetadata,
@@ -91,13 +93,14 @@ export async function getNoteClient(id: number) {
   return (await res.json()) as TimeNote | TimelessNote
 }
 
-export async function updateNoteClient(id: number, data: UpdateNoteData) {
-  const body = {
+export async function updateNoteClient(
+  id: number,
+  data: UpdateNoteFront,
+  topic?: { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
+) {
+  const body: UpdateNoteBody = {
     ...data,
-    startTimestamp:
-      data.startTimestamp instanceof Date ? data.startTimestamp.toISOString() : data.startTimestamp,
-    endTimestamp:
-      data.endTimestamp instanceof Date ? data.endTimestamp.toISOString() : data.endTimestamp
+    topic
   }
   const res = await fetch(`/api/notes/${id}`, {
     method: "PATCH",
