@@ -14,8 +14,6 @@ export type PaginationOptions = {
 
 export type PaginatedResponse<T> = {
   data: T[]
-  skip: number
-  limit: number
   hasNext: boolean
   total?: number
 }

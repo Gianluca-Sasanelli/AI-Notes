@@ -204,8 +204,11 @@ export function NotesList() {
                   noteFiles={editingNote.files}
                   pendingFilestoUpload={pendingFiles}
                   onPendingFilesChange={setPendingFiles}
-                  onDeleteFile={(filename : string) => {
-                    setEditingNote({ ...editingNote, files: editingNote.files?.filter((f) => f !== filename) ?? undefined })
+                  onDeleteFile={(filename: string) => {
+                    setEditingNote({
+                      ...editingNote,
+                      files: editingNote.files?.filter((f) => f !== filename) ?? undefined
+                    })
                   }}
                   compact
                 />

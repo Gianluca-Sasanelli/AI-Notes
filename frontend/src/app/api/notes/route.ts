@@ -44,8 +44,6 @@ export async function GET(request: Request) {
     })
     return NextResponse.json({
       data: result.data,
-      skip,
-      limit,
       hasNext: result.hasNext,
       total: result.total
     })
