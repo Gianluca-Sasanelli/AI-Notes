@@ -93,7 +93,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
               href="/settings"
               onClick={onClose}
               className={cn(
-                "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
+                "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-2 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
                 pathname === "/settings" && "bg-accent text-accent-foreground"
               )}
             >
@@ -125,7 +125,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                     appearance={{
                       elements: {
                         rootBox:
-                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
+                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-2 pt-2 text-sm font-medium text-secondary-foreground",
                         userButtonTrigger: "size-full cursor-pointer",
                         userButtonBox: "size-full ",
                         userButtonAvatarBox: "order-first !size-6 justify-start",

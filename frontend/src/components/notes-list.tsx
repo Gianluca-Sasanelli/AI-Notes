@@ -198,12 +198,18 @@ export function NotesList() {
             <div className="flex flex-wrap items-center gap-2">
               <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
               <TopicEditor value={topicEdit} onChange={setTopicEdit} />
-              <FileUpload
-                noteId={editingNote?.id}
-                pendingFiles={pendingFiles}
-                onFilesChange={setPendingFiles}
-                compact
-              />
+              {editingNote && (
+                <FileUpload
+                  noteId={editingNote.id}
+                  noteFiles={editingNote.files}
+                  pendingFilestoUpload={pendingFiles}
+                  onPendingFilesChange={setPendingFiles}
+                  onDeleteFile={(filename : string) => {
+                    setEditingNote({ ...editingNote, files: editingNote.files?.filter((f) => f !== filename) ?? undefined })
+                  }}
+                  compact
+                />
+              )}
             </div>
 
             <div className="flex justify-end gap-2">
