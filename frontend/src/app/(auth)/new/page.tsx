@@ -80,8 +80,8 @@ export default function NewNotePage() {
 
         <div className="flex flex-col gap-3 w-full">
           <FileUpload
-            pendingFiles={pendingFiles}
-            onFilesChange={setPendingFiles}
+            pendingFilestoUpload={pendingFiles}
+            onPendingFilesChange={setPendingFiles}
             compact={isMobile}
           />
           <MetadataEditor value={metadata} onChange={setMetadata} />

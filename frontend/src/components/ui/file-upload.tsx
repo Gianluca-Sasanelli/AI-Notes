@@ -1,11 +1,11 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Upload, X, FileIcon, Loader2, Download, Pencil, Check } from "lucide-react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Upload, X, FileIcon, Download, Pencil, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { getNoteFilesClient, deleteFileClient, getFileUrlClient } from "@/lib/api"
+import { deleteFileClient, getFileUrlClient } from "@/lib/api"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -17,12 +17,23 @@ export type PendingFile = {
   filename: string
 }
 
-type FileUploadProps = {
-  noteId?: number
-  pendingFiles: PendingFile[]
-  onFilesChange: (files: PendingFile[]) => void
-  compact?: boolean
-}
+type FileUploadProps =
+  | {
+      noteId: number
+      noteFiles: string[]
+      pendingFilestoUpload: PendingFile[]
+      onPendingFilesChange: (files: PendingFile[]) => void
+      onDeleteFile: (filename: string) => void
+      compact?: boolean
+    }
+  | {
+      noteId?: undefined
+      noteFiles?: undefined
+      pendingFilestoUpload: PendingFile[]
+      onPendingFilesChange: (files: PendingFile[]) => void
+      onDeleteFile?: undefined
+      compact?: boolean
+    }
 
 export function FileUpload(props: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
@@ -34,18 +45,17 @@ export function FileUpload(props: FileUploadProps) {
 
   const hasNoteId = props.noteId !== undefined
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["note-files", props.noteId],
-    queryFn: () => getNoteFilesClient(props.noteId!),
-    enabled: hasNoteId
-  })
+
 
   const deleteMutation = useMutation({
     mutationFn: (filename: string) => {
       if (!hasNoteId) return Promise.reject()
-      return deleteFileClient(props.noteId!, filename)
+      return deleteFileClient(props.noteId, filename)
     },
-    onSuccess: () => {
+    onSuccess: (_, filename: string) => {
+      if (props.onDeleteFile) {
+        props.onDeleteFile(filename)
+      }
       toast.success("File deleted")
       queryClient.invalidateQueries({ queryKey: ["note-files", props.noteId] })
       queryClient.invalidateQueries({ queryKey: ["notes"] })
@@ -72,19 +82,19 @@ export function FileUpload(props: FileUploadProps) {
       validFiles.push(file)
     }
     if (validFiles.length > 0) {
-      props.onFilesChange([
-        ...props.pendingFiles,
+      props.onPendingFilesChange([
+        ...props.pendingFilestoUpload,
         ...validFiles.map((file) => ({ file, filename: file.name }))
       ])
     }
   }
 
   const handleRemove = (index: number) => {
-    props.onFilesChange(props.pendingFiles.filter((_, i) => i !== index))
+    props.onPendingFilesChange(props.pendingFilestoUpload.filter((_, i) => i !== index))
   }
 
   const startEditing = (index: number) => {
-    const current = props.pendingFiles[index].filename
+    const current = props.pendingFilestoUpload[index].filename
     const ext = current.split(".").pop() || ""
     const nameWithoutExt = current.slice(0, current.length - ext.length - 1)
     setEditingIndex(index)
@@ -93,22 +103,18 @@ export function FileUpload(props: FileUploadProps) {
 
   const saveEditing = () => {
     if (editingIndex === null) return
-    const original = props.pendingFiles[editingIndex].filename
+    const original = props.pendingFilestoUpload[editingIndex].filename
     const ext = original.split(".").pop() || ""
     const newFilename = editingName.trim() ? `${editingName.trim()}.${ext}` : original
-    const updated = props.pendingFiles.map((pf, i) =>
+    const updated = props.pendingFilestoUpload.map((pf, i) =>
       i === editingIndex ? { ...pf, filename: newFilename } : pf
     )
-    props.onFilesChange(updated)
+    props.onPendingFilesChange(updated)
     setEditingIndex(null)
     setEditingName("")
   }
 
-  const handleDelete = (filename: string) => {
-    if (hasNoteId) {
-      deleteMutation.mutate(filename)
-    }
-  }
+
 
   const handleDownload = async (filename: string) => {
     if (!hasNoteId) return
@@ -126,7 +132,7 @@ export function FileUpload(props: FileUploadProps) {
     handleFiles(e.dataTransfer.files)
   }
 
-  const existingFiles = data?.files ?? []
+  const existingFiles = hasNoteId ? props.noteFiles : []
 
   return (
     <div className={cn("w-full", compact ? "" : "space-y-3")}>
@@ -169,12 +175,6 @@ export function FileUpload(props: FileUploadProps) {
         </div>
       )}
 
-      {hasNoteId && isLoading ? (
-        <div className="flex justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </div>
-      ) : null}
-
       {existingFiles.length > 0 && (
         <ul className={cn("space-y-2 w-full", compact && "mt-3")}>
           {existingFiles.map((filename) => (
@@ -195,7 +195,9 @@ export function FileUpload(props: FileUploadProps) {
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  onClick={() => handleDelete(filename)}
+                  onClick={() => {if (hasNoteId) {
+                    deleteMutation.mutate(filename)
+                  }}}
                   disabled={deleteMutation.isPending}
                 >
                   <X className="h-4 w-4" />
@@ -206,9 +208,9 @@ export function FileUpload(props: FileUploadProps) {
         </ul>
       )}
 
-      {props.pendingFiles.length > 0 && (
+      {props.pendingFilestoUpload.length > 0 && (
         <ul className={cn("space-y-2 w-full", compact && existingFiles.length === 0 && "mt-3")}>
-          {props.pendingFiles.map((pf, index) => (
+          {props.pendingFilestoUpload.map((pf, index) => (
             <li
               key={`${pf.filename}-${index}`}
               className="flex items-center justify-between gap-2 rounded-md border p-2 w-full"
