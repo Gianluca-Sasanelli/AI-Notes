@@ -1,29 +1,11 @@
 import { auth } from "@clerk/nextjs/server"
 import { createNote, getTimeNotes, getTimelessNotes } from "@/db"
-import { ErrorData, NoteGranularity } from "@/lib/types/database-types"
+import { ErrorData, CreateNoteBody } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
-import type { NoteMetadata } from "@/db/schema"
 import { logger, withTiming } from "@/lib/logger"
-
-type TimeNoteBody = {
-  timeless: false
-  startTimestamp: string
-  endTimestamp?: string
-  granularity: NoteGranularity
-  content: string
-  metadata: NoteMetadata
-}
-
-type TimelessNoteBody = {
-  timeless: true
-  content: string
-  metadata: NoteMetadata
-}
-
-type CreateNoteBody = TimeNoteBody | TimelessNoteBody
+import { handleTopicCreationOrUpdate } from "@/lib/route-functions/topic-creation"
 
 export async function GET(request: Request) {
-  console.log("Test log")
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
@@ -66,15 +48,17 @@ export async function POST(request: Request) {
   try {
     const id = await withTiming("api", "POST /api/notes", async () => {
       if (body.timeless) {
-        return createNote(userId, body.content, body.metadata, null, null, null)
+        return createNote(userId, body.content, body.metadata ?? {}, null, null, null)
       }
+      const createdId = await handleTopicCreationOrUpdate(userId, body.topic)
       return createNote(
         userId,
         body.content,
-        body.metadata,
+        body.metadata ?? {},
         new Date(body.startTimestamp),
         body.endTimestamp ? new Date(body.endTimestamp) : null,
-        body.granularity
+        body.granularity,
+        createdId
       )
     })
     return NextResponse.json(

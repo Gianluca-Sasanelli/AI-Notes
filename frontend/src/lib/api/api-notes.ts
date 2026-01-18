@@ -1,32 +1,14 @@
-import {
-  NoteGranularity,
-  PaginatedResponse,
-  PaginationOptions,
-  TimeNote,
-  TimelessNote,
-  TopicDbData,
-  UpdateNoteBody
-} from "@/lib/types/database-types"
+import { PaginatedResponse, TimeNote, TimelessNote, TopicDbData } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
+import { UpdateNoteBody, PaginationOptions, CreateNoteBody } from "@/lib/types/api-types"
 
 type UpdateNoteFront = Omit<UpdateNoteBody, "topic">
-export async function createTimeNoteClient(
-  content: string,
-  metadata: NoteMetadata,
-  startTimestamp: Date,
-  granularity: NoteGranularity,
-  endTimestamp?: Date
-) {
+export async function createTimeNoteClient(NoteCreateData: CreateNoteBody) {
   const res = await fetch("/api/notes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      timeless: false,
-      startTimestamp: startTimestamp.toISOString(),
-      endTimestamp: endTimestamp?.toISOString(),
-      granularity,
-      content,
-      metadata
+      ...NoteCreateData
     })
   })
   if (!res.ok) {

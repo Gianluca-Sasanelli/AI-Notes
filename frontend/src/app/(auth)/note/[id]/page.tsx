@@ -14,12 +14,13 @@ import {
   File
 } from "lucide-react"
 import Link from "next/link"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/schadcn/card"
+import { Badge } from "@/components/ui/schadcn/badge"
+import { Button } from "@/components/ui/schadcn/button"
 import { getNoteClient, getFileUrlClient } from "@/lib/api"
 import { formatTimestampRange } from "@/lib/notes-utils"
-import { isTimeNote, TimeNote, TimelessNote, PaginatedResponse } from "@/lib/types/database-types"
+import { TimeNote, TimelessNote, PaginatedResponse } from "@/lib/types/database-types"
+import { isTimeNote } from "@/lib/types/api-types"
 import { format } from "date-fns"
 
 const isImageFile = (filename: string) => {
@@ -49,7 +50,9 @@ function FileItem({ noteId, filename }: { noteId: number; filename: string }) {
   const isImage = isImageFile(filename)
 
   return (
-    <button
+    <Button
+      type="button"
+      variant="outline"
       onClick={handleClick}
       disabled={loading}
       className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors text-left w-full"
@@ -67,7 +70,7 @@ function FileItem({ noteId, filename }: { noteId: number; filename: string }) {
       ) : (
         <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
       )}
-    </button>
+    </Button>
   )
 }
 
@@ -129,7 +132,7 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
     )
   }
 
-  const metadata = note.metadata as Record<string, string | number | boolean> | null
+  const metadata = note.metadata as Record<string, string | number | boolean>
 
   return (
     <div className="w-full max-w-3xl mx-auto py-10 px-4 overflow-y-auto">

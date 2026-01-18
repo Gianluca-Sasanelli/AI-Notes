@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/schadcn/button"
+import { Textarea } from "@/components/ui/schadcn/textarea"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
@@ -13,6 +13,8 @@ import { createTimeNoteClient, uploadFileClient } from "@/lib/api"
 import type { NoteMetadata } from "@/db/schema"
 import type { NoteGranularity } from "@/lib/types/database-types"
 import { useIsMobile } from "@/lib/hooks"
+import { TopicEdit, TopicEditor } from "@/components/ui/topic-editor"
+import { transformTopicEditToTopicBody } from "@/lib/utils"
 export default function NewNotePage() {
   const [content, setContent] = useState("")
   const [startTimestamp, setStartTimestamp] = useState<Date>(new Date())
@@ -23,16 +25,18 @@ export default function NewNotePage() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const isMobile = useIsMobile()
-
+  const [topic, setTopic] = useState<TopicEdit>({ id: null, name: "", color: "#3b82f6" })
   const mutation = useMutation({
     mutationFn: async () => {
-      const noteId = await createTimeNoteClient(
-        content.trim(),
+      const noteId = await createTimeNoteClient({
+        timeless: false,
+        content: content.trim(),
         metadata,
         startTimestamp,
         granularity,
-        endTimestamp ?? undefined
-      )
+        endTimestamp: endTimestamp ?? null,
+        topic: transformTopicEditToTopicBody(topic)
+      })
       for (const pf of pendingFiles) {
         await uploadFileClient(noteId, pf.file, pf.filename)
       }
@@ -79,12 +83,13 @@ export default function NewNotePage() {
         />
 
         <div className="flex flex-col gap-3 w-full">
+          <MetadataEditor value={metadata} onChange={setMetadata} />
           <FileUpload
             pendingFilestoUpload={pendingFiles}
             onPendingFilesChange={setPendingFiles}
             compact={isMobile}
           />
-          <MetadataEditor value={metadata} onChange={setMetadata} />
+          <TopicEditor value={topic} onChange={setTopic} />
         </div>
 
         <Button

@@ -4,17 +4,17 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Paperclip, Circle } from "lucide-react"
 import Link from "next/link"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Card } from "@/components/ui/schadcn/card"
+import { Badge } from "@/components/ui/schadcn/badge"
+import { Button } from "@/components/ui/schadcn/button"
+import { Textarea } from "@/components/ui/schadcn/textarea"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription
-} from "@/components/ui/dialog"
+} from "@/components/ui/schadcn/dialog"
 import { PaginationControls } from "@/components/pagination-controls"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
@@ -61,10 +61,10 @@ export function NotesList() {
         editingNote.id,
         {
           content: editingContent.trim(),
-          startTimestamp: editingStartTimestamp,
-          endTimestamp: editingEndTimestamp,
+          startTimestamp: editingStartTimestamp ?? undefined,
+          endTimestamp: editingEndTimestamp ?? undefined,
           granularity: editingGranularity,
-          metadata: editingMetadata
+          metadata: editingMetadata ?? undefined
         },
         topic
       )
@@ -77,7 +77,7 @@ export function NotesList() {
       setEditingNote(null)
       setPendingFiles([])
       setTopicEdit(null)
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
+      queryClient.invalidateQueries({ queryKey: ["notes", skip, limit] })
       queryClient.invalidateQueries({ queryKey: ["note-files", editingNote?.id] })
     },
     onError: (error) => {
