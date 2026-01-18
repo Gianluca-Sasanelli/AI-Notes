@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from "react"
 import { useTheme } from "next-themes"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/schadcn/button"
+import { Textarea } from "@/components/ui/schadcn/textarea"
+import { Input } from "@/components/ui/schadcn/input"
 import { toast } from "sonner"
 import { Loader2, Sun, Moon, Monitor, RefreshCw, Plus, Pencil, Trash2, X, Tag } from "lucide-react"
 import {
@@ -24,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription
-} from "@/components/ui/dialog"
+} from "@/components/ui/schadcn/dialog"
 import type { TimelessNote } from "@/lib/types/database-types"
 import { useQuickTagsStore } from "@/lib/stores/metadata-store"
 
@@ -100,7 +100,7 @@ export default function SettingsPage() {
       if (!editingNote) return Promise.reject()
       return updateNoteClient(editingNote.id, {
         content: editingContent.trim(),
-        metadata: editingNote.metadata
+        metadata: editingNote.metadata ?? undefined
       })
     },
     onSuccess: () => {

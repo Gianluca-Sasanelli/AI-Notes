@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server"
 import { updateChatTitle, deleteChat } from "@/db"
-import { ErrorData } from "@/lib/types/database-types"
+import { ErrorData } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ chatId: string }> }) {

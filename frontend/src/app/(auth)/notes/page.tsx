@@ -1,7 +1,7 @@
 "use client"
 
 import { NotesList } from "@/components/notes-list"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/schadcn/button"
 import { Plus } from "lucide-react"
 import Link from "next/link"
 

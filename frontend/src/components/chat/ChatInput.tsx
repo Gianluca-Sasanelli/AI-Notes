@@ -1,8 +1,8 @@
 import { FileIcon, Loader2, PaperclipIcon, SendIcon, StopCircle, X } from "lucide-react"
 import { useEffect, useRef, useState, type KeyboardEvent as KeyboardEventReact } from "react"
 
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/schadcn/button"
+import { Textarea } from "@/components/ui/schadcn/textarea"
 import { handleGlobalKeyDown } from "@/lib/hooks"
 import { ModelSelector } from "./ModelSelector"
 import Image from "next/image"

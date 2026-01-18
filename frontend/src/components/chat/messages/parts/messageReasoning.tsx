@@ -1,5 +1,9 @@
 import type { ReasoningUIPart } from "ai"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from "@/components/ui/schadcn/collapsible"
 import { ChevronRight } from "lucide-react"
 import { useState } from "react"
 

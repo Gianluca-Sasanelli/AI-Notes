@@ -4,16 +4,16 @@ import { Pencil, Trash2 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/schadcn/button"
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+} from "@/components/ui/schadcn/dialog"
+import { Input } from "@/components/ui/schadcn/input"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/schadcn/tooltip"
 import { deleteChatClient, updateChatClient } from "@/lib/api"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"

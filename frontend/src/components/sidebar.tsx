@@ -4,9 +4,14 @@ import { UserButton, useUser } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/schadcn/button"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/schadcn/sheet"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/schadcn/tooltip"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks"
 import { Notebook, Plus, Pencil, PanelLeft, Settings } from "lucide-react"

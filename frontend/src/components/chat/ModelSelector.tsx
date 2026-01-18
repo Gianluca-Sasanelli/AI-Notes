@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select"
+} from "@/components/ui/schadcn/select"
 import { USER_MODELS, type AIModel } from "@/lib/agents/models"
 import { useModelStore } from "@/lib/stores/model-store"
 

@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { ErrorData } from "@/lib/types/database-types"
+import { ErrorData } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
 import { uploadFile, deleteFile, getFileUrl, sanitizeFilename } from "@/lib/storage"

@@ -1,14 +1,14 @@
 "use client"
 
 import { ArrowLeft, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/schadcn/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select"
+} from "@/components/ui/schadcn/select"
 
 interface PaginationControlsProps {
   skip: number

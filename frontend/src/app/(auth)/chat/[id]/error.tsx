@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/schadcn/button"
 import { AlertCircle } from "lucide-react"
 
 export default function ChatErrorPage({

@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { ErrorData } from "@/lib/types/database-types"
+import { ErrorData } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
 import { getTopics } from "@/db/db-topic"
 

@@ -10,13 +10,14 @@ export const createNote = async (
   metadata: NoteMetadata,
   startTimestamp?: Date | null,
   endTimestamp?: Date | null,
-  granularity?: NoteGranularity | null
+  granularity?: NoteGranularity | null,
+  topicId?: number | null
 ) => {
   logger.info("db", "Creating note", { userId, granularity })
   return withTiming("db", "createNote", async () => {
     const [note] = await db
       .insert(notes)
-      .values({ userId, content, startTimestamp, endTimestamp, granularity, metadata })
+      .values({ userId, content, startTimestamp, endTimestamp, granularity, metadata, topicId })
       .returning({ id: notes.id })
     logger.info("db", "Note created", { noteId: note.id })
     return note.id

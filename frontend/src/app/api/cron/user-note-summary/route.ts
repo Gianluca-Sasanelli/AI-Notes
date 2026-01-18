@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { generateText } from "ai"
 import { GOOGLE_MODEL, getModelInstance } from "@/lib/agents/models"
 import { buildUserNotesSummaryPrompt } from "@/lib/agents/system-prompts/prompts"
-import { ErrorData } from "@/lib/types/database-types"
+import { ErrorData } from "@/lib/types/api-types"
 import { getUserSummary, upsertUserSummary, getNotesAfterDate, getLatestNotes } from "@/db"
 
 export async function POST() {

@@ -3,9 +3,10 @@
 import * as React from "react"
 import { Plus, X, Tag } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/schadcn/button"
+import { Input } from "@/components/ui/schadcn/input"
+import { Badge } from "@/components/ui/schadcn/badge"
+import { useState } from "react"
 import type { NoteMetadata } from "@/db/schema"
 import { useQuickTagsStore } from "@/lib/stores/metadata-store"
 
@@ -16,9 +17,9 @@ interface MetadataEditorProps {
 
 export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
   const { tags } = useQuickTagsStore()
-  const [isOpen, setIsOpen] = React.useState(false)
-  const [newKey, setNewKey] = React.useState("")
-  const [newValue, setNewValue] = React.useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const [newKey, setNewKey] = useState("")
+  const [newValue, setNewValue] = useState("")
 
   const entries = Object.entries(value)
 

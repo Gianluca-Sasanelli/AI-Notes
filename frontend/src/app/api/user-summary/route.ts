@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { getUserSummary, upsertUserSummary } from "@/db"
-import { ErrorData } from "@/lib/types/database-types"
+import { ErrorData } from "@/lib/types/api-types"
 
 export async function GET() {
   const { userId } = await auth()
