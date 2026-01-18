@@ -45,8 +45,6 @@ export function FileUpload(props: FileUploadProps) {
 
   const hasNoteId = props.noteId !== undefined
 
-
-
   const deleteMutation = useMutation({
     mutationFn: (filename: string) => {
       if (!hasNoteId) return Promise.reject()
@@ -113,8 +111,6 @@ export function FileUpload(props: FileUploadProps) {
     setEditingIndex(null)
     setEditingName("")
   }
-
-
 
   const handleDownload = async (filename: string) => {
     if (!hasNoteId) return
@@ -195,9 +191,11 @@ export function FileUpload(props: FileUploadProps) {
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  onClick={() => {if (hasNoteId) {
-                    deleteMutation.mutate(filename)
-                  }}}
+                  onClick={() => {
+                    if (hasNoteId) {
+                      deleteMutation.mutate(filename)
+                    }
+                  }}
                   disabled={deleteMutation.isPending}
                 >
                   <X className="h-4 w-4" />
