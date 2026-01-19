@@ -176,12 +176,13 @@ export function NotesList() {
             ))}
           </div>
 
-          {notes.length >= 5 && (
+          {notes.length > 10 && (
             <PaginationControls
               skip={skip}
               limit={limit}
               hasNext={hasNext}
               onParamsChange={handleParamsChange}
+              className="justify-end"
             />
           )}
         </>

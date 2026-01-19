@@ -9,35 +9,43 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/schadcn/select"
+import { useIsMobile } from "@/lib/hooks"
+import { cn } from "@/lib/utils"
 
 interface PaginationControlsProps {
   skip: number
   limit: number
   hasNext: boolean
   onParamsChange: (params: { skip?: number; limit?: number }) => void
+  className?: string
 }
 
 export function PaginationControls({
   skip,
   limit,
   hasNext,
-  onParamsChange
+  onParamsChange,
+  className
 }: PaginationControlsProps) {
+  const isMobile = useIsMobile()
+  console.log("IsMobbile:", isMobile)
   return (
-    <div className="flex items-center space-x-4">
-      <Select
-        value={limit.toString()}
-        onValueChange={(value) => onParamsChange({ limit: Number(value), skip: 0 })}
-      >
-        <SelectTrigger className="w-[130px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="10">10 per page</SelectItem>
-          {(hasNext || limit >= 25) && <SelectItem value="25">25 per page</SelectItem>}
-          {(hasNext || limit >= 50) && <SelectItem value="50">50 per page</SelectItem>}
-        </SelectContent>
-      </Select>
+    <div className={cn("flex items-center space-x-4", className)}>
+      {!isMobile && (
+        <Select
+          value={limit.toString()}
+          onValueChange={(value) => onParamsChange({ limit: Number(value), skip: 0 })}
+        >
+          <SelectTrigger className="w-[130px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10 per page</SelectItem>
+            {(hasNext || limit >= 25) && <SelectItem value="25">25 per page</SelectItem>}
+            {(hasNext || limit >= 50) && <SelectItem value="50">50 per page</SelectItem>}
+          </SelectContent>
+        </Select>
+      )}
 
       <div className="flex items-center gap-3">
         <div className="flex gap-2">
