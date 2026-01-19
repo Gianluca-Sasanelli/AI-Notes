@@ -28,7 +28,8 @@ export const getTimeNotes = async (
   userId: string,
   skip: number = 0,
   limit: number = 10,
-  includeTotal: boolean = false
+  includeTotal: boolean = false,
+  topicId: number | undefined = undefined
 ) => {
   logger.debug("db", "Fetching time notes", { userId, skip, limit, includeTotal })
   return withTiming("db", "getTimeNotes", async () => {
@@ -51,7 +52,13 @@ export const getTimeNotes = async (
       })
       .from(notes)
       .leftJoin(topics, eq(notes.topicId, topics.id))
-      .where(and(eq(notes.userId, userId), sql`${notes.startTimestamp} IS NOT NULL`))
+      .where(
+        and(
+          eq(notes.userId, userId),
+          sql`${notes.startTimestamp} IS NOT NULL`,
+          topicId === undefined ? sql`true` : eq(notes.topicId, topicId)
+        )
+      )
       .orderBy(desc(sql`COALESCE(${notes.endTimestamp}, ${notes.startTimestamp})`))
       .limit(limit + 1)
       .offset(skip)

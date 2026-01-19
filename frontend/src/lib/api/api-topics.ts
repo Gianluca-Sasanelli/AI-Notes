@@ -1,7 +1,7 @@
 import { PaginatedResponse } from "../types/database-types"
 import { TopicData } from "../types/database-types"
 
-export async function getTopic(skip: number = 0, limit: number = 10) {
+export async function getTopics(skip: number = 0, limit: number = 10) {
   const params = new URLSearchParams()
   params.set("skip", skip.toString())
   params.set("limit", limit.toString())

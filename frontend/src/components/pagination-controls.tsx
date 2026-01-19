@@ -24,7 +24,7 @@ export function PaginationControls({
   onParamsChange
 }: PaginationControlsProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center space-x-4">
       <Select
         value={limit.toString()}
         onValueChange={(value) => onParamsChange({ limit: Number(value), skip: 0 })}
@@ -34,8 +34,8 @@ export function PaginationControls({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="10">10 per page</SelectItem>
-          <SelectItem value="25">25 per page</SelectItem>
-          <SelectItem value="50">50 per page</SelectItem>
+          {(hasNext || limit >= 25) && <SelectItem value="25">25 per page</SelectItem>}
+          {(hasNext || limit >= 50) && <SelectItem value="50">50 per page</SelectItem>}
         </SelectContent>
       </Select>
 
