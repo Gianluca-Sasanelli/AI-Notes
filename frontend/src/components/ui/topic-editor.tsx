@@ -16,12 +16,18 @@ import { getTopics } from "@/lib/api"
 
 export type TopicEdit =
   | { id: number; name: string; color: string; modified: boolean }
+  | { id: number; removed: true }
   | { id: null; name: string; color: string; modified?: boolean }
   | null
+
+type EditableTopic = Exclude<TopicEdit, null | { removed: true }>
+
+export const isEditableTopic = (t: TopicEdit): t is EditableTopic => t !== null && !("removed" in t)
 
 const DEFAULT_TOPIC_COLOR = "#3b82f6"
 const isModified = (initialvalue: TopicEdit, newName: string, newColor: string): boolean => {
   if (!initialvalue || initialvalue.id === null) return true
+  if ("removed" in initialvalue) return false
   return initialvalue.name !== newName || initialvalue.color !== newColor
 }
 export function TopicEditor({
@@ -31,8 +37,8 @@ export function TopicEditor({
   value: TopicEdit
   onChange: (v: TopicEdit) => void
 }) {
-  const [localColor, setLocalColor] = useState(value?.color ?? "#3b82f6")
-  const [localName, setLocalName] = useState(value?.name ?? "")
+  const [localColor, setLocalColor] = useState(isEditableTopic(value) ? value.color : "#3b82f6")
+  const [localName, setLocalName] = useState(isEditableTopic(value) ? value.name : "")
   console.log("The value is:", value)
   const { data: topicsData } = useQuery({
     queryKey: ["topics"],
@@ -66,7 +72,7 @@ export function TopicEditor({
     onChange({ id: null, name: "", color: DEFAULT_TOPIC_COLOR })
   }
 
-  if (!value) {
+  if (!isEditableTopic(value)) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -113,6 +119,7 @@ export function TopicEditor({
         />
         <Circle className="w-6 h-6" fill={localColor} stroke={localColor} />
       </label>
+
       <Input
         placeholder="Topic name"
         value={localName}
@@ -124,7 +131,13 @@ export function TopicEditor({
         variant="ghost"
         size="icon"
         onClick={() => {
-          onChange(null)
+          console.log("Current value before removal:", value)
+          if (value.id !== null) {
+            console.log("Removing topic with id:", value.id)
+            onChange({ id: value.id, removed: true })
+          } else {
+            onChange(null)
+          }
         }}
       >
         <X className="h-4 w-4" />

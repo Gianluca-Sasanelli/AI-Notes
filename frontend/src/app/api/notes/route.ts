@@ -3,7 +3,7 @@ import { createNote, getTimeNotes, getTimelessNotes } from "@/db"
 import { ErrorData, CreateNoteBody } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
-import { handleTopicCreationOrUpdate } from "@/lib/route-functions/topic-creation"
+import { handleTopicCreationOrUpdateOrRemoval } from "@/lib/route-functions/topic-creation"
 
 export async function GET(request: Request) {
   const { userId } = await auth()
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       if (body.timeless) {
         return createNote(userId, body.content, body.metadata ?? {}, null, null, null)
       }
-      const createdId = await handleTopicCreationOrUpdate(userId, body.topic)
+      const createdId = await handleTopicCreationOrUpdateOrRemoval(userId, body.topic)
       return createNote(
         userId,
         body.content,

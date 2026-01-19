@@ -1,19 +1,19 @@
-import { TopicDbData } from "../types/database-types"
+import { TopicBody } from "../types/api-types"
 import { createTopic, updateTopic } from "@/db/db-topic"
 import { logger } from "@/lib/logger"
 
-
-export async function handleTopicCreationOrUpdate(
-  userId: string,
-  topicEntry: { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
-) {
+export async function handleTopicCreationOrUpdateOrRemoval(userId: string, topicEntry: TopicBody) {
   console.log("In handletopicCreationOrUpdate with topicEntry:", topicEntry)
-  let output: number | undefined = undefined
+  let output: number | undefined | null = undefined
   if (!topicEntry) {
     return output
   }
   if ("new" in topicEntry) {
     output = await createTopic(userId, topicEntry.new)
+  }
+  if ("removed" in topicEntry) {
+    //For the future delete the topic
+    output = null
   } else {
     for (const [id, data] of Object.entries(topicEntry)) {
       const parsedId = parseInt(id, 10)
