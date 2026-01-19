@@ -1,7 +1,7 @@
-import { PaginatedResponse, TimeNote, TimelessNote, TopicDbData } from "@/lib/types/database-types"
+import { PaginatedResponse, TimeNote, TimelessNote } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 import { UpdateNoteBody, PaginationOptions, CreateNoteBody } from "@/lib/types/api-types"
-
+import { TopicBody } from "@/lib/types/api-types"
 type UpdateNoteFront = Omit<UpdateNoteBody, "topic">
 export async function createTimeNoteClient(NoteCreateData: CreateNoteBody) {
   const res = await fetch("/api/notes", {
@@ -76,11 +76,7 @@ export async function getNoteClient(id: number) {
   return (await res.json()) as TimeNote | TimelessNote
 }
 
-export async function updateNoteClient(
-  id: number,
-  data: UpdateNoteFront,
-  topic?: { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
-) {
+export async function updateNoteClient(id: number, data: UpdateNoteFront, topic?: TopicBody) {
   const body: UpdateNoteBody = {
     ...data,
     topic

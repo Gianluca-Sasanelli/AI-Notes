@@ -10,7 +10,10 @@ export type TimelessNoteBody = DbTimeNote & {
   content: string
   metadata: NoteMetadata
 }
-export type TopicBody = { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
+export type TopicBody =
+  | { [id: number]: TopicDbData & { modified: boolean } }
+  | { new: TopicDbData }
+  | undefined
 export type UpdateNoteBody = Partial<TimeNoteBody> & {
   topic?: TopicBody
 }

@@ -27,5 +27,5 @@ export function handleAgentError(error: { error: unknown }, agentName: string): 
 export function transformTopicEditToTopicBody(topic: TopicEdit | undefined | null): TopicBody {
   if (!topic) return undefined
   if (topic.id === null) return { new: { name: topic.name, color: topic.color } }
-  return { [topic.id]: { name: topic.name, color: topic.color } }
+  return { [topic.id]: { name: topic.name, color: topic.color, modified: topic.modified } }
 }

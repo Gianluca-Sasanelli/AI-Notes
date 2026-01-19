@@ -26,7 +26,7 @@ import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
 import { TopicEditor, type TopicEdit } from "@/components/ui/topic-editor"
 import { TopicSelector } from "@/components/ui/topic-selector"
-
+import { transformTopicEditToTopicBody } from "@/lib/utils"
 export function NotesList() {
   const [skip, setSkip] = useState(0)
   const [limit, setLimit] = useState(10)
@@ -54,11 +54,7 @@ export function NotesList() {
         toast.error("No note selected")
         return Promise.reject()
       }
-      const topic = topicEdit
-        ? topicEdit.id === null
-          ? { new: { name: topicEdit.name, color: topicEdit.color } }
-          : { [topicEdit.id]: { name: topicEdit.name, color: topicEdit.color } }
-        : undefined
+      const topic = transformTopicEditToTopicBody(topicEdit)
       await updateNoteClient(
         editingNote.id,
         {
@@ -118,7 +114,9 @@ export function NotesList() {
     setEditingGranularity(note.granularity)
     setEditingMetadata(note.metadata)
     setTopicEdit(
-      note.topic ? { id: note.topic.id, name: note.topic.name, color: note.topic.color } : null
+      note.topic
+        ? { id: note.topic.id, name: note.topic.name, color: note.topic.color, modified: false }
+        : null
     )
     setEditingNote(note)
   }
@@ -243,7 +241,11 @@ export function NotesList() {
               </Button>
               <Button
                 onClick={() => updateMutation.mutate()}
-                disabled={!editingContent.trim() || updateMutation.isPending}
+                disabled={
+                  !editingContent.trim() ||
+                  updateMutation.isPending ||
+                  topicEdit?.name.trim() === ""
+                }
               >
                 {updateMutation.isPending ? "Saving..." : "Save"}
               </Button>
