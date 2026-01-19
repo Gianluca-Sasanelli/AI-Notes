@@ -52,7 +52,7 @@ export default function Chat({
           <p className="text-base text-muted-foreground">
             Ask about your notes and general questions.
           </p>
-          <div className="flex w-full max-w-3xl sm:max-w-2xl flex-col rounded-xl">
+          <div className="flex w-full max-w-3xl sm:max-w-2xl min-h-[15dvh] flex-col rounded-xl">
             <ChatInput
               onSendMessage={(text: string, files?: FileList) => {
                 sendMessage(

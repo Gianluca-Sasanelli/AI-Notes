@@ -3,6 +3,7 @@
 import { getChatsClient } from "@/lib/api"
 import type { ChatHistoryItem } from "@/lib/types/database-types"
 import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/lib/hooks"
 import { useQuery } from "@tanstack/react-query"
 import { History } from "lucide-react"
 import Link from "next/link"
@@ -58,6 +59,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
     gcTime: 60 * 60 * 1000
   })
   const pathname = usePathname()
+  const isMobile = useIsMobile()
   const groupedChats = useMemo(() => (data ? groupChatsByDate(data.data) : []), [data])
 
   if (isLoading || !data) return null
@@ -92,7 +94,12 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                         {chat.title || "Untitled"}
                       </span>
                     </Link>
-                    <div className="absolute right-1 flex items-center opacity-0 group-hover:opacity-100">
+                    <div
+                      className={cn(
+                        "absolute right-1 flex items-center",
+                        !isMobile && "opacity-0 group-hover:opacity-100"
+                      )}
+                    >
                       <ChatDropdown chatId={chat.id} currentTitle={chat.title || "Untitled"} />
                     </div>
                   </div>
