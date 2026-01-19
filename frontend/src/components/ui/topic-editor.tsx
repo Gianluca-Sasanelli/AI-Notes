@@ -15,12 +15,15 @@ import {
 import { getTopics } from "@/lib/api"
 
 export type TopicEdit =
-  | { id: number; name: string; color: string }
-  | { id: null; name: string; color: string }
+  | { id: number; name: string; color: string; modified: boolean }
+  | { id: null; name: string; color: string; modified?: boolean }
   | null
 
 const DEFAULT_TOPIC_COLOR = "#3b82f6"
-
+const isModified = (initialvalue: TopicEdit, newName: string, newColor: string): boolean => {
+  if (!initialvalue || initialvalue.id === null) return true
+  return initialvalue.name !== newName || initialvalue.color !== newColor
+}
 export function TopicEditor({
   value,
   onChange
@@ -30,7 +33,7 @@ export function TopicEditor({
 }) {
   const [localColor, setLocalColor] = useState(value?.color ?? "#3b82f6")
   const [localName, setLocalName] = useState(value?.name ?? "")
-
+  console.log("The value is:", value)
   const { data: topicsData } = useQuery({
     queryKey: ["topics"],
     queryFn: () => getTopics()
@@ -43,13 +46,18 @@ export function TopicEditor({
 
   const syncName = (name: string) => {
     setLocalName(name)
-    if (value) onChange({ ...value, name })
+    if (value) onChange({ ...value, name, modified: isModified(value, name, localColor) })
   }
 
   const selectExistingTopic = (topic: { id: number; name: string; color: string | null }) => {
     setLocalColor(topic.color ?? DEFAULT_TOPIC_COLOR)
     setLocalName(topic.name)
-    onChange({ id: topic.id, name: topic.name, color: topic.color ?? DEFAULT_TOPIC_COLOR })
+    onChange({
+      id: topic.id,
+      name: topic.name,
+      color: topic.color ?? DEFAULT_TOPIC_COLOR,
+      modified: false
+    })
   }
 
   const startNewTopic = () => {
