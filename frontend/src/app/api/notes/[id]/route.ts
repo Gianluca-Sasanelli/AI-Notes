@@ -3,7 +3,7 @@ import { getNote, updateNote, deleteNote } from "@/db"
 import { ErrorData, UpdateNoteBody } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
 import { logger, withTiming } from "@/lib/logger"
-import { handleTopicCreationOrUpdate } from "@/lib/route-functions/topic-creation"
+import { handleTopicCreationOrUpdateOrRemoval } from "@/lib/route-functions/topic-creation"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()
@@ -54,7 +54,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (body.endTimestamp) {
     body.endTimestamp = new Date(body.endTimestamp)
   }
-  const createdId = await handleTopicCreationOrUpdate(userId, body.topic)
+  const createdId = await handleTopicCreationOrUpdateOrRemoval(userId, body.topic)
   logger.info("api", `PATCH /api/notes/${noteId}`)
   try {
     await withTiming("api", `PATCH /api/notes/${noteId}`, async () => {

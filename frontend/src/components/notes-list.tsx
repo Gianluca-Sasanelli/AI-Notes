@@ -24,7 +24,7 @@ import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
-import { TopicEditor, type TopicEdit } from "@/components/ui/topic-editor"
+import { TopicEditor, type TopicEdit, isEditableTopic } from "@/components/ui/topic-editor"
 import { TopicSelector } from "@/components/ui/topic-selector"
 import { transformTopicEditToTopicBody } from "@/lib/utils"
 export function NotesList() {
@@ -244,7 +244,7 @@ export function NotesList() {
                 disabled={
                   !editingContent.trim() ||
                   updateMutation.isPending ||
-                  topicEdit?.name.trim() === ""
+                  (isEditableTopic(topicEdit) && topicEdit.name.trim() === "")
                 }
               >
                 {updateMutation.isPending ? "Saving..." : "Save"}
