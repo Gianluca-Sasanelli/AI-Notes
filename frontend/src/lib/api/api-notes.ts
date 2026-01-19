@@ -37,7 +37,9 @@ export async function createTimelessNoteClient(content: string, metadata: NoteMe
   return data.id
 }
 
-type GetNotesOptions<T extends boolean> = PaginationOptions & { timeless?: T }
+type GetNotesOptions<T extends boolean> = PaginationOptions & { timeless?: T } & {
+  topicId?: number | null
+}
 
 export async function getNotesClient(
   options: GetNotesOptions<true>
@@ -48,12 +50,13 @@ export async function getNotesClient(
 export async function getNotesClient(
   options: GetNotesOptions<boolean> = {}
 ): Promise<PaginatedResponse<TimeNote | TimelessNote>> {
-  const { skip, limit, includeTotal, timeless } = options
+  const { skip, limit, includeTotal, timeless, topicId } = options
   const params = new URLSearchParams()
   if (skip !== undefined) params.set("skip", skip.toString())
   if (limit !== undefined) params.set("limit", limit.toString())
   if (includeTotal) params.set("total", "true")
   if (timeless) params.set("timeless", "true")
+  if (topicId) params.set("topicId", topicId.toString())
 
   const url = params.toString() ? `/api/notes?${params.toString()}` : "/api/notes"
   const res = await fetch(url)

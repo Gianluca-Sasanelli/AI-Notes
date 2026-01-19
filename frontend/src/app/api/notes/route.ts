@@ -16,13 +16,14 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50)
   const includeTotal = searchParams.get("total") === "true"
   const timeless = searchParams.get("timeless") === "true"
+  const topicIdParam = parseInt(searchParams.get("topicId") || "0", 10) || undefined
 
   logger.info("api", "GET /api/notes", { skip, limit, includeTotal, timeless })
   try {
     const result = await withTiming("api", "GET /api/notes", async () => {
       return timeless
         ? getTimelessNotes(userId, skip, limit, includeTotal)
-        : getTimeNotes(userId, skip, limit, includeTotal)
+        : getTimeNotes(userId, skip, limit, includeTotal, topicIdParam)
     })
     return NextResponse.json({
       data: result.data,

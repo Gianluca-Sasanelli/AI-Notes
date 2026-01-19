@@ -1,14 +1,25 @@
 "use client"
 
 import { useState } from "react"
-import { Circle, X, Plus } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
+import { Circle, X, Plus, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/schadcn/input"
 import { Button } from "@/components/ui/schadcn/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/schadcn/dropdown-menu"
+import { getTopics } from "@/lib/api"
 
 export type TopicEdit =
   | { id: number; name: string; color: string }
   | { id: null; name: string; color: string }
   | null
+
+const DEFAULT_TOPIC_COLOR = "#3b82f6"
 
 export function TopicEditor({
   value,
@@ -20,6 +31,12 @@ export function TopicEditor({
   const [localColor, setLocalColor] = useState(value?.color ?? "#3b82f6")
   const [localName, setLocalName] = useState(value?.name ?? "")
 
+  const { data: topicsData } = useQuery({
+    queryKey: ["topics"],
+    queryFn: () => getTopics()
+  })
+  const topics = topicsData?.data ?? []
+
   const syncColor = () => {
     if (value) onChange({ ...value, color: localColor })
   }
@@ -29,18 +46,50 @@ export function TopicEditor({
     if (value) onChange({ ...value, name })
   }
 
+  const selectExistingTopic = (topic: { id: number; name: string; color: string | null }) => {
+    setLocalColor(topic.color ?? DEFAULT_TOPIC_COLOR)
+    setLocalName(topic.name)
+    onChange({ id: topic.id, name: topic.name, color: topic.color ?? DEFAULT_TOPIC_COLOR })
+  }
+
+  const startNewTopic = () => {
+    setLocalColor(DEFAULT_TOPIC_COLOR)
+    setLocalName("")
+    onChange({ id: null, name: "", color: DEFAULT_TOPIC_COLOR })
+  }
+
   if (!value) {
     return (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-8 w-full"
-        onClick={() => onChange({ id: null, name: "", color: "#3b82f6" })}
-      >
-        <Plus className="h-3.5 w-3.5 mr-1" />
-        Topic
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="outline" size="sm" className="h-8 w-full">
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            Topic
+            <ChevronDown className="h-3.5 w-3.5 ml-1" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuItem onClick={startNewTopic}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create new topic
+          </DropdownMenuItem>
+          {topics.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              {topics.map((topic) => (
+                <DropdownMenuItem key={topic.id} onClick={() => selectExistingTopic(topic)}>
+                  <Circle
+                    className="h-4 w-4 mr-2"
+                    fill={topic.color ?? undefined}
+                    stroke={topic.color ?? undefined}
+                  />
+                  {topic.name}
+                </DropdownMenuItem>
+              ))}
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     )
   }
 
@@ -62,7 +111,14 @@ export function TopicEditor({
         onChange={(e) => syncName(e.target.value)}
         className="h-8 flex-1 text-sm border-0 focus-visible:ring-0"
       />
-      <Button type="button" variant="ghost" size="icon" onClick={() => onChange(null)}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={() => {
+          onChange(null)
+        }}
+      >
         <X className="h-4 w-4" />
       </Button>
     </div>

@@ -25,6 +25,7 @@ export const getTopics = async (userId: string, skip: number = 0, limit: number 
       .select({
         id: topics.id,
         name: topics.name,
+        color: topics.color,
         createdAt: topics.createdAt,
         updatedAt: topics.updatedAt
       })

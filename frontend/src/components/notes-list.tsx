@@ -25,6 +25,7 @@ import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
 import { TopicEditor, type TopicEdit } from "@/components/ui/topic-editor"
+import { TopicSelector } from "@/components/ui/topic-selector"
 
 export function NotesList() {
   const [skip, setSkip] = useState(0)
@@ -38,11 +39,12 @@ export function NotesList() {
   const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const [topicEdit, setTopicEdit] = useState<TopicEdit>(null)
+  const [queryTopicId, setQueryTopic] = useState<number | null>(null)
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
-    queryKey: ["notes", skip, limit],
-    queryFn: () => getNotesClient({ skip, limit, timeless: false }),
+    queryKey: ["notes", skip, limit, queryTopicId],
+    queryFn: () => getNotesClient({ skip, limit, timeless: false, topicId: queryTopicId }),
     placeholderData: keepPreviousData
   })
 
@@ -79,6 +81,7 @@ export function NotesList() {
       setTopicEdit(null)
       queryClient.invalidateQueries({ queryKey: ["notes", skip, limit] })
       queryClient.invalidateQueries({ queryKey: ["note-files", editingNote?.id] })
+      queryClient.invalidateQueries({ queryKey: ["topics"] })
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to update")
@@ -130,21 +133,40 @@ export function NotesList() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : notes.length === 0 ? (
-        <Card className="p-12">
-          <div className="text-center">
-            <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">No notes yet</p>
-          </div>
-        </Card>
+        <>
+          {queryTopicId !== null && (
+            <TopicSelector
+              value={queryTopicId}
+              onChange={(topicId) => {
+                setQueryTopic(topicId)
+                setSkip(0)
+              }}
+            />
+          )}
+          <Card className="p-12">
+            <div className="text-center">
+              <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+              <p className="text-muted-foreground">No notes yet</p>
+            </div>
+          </Card>
+        </>
       ) : (
         <>
-          <PaginationControls
-            skip={skip}
-            limit={limit}
-            hasNext={hasNext}
-            onParamsChange={handleParamsChange}
-          />
-
+          <div className="flex justify-between items-center mb-2">
+            <TopicSelector
+              value={queryTopicId}
+              onChange={(topicId) => {
+                setQueryTopic(topicId)
+                setSkip(0)
+              }}
+            />
+            <PaginationControls
+              skip={skip}
+              limit={limit}
+              hasNext={hasNext}
+              onParamsChange={handleParamsChange}
+            />
+          </div>
           <div className="space-y-3">
             {notes.map((note) => (
               <TimeNoteCard

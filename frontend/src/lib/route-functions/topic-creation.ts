@@ -6,6 +6,7 @@ export async function handleTopicCreationOrUpdate(
   userId: string,
   topicEntry: { [id: number]: TopicDbData } | { new: TopicDbData } | undefined
 ) {
+  console.log("In handletopicCreationOrUpdate with topicEntry:", topicEntry)
   let output: number | undefined = undefined
   if (!topicEntry) {
     return output
