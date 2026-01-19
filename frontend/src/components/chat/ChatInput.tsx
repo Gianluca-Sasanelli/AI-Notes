@@ -111,7 +111,7 @@ const ChatInput = React.memo(function ChatInput({
   }
 
   return (
-    <div className="flex w-full flex-col rounded-xl border-2 pl-1 py-1 lg:py-2 lg:pl-2 shadow-md focus-within:border-primary">
+    <div className="flex size-full flex-col rounded-xl border-2 pl-1 py-1 lg:py-2 lg:pl-2 shadow-md focus-within:border-primary">
       {attachedFiles.length > 0 && (
         <div className="flex flex-wrap gap-2 pr-2">
           {attachedFiles.map((file, index) => (
@@ -139,7 +139,7 @@ const ChatInput = React.memo(function ChatInput({
           ))}
         </div>
       )}
-      <div className="w-full flex-1 flex-col gap-2">
+      <div className="w-full flex-1 flex flex-col gap-2">
         <input
           ref={fileInputRef}
           onChange={handleUploadFile}
@@ -157,7 +157,7 @@ const ChatInput = React.memo(function ChatInput({
           placeholder="Ask about your notes, or health issues..."
           className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0"
         />
-        <div className="flex max-h-[30%] items-center justify-between pr-2">
+        <div className="flex max-h-[30%] items-center justify-between pr-2 mt-auto">
           <ModelSelector />
           <div className="flex items-center gap-2">
             <Button
