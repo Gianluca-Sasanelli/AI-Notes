@@ -154,15 +154,15 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 appearance={{
                   elements: {
                     rootBox:
-                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-3 pt-2 text-sm font-medium text-secondary-foreground",
+                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-2 pt-2 ",
                     userButtonTrigger: "hidden",
-                    userButtonBox: "size-full",
-                    userButtonAvatarBox: "order-first size-6",
+                    userButtonBox: "size-full flex items-center !gap-0 !focus:ring-0",
+                    userButtonAvatarBox: "order-first !size-6",
                     userButtonOuterIdentifier:
-                      "flex-1 cursor-pointer whitespace-nowrap text-left text-sm !text-secondary-foreground",
+                      "flex-1 p-0  whitespace-nowrap text-left  !text-foreground !focus:ring-0",
                     card: "bg-popover border-border",
-                    profileSectionTitle: "!text-secondary-foreground",
-                    accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
+                    profileSectionTitle: "p-0 !text-secondary-foreground items-center",
+                    accordionTriggerButton: "hover:bg-accent !focus:bg-accent",
                     accordionContent: "bg-background",
                     profileSectionContent: "text-secondary-foreground"
                   }
