@@ -1,8 +1,9 @@
-import { FileIcon, Loader2, PaperclipIcon, SendIcon, StopCircle, X } from "lucide-react"
+import { FileIcon, Loader2, SendIcon, StopCircle, X } from "lucide-react"
 import { useEffect, useRef, useState, type KeyboardEvent as KeyboardEventReact } from "react"
 
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
+import { ChatContextPopover } from "@/components/ui/chat-context"
 import { handleGlobalKeyDown } from "@/lib/hooks"
 import { ModelSelector } from "./ModelSelector"
 import Image from "next/image"
@@ -28,7 +29,10 @@ const ChatInput = React.memo(function ChatInput({
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])
-
+  let placeholdertext = "Ask about your notes, or health issues..."
+  if (attachedFiles.length > 0) {
+    placeholdertext = ""
+  }
   useEffect(() => {
     const handler = (e: KeyboardEvent) => handleGlobalKeyDown(e, setInput, taRef)
     window.addEventListener("keydown", handler)
@@ -111,9 +115,9 @@ const ChatInput = React.memo(function ChatInput({
   }
 
   return (
-    <div className="flex size-full flex-col rounded-xl border-2 pl-1 py-1 lg:py-2 lg:pl-2 shadow-md focus-within:border-primary">
+    <div className="flex size-full flex-col gap-2 rounded-xl border-2 pl-1 py-1 lg:py-2 lg:pl-2 shadow-md focus-within:border-primary">
       {attachedFiles.length > 0 && (
-        <div className="flex flex-wrap gap-2 pr-2">
+        <div className="flex flex-wrap gap-2 p-1">
           {attachedFiles.map((file, index) => (
             <div key={file.file.name} className="relative">
               {file.type === "image" ? (
@@ -154,29 +158,19 @@ const ChatInput = React.memo(function ChatInput({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
-          placeholder="Ask about your notes, or health issues..."
+          placeholder={placeholdertext}
           className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0"
         />
         <div className="flex max-h-[30%] items-center justify-between pr-2 mt-auto">
           <ModelSelector />
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="rounded-full text-muted-foreground hover:text-foreground"
-              disabled={isLoading}
-              title="Upload file"
-              onClick={triggerFileInput}
-            >
-              <PaperclipIcon className="size-6" />
-            </Button>
+            <ChatContextPopover disabled={isLoading} onAddFile={triggerFileInput} />
             {isLoading && onStopGeneration ? (
               <Button
                 onClick={onStopGeneration}
                 variant="ghost"
                 size="icon"
-                className="hover:bg-destructive/10"
+                className="hover:bg-destructive/10 rounded-md"
                 title="Stop Generation"
               >
                 <StopCircle className="size-6" />
@@ -189,7 +183,7 @@ const ChatInput = React.memo(function ChatInput({
                 disabled={isLoading || !input.trim()}
                 variant="ghost"
                 size="icon"
-                className="hover:bg-primary/10"
+                className="hover:bg-primary/10 rounded-md"
                 title={isLoading ? "Generating..." : "Send Message"}
               >
                 {isLoading ? (
