@@ -25,10 +25,10 @@ export function MessageBubble(props: MessageBubbleProps) {
 
   return (
     <div
-      className={`flex flex-col ${isUser ? "items-end" : "items-start"} gap-x-2`}
+      className={`flex flex-col ${isUser ? "items-end" : "items-start"} pt-2`}
       ref={messageRef ?? undefined}
     >
-      <div className={`group max-w-full`}>
+      <div className={`flex flex-col group  ${isUser ? "max-w-full" : "gap-6 w-full"}`}>
         {message?.parts?.map((part, index) => {
           if (part.type === "text") {
             return <MessageUI key={`${message.id}-${index}`} message={part.text} isUser={isUser} />
@@ -55,7 +55,10 @@ export function MessageBubble(props: MessageBubbleProps) {
             console.log("The name of the tool is", name)
 
             return (
-              <div key={`${message.id}-${index}-${part.type}`} className="flex w-full ">
+              <div
+                key={`${message.id}-${index}-${part.type}`}
+                className="flex w-full justify-center "
+              >
                 <ToolCallWidget
                   toolName={name}
                   state={
@@ -77,13 +80,15 @@ export function MessageBubble(props: MessageBubbleProps) {
             )
           }
         })}
-        <div className="flex mx-2 my-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div
+          className={`flex my-1 opacity-0 ${isUser ? "justify-end" : ""} group-hover:opacity-100 transition-opacity duration-500`}
+        >
           <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="!bg-transparent hover:!bg-transparent p-0"
+                className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
                 onClick={() => {
                   const text = message.parts
                     ?.filter((part) => part.type === "text")
