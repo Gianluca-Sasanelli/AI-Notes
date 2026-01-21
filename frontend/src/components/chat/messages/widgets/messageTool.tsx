@@ -20,7 +20,7 @@ export default function ToolCallWidget({
     )
   }
   return (
-    <div className="flex h-20 w-[50%] items-center justify-center rounded-lg bg-secondary p-4 text-secondary-foreground">
+    <div className="flex h-20 min-w-64 items-center justify-center rounded-xl bg-secondary p-2 text-secondary-foreground">
       <span className="flex items-center gap-2">
         <span className="text-xl">{AiFrontendTools[toolName]?.icon}</span>
         <span className="text-sm">{AiFrontendTools[toolName]?.title ?? toolName}</span>

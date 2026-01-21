@@ -28,9 +28,7 @@ export function MessageBubble(props: MessageBubbleProps) {
       className={`flex flex-col ${isUser ? "items-end" : "items-start"} gap-x-2`}
       ref={messageRef ?? undefined}
     >
-      <div
-        className={`group flex flex-col ${isUser ? "items-end" : "items-start"} flex-grow max-w-full`}
-      >
+      <div className={`group max-w-full`}>
         {message?.parts?.map((part, index) => {
           if (part.type === "text") {
             return <MessageUI key={`${message.id}-${index}`} message={part.text} isUser={isUser} />
@@ -57,10 +55,7 @@ export function MessageBubble(props: MessageBubbleProps) {
             console.log("The name of the tool is", name)
 
             return (
-              <div
-                key={`${message.id}-${index}-${part.type}`}
-                className="flex w-full justify-center"
-              >
+              <div key={`${message.id}-${index}-${part.type}`} className="flex w-full ">
                 <ToolCallWidget
                   toolName={name}
                   state={
