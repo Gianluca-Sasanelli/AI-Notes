@@ -347,8 +347,13 @@ function TimeNoteCard({
           <Button variant="ghost" size="icon" onClick={() => onEdit(note)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(note.id)}>
-            <Trash2 className="h-4 w-4" />
+          <Button
+            variant="destructive"
+            size="icon"
+            className="!bg-transparent !hover:bg-destructive/50"
+            onClick={() => onDelete(note.id)}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         </div>
       </div>
