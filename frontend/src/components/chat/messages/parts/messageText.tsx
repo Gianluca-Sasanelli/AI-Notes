@@ -70,7 +70,7 @@ export default function MessageUI({ message, isUser }: { message: string; isUser
           {message}
         </div>
       ) : (
-        <div className="min-w-0 w-full overflow-hidden rounded-2xl p-2 text-base leading-relaxed tracking-wide text-foreground">
+        <div className="min-w-0 w-full overflow-hidden text-base leading-relaxed tracking-wide text-foreground">
           <div className="min-w-0 max-w-full break-words [word-break:break-word]">
             <Markdown options={markdownOptions}>{message}</Markdown>
           </div>
