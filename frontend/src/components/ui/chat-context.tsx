@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/schadcn/input"
 import { useQuery } from "@tanstack/react-query"
 import { getTopics } from "@/lib/api/api-topics"
 import { TopicData } from "@/lib/types/database-types"
-
+import { useIsMobile } from "@/lib/hooks"
 interface ChatContextPopoverProps {
   disabled?: boolean
   selectedTopicId?: number | null
@@ -23,6 +23,7 @@ export function ChatContextPopover({
   onAddFile,
   onSelectTopic
 }: ChatContextPopoverProps) {
+  const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const [topicSubmenuOpen, setTopicSubmenuOpen] = useState(false)
   const { data: topicsData } = useQuery({
@@ -79,7 +80,7 @@ export function ChatContextPopover({
               </button>
             </PopoverTrigger>
             <PopoverContent
-              side="right"
+              side={isMobile ? "top" : "right"}
               align="start"
               className="w-56 p-2"
               onMouseLeave={() => setTopicSubmenuOpen(false)}
@@ -122,13 +123,15 @@ interface TopicSelectorPopoverProps {
   selectedTopic?: TopicData | null
   onSelectTopic: (topic: TopicData) => void
   onRemoveTopic: () => void
+  side: "top" | "right" | "bottom" | "left"
 }
 
 export function TopicSelectorPopover({
   disabled,
   selectedTopic,
   onSelectTopic,
-  onRemoveTopic
+  onRemoveTopic,
+  side = "right"
 }: TopicSelectorPopoverProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -174,7 +177,7 @@ export function TopicSelectorPopover({
           <span>Add topic</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent side="top" align="start" className="w-56 p-2">
+      <PopoverContent side={side} align="start" className="w-56 p-2">
         <div className="flex flex-col gap-2">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

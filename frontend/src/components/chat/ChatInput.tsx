@@ -34,6 +34,7 @@ const ChatInput = React.memo(function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])
   const [selectedTopic, setSelectedTopic] = useState<TopicData | null>(null)
+  console.log("Selected topic in ChatInput is", selectedTopic)
   let placeholdertext = "Ask about your notes, or health issues..."
   if (attachedFiles.length > 0) {
     placeholdertext = ""
