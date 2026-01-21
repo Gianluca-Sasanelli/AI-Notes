@@ -1,15 +1,19 @@
-import { FileIcon, Loader2, SendIcon, StopCircle, X } from "lucide-react"
+import { FileIcon, FolderIcon, Loader2, SendIcon, StopCircle, X } from "lucide-react"
 import { useEffect, useRef, useState, type KeyboardEvent as KeyboardEventReact } from "react"
 
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/schadcn/tooltip"
 import { ChatContextPopover } from "@/components/ui/chat-context"
+import { TopicData } from "@/lib/types/database-types"
 import { handleGlobalKeyDown } from "@/lib/hooks"
 import { ModelSelector } from "./ModelSelector"
+
 import Image from "next/image"
 import React from "react"
+import { chatContext } from "@/lib/types/chat-types"
 interface ChatInputProps {
-  onSendMessage: (text: string, files?: FileList) => void
+  onSendMessage: (text: string, files?: FileList, context?: chatContext) => void
   isLoading: boolean
   onStopGeneration?: () => void
 }
@@ -29,6 +33,7 @@ const ChatInput = React.memo(function ChatInput({
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])
+  const [selectedTopic, setSelectedTopic] = useState<TopicData | null>(null)
   let placeholdertext = "Ask about your notes, or health issues..."
   if (attachedFiles.length > 0) {
     placeholdertext = ""
@@ -93,7 +98,9 @@ const ChatInput = React.memo(function ChatInput({
       attachedFiles.forEach((file) => dataTransfer.items.add(file.file))
       fileListToSend = dataTransfer.files
     }
-    onSendMessage(input, fileListToSend)
+    const context: chatContext = selectedTopic ? { topicId: selectedTopic.id.toString() } : null
+    console.log("The context being sent is", context)
+    onSendMessage(input, fileListToSend, context)
 
     setInput("")
     setAttachedFiles([])
@@ -162,9 +169,38 @@ const ChatInput = React.memo(function ChatInput({
           className="max-h-[35vh] overflow-y-auto border-none bg-transparent text-base focus:outline-none focus:ring-0"
         />
         <div className="flex max-h-[30%] items-center justify-between pr-2 mt-auto">
-          <ModelSelector />
           <div className="flex items-center gap-2">
-            <ChatContextPopover disabled={isLoading} onAddFile={triggerFileInput} />
+            <ModelSelector />
+            {selectedTopic && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedTopic(null)}
+                    className="rounded-full"
+                  >
+                    <FolderIcon
+                      className="size-5"
+                      style={{ color: selectedTopic.color ?? undefined }}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="start">
+                  <p>{selectedTopic.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <ChatContextPopover
+              disabled={isLoading}
+              selectedTopicId={selectedTopic?.id}
+              onAddFile={triggerFileInput}
+              onSelectTopic={(topic) => {
+                setSelectedTopic(topic)
+              }}
+            />
             {isLoading && onStopGeneration ? (
               <Button
                 onClick={onStopGeneration}

@@ -290,3 +290,19 @@ export const getTimeNotesByDateRange = async (
     return result as TimeNoteSummary[]
   })
 }
+export const getNotesByTopicId = async (userId: string, topicId: number) => {
+  logger.debug("db", "Fetching notes by topic id", { userId, topicId })
+  return withTiming("db", "getNotesByTopicId", async () => {
+    const result = await db
+      .select({
+        id: notes.id,
+        content: notes.content,
+        startTimestamp: notes.startTimestamp,
+        endTimestamp: notes.endTimestamp
+      })
+      .from(notes)
+      .where(and(eq(notes.userId, userId), eq(notes.topicId, topicId)))
+      .orderBy(desc(notes.startTimestamp))
+    return result as TimeNoteSummary[]
+  })
+}

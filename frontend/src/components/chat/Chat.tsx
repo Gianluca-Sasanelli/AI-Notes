@@ -6,7 +6,7 @@ import { useMemo, useRef } from "react"
 import { toast } from "sonner"
 import ChatInput from "./ChatInput"
 import ChatMessages from "./messages/ChatMessages"
-import { ChatUIMessage } from "@/lib/types/chat-types"
+import { chatContext, ChatUIMessage } from "@/lib/types/chat-types"
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useModelStore } from "@/lib/stores/model-store"
@@ -54,13 +54,14 @@ export default function Chat({
           </p>
           <div className="flex w-full max-w-3xl sm:max-w-2xl min-h-[15dvh] flex-col rounded-xl">
             <ChatInput
-              onSendMessage={(text: string, files?: FileList) => {
+              onSendMessage={(text: string, files?: FileList, context?: chatContext) => {
                 sendMessage(
                   { text, files },
                   {
                     body: {
                       id: backupChatId,
-                      model: selectedModel
+                      model: selectedModel,
+                      context: context || null
                     }
                   }
                 )
