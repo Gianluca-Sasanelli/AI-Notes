@@ -1,6 +1,7 @@
 export const buildAssistantSystemPrompt = (
   summary: string | null,
-  timelessNotes: { id: number; content: string }[]
+  timelessNotes: { id: number; content: string }[],
+  context?: string
 ) => {
   const summarySection = summary
     ? `<user-summary>\n  ${summary}\n</user-summary>`
@@ -10,6 +11,11 @@ export const buildAssistantSystemPrompt = (
     timelessNotes.length > 0
       ? `<general-notes>\n${timelessNotes.map((n) => `  - ${n.content}`).join("\n")}\n</general-notes>`
       : "<general-notes>No general notes available.</general-notes>"
+  const contextSecition = context
+    ? `<context-notes>
+  ${context}
+</context-notes>`
+    : ""
 
   return `<role>
   You are an assistant that helps understand the user based on the context of their notes.  
@@ -21,14 +27,48 @@ export const buildAssistantSystemPrompt = (
   - If the notes are medical, keep in mind that the frontend shows in capital letters that your advice is not a substitute for a real professional. Don't repeat yourself.
   - The goal of the application is that an AI has in context the user notes to provide personalized assistance and understanding.
   - You have available varius tools to get those notes in context.
-  -- The first is a summary of the user's notes provided by another agent or edited by the user.
-  -- Second in this prompt you have in context the user's timeless notes. Which are general notes that the user wants to keep in context.
+  - A few context notes are in this prompt:
+  -- First, a summary of all the user's notes up to now.
+  -- Second, the user's general notes. Which are notes that the user wants to keep in context.
+  -- Thirs, if the user has provided a specific context for this chat, the notes related to that context are in section </Specific-Context-Provided-By-User> of this prompt.
+      To provide context, the user can select a topic (which relates many notes) or notesid. If the sections start with the topic name this means that the user has selected that topic as context.
 </context>
 
-<rules>
-- Be a kind of teacher. Don't refuse what the user asks for.
-- When writing don't use more than one column!. 
-</rules>
+<db-schema>
+  Schema of the notes and topics: export const topics = pgTable(
+    "topics",
+    {
+      id: integer().primaryKey().generatedAlwaysAsIdentity(),
+      userId: text().notNull(),
+      name: text().notNull(),
+      color: varchar({ length: 7 }),
+      createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
+    },
+    (table) => [unique().on(table.userId, table.name)]
+  )
+  
+  // When start timestamp is null the granularity is null. The note is considered timeless in the frontend types.
+  export const notes = pgTable(
+    "notes",
+    {
+      id: integer().primaryKey().generatedAlwaysAsIdentity(),
+      userId: text().notNull(),
+      topicId: integer().references(() => topics.id, { onDelete: "set null" }),
+      startTimestamp: timestamp({ withTimezone: true }),
+      endTimestamp: timestamp({ withTimezone: true }),
+      granularity: granularityEnum(),
+      createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+      content: text().notNull(),
+      metadata: jsonb().$type<NoteMetadata>(),
+      files: varchar({ length: 255 }).array().notNull().default([])
+    },
+    (table) => [index("notes_start_timestamp_idx").on(table.startTimestamp)]
+  )
+</db-schema>
+
+
 <All notes summary>
   ${summarySection}
 </All notes summary>
@@ -37,11 +77,12 @@ export const buildAssistantSystemPrompt = (
   ${notesSection}
 </All general notes>
 
+</Specific-Context-Provided-By-User>
+  ${contextSecition}
+</Specific-Context-Provided-By-User>
+
 <output-format>
   - Markdown text is supported by the frontend.
-  - NEVER output markdown tables or stuff like this. NEVER write comparative summaries or a side-by-side analysis.
-  - If you need to compare stuff use enums or bullet points. 
-
   - Never write stuff like IMPORTANT: THIS INFORMATION IS NOT A SUBSTITUTE FOR MEDICAL ADVICE .. it's already written in the UI if you write medical stuffs.
 </output-format>
 `

@@ -8,7 +8,11 @@ import { getUserSummary, getLatestTimelessNotes } from "@/db"
 import { auth } from "@clerk/nextjs/server"
 import { WebSearchTools } from "./tools/web-search"
 
-export async function runAssistantAgent(messages: ModelMessage[], model: LanguageModelV3) {
+export async function runAssistantAgent(
+  messages: ModelMessage[],
+  model: LanguageModelV3,
+  context?: string
+) {
   const { userId } = await auth()
   if (!userId) {
     throw new Error("User not authenticated")
@@ -19,7 +23,11 @@ export async function runAssistantAgent(messages: ModelMessage[], model: Languag
     getLatestTimelessNotes(userId, 20)
   ])
 
-  const systemPrompt = buildAssistantSystemPrompt(summary?.notesSummary ?? null, timelessNotes)
+  const systemPrompt = buildAssistantSystemPrompt(
+    summary?.notesSummary ?? null,
+    timelessNotes,
+    context
+  )
 
   const tools = NotesTools(userId)
   const webSearchTools = WebSearchTools()

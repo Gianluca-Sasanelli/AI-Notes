@@ -17,6 +17,18 @@ export const createTopic = async (userId: string, data: TopicDbData) => {
     return topic.id
   })
 }
+export const getTopicById = async (userId: string, id: number) => {
+  logger.debug("db", "Fetching topic by id", { userId, id })
+  return withTiming("db", "getTopicById", async () => {
+    const [topic] = await db
+      .select({
+        name: topics.name
+      })
+      .from(topics)
+      .where(and(eq(topics.userId, userId), eq(topics.id, id)))
+    return topic ?? null
+  })
+}
 
 export const getTopics = async (userId: string, skip: number = 0, limit: number = 10) => {
   logger.debug("db", "Fetching topics", { userId })

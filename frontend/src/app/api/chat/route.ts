@@ -6,6 +6,7 @@ import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
 import { createChat, updateChat } from "@/db"
+import RetrieveContex from "@/lib/agents/context/context"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {
@@ -25,14 +26,15 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const { messages, id: chatId, model } = parseResult.data
+  const { messages, id: chatId, model, context } = parseResult.data
+  console.log("The context received is", context)
   const modelInstance = getModelInstance(model)
   const isFirstUserMessage = messages.length === 1 && messages[0].role === "user"
 
   const ServerMessages = await convertToModelMessages(messages, {
     ignoreIncompleteToolCalls: true
   })
-
+  const RetrievedContext = await RetrieveContex(context, userId)
   let hasError = false
 
   const response = createUIMessageStreamResponse({
@@ -46,7 +48,11 @@ export async function POST(req: NextRequest) {
             frontend_message: "Thinking..."
           }
         })
-        const streamAssistant = await runAssistantAgent(ServerMessages, modelInstance)
+        const streamAssistant = await runAssistantAgent(
+          ServerMessages,
+          modelInstance,
+          RetrievedContext
+        )
         writer.merge(streamAssistant.toUIMessageStream())
       },
       onError: (error) => {
