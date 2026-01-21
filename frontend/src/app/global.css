@@ -12,6 +12,34 @@
     background-color: var(--accent);
     color: var(--accent-foreground);
   }
+
+}
+
+/* Custom scrollbar styles */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 :root {

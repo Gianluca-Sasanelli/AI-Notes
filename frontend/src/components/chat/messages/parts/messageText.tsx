@@ -23,7 +23,7 @@ const markdownOptions = {
     },
     pre: {
       props: {
-        className: "mb-6 rounded bg-muted p-4 text-sm overflow-x-auto"
+        className: "mb-6 rounded bg-muted p-4 text-sm overflow-x-auto "
       }
     },
     h1: { props: { className: "text-2xl font-bold mb-2 mt-4" } },
@@ -70,7 +70,7 @@ export default function MessageUI({ message, isUser }: { message: string; isUser
           {message}
         </div>
       ) : (
-        <div className="min-w-0 w-full overflow-hidden rounded-2xl p-4 text-base leading-relaxed tracking-wide text-foreground">
+        <div className="min-w-0 w-full overflow-hidden rounded-2xl p-2 text-base leading-relaxed tracking-wide text-foreground">
           <div className="min-w-0 max-w-full break-words [word-break:break-word]">
             <Markdown options={markdownOptions}>{message}</Markdown>
           </div>
