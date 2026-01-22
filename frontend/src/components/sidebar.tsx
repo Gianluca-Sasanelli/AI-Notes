@@ -91,18 +91,18 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         )}
       </div>
 
-      <div className="h-[100px] min-h-0 flex-none mt-auto">
+      <div className="h-[100px] min-h-0 flex-none mt-auto flex flex-col items-center justify-center">
         {(() => {
           const SettingsLink = (
             <Link
               href="/settings"
               onClick={onClose}
               className={cn(
-                "group inline-flex h-[50px] w-full items-center justify-start whitespace-nowrap bg-transparent px-2 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md",
+                "group inline-flex h-[50px] w-full items-center justify-center whitespace-nowrap bg-transparent text-sm font-medium text-foreground hover:bg-accent rounded-md",
                 pathname === "/settings" && "bg-accent text-accent-foreground"
               )}
             >
-              <div className="size-6 justify-start">
+              <div className="size-6 flex items-center justify-center">
                 <Settings />
               </div>
               {!isCollapsed && <span className="ml-2">Settings</span>}
@@ -119,9 +119,9 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
           )
         })()}
 
-        <div className="h-[50px] flex-none justify-start border-t" suppressHydrationWarning>
+        <div className="h-[50px] w-full flex-none border-t" suppressHydrationWarning>
           {!isLoaded ? (
-            <div className={"flex items-center size-full bg-muted animate-pulse rounded-md"}></div>
+            <div className={"flex items-center  size-full bg-muted animate-pulse rounded-md"}></div>
           ) : isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -130,10 +130,12 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                     appearance={{
                       elements: {
                         rootBox:
-                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-2 pt-2 text-sm font-medium text-secondary-foreground",
-                        userButtonTrigger: "size-full cursor-pointer",
-                        userButtonBox: "size-full ",
-                        userButtonAvatarBox: "order-first !size-6 justify-start",
+                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-center rounded-md text-sm font-medium text-secondary-foreground [&_*]:!outline-none [&_*]:!ring-0",
+                        userButtonTrigger: "size-full cursor-pointer !outline-none !ring-0",
+                        userButtonBox: "size-full !outline-none !ring-0",
+                        userButtonAvatarBox:
+                          "order-first !size-6 justify-start !outline-none !ring-0",
+                        userButtonAvatarImage: "!outline-none !ring-0",
                         userButtonOuterIdentifier: "hidden",
                         card: "bg-popover border-border",
                         profileSectionTitle: "!text-secondary-foreground",
@@ -154,15 +156,15 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 appearance={{
                   elements: {
                     rootBox:
-                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md px-2 pt-2 ",
+                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md m-1 ",
                     userButtonTrigger: "hidden",
-                    userButtonBox: "size-full flex items-center !gap-0 !focus:ring-0",
+                    userButtonBox: "size-full flex items-center !gap-0 focus:ring-0",
                     userButtonAvatarBox: "order-first !size-6",
                     userButtonOuterIdentifier:
-                      "flex-1 p-0  whitespace-nowrap text-left  !text-foreground !focus:ring-0",
+                      "flex-1 p-0  whitespace-nowrap text-left  !text-foreground",
                     card: "bg-popover border-border",
                     profileSectionTitle: "p-0 !text-secondary-foreground items-center",
-                    accordionTriggerButton: "hover:bg-accent !focus:bg-accent",
+                    accordionTriggerButton: "hover:bg-accent focus:bg-accent",
                     accordionContent: "bg-background",
                     profileSectionContent: "text-secondary-foreground"
                   }
