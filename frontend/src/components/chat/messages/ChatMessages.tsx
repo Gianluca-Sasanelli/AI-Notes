@@ -1,7 +1,7 @@
 "use client"
 
 import usePlaceholderUpdater from "@/lib/hooks"
-import type { ChatUIMessage } from "@/lib/types/chat-types"
+import type { ChatUIMessage, chatContext } from "@/lib/types/chat-types"
 import type { ChatStatus } from "ai"
 import React, { useRef } from "react"
 import { StatusIndicator } from "./widgets/StatusIndicator"
@@ -14,12 +14,19 @@ export interface ChatMessagesProps {
   error: Error | null
   inputRef: React.RefObject<HTMLDivElement | null>
   chatId: string
+  onEditMessage: (
+    messageId: string,
+    newText: string,
+    files?: FileList,
+    context?: chatContext | null
+  ) => void
 }
 
 const ChatMessages = React.memo(function ChatMessages({
   messages,
   status,
   error,
+  onEditMessage,
   inputRef,
   chatId
 }: ChatMessagesProps) {
@@ -50,6 +57,7 @@ const ChatMessages = React.memo(function ChatMessages({
               ? userLastMsgRef
               : undefined
           }
+          onEditMessage={onEditMessage}
         />
       ))}
       <div ref={assistantLastMsgRef}>
