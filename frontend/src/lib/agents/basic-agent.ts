@@ -36,7 +36,7 @@ export async function runAssistantAgent(
     system: systemPrompt,
     messages,
     tools: { ...tools, ...webSearchTools },
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(10),
     onError: (error) => {
       throw handleAgentError(error, "ASSISTANT AGENT")
     }

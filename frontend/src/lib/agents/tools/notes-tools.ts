@@ -4,6 +4,7 @@ import { getTimeNotes, getNoteFiles, getTimeNotesByDateRange } from "@/db"
 import { getFileContent } from "@/lib/storage"
 import { z } from "zod"
 import { extractText } from "unpdf"
+import { logger } from "@/lib/logger"
 
 const MAX_RANGE_MS = 31 * 24 * 60 * 60 * 1000
 
@@ -53,7 +54,15 @@ export const NotesTools = (userId: string) => {
       execute: async ({ noteId, filename }: { noteId: number; filename: string }) => {
         const files = await getNoteFiles(userId, noteId)
         if (!files.includes(filename)) {
-          return { error: "File not found in this note" }
+          logger.error("notes-tools", "File not found in this note", { noteId, filename, files })
+          return {
+            error:
+              "File not found in this note. The available files are: " +
+              files.join(", ") +
+              ". You passed: " +
+              filename +
+              "."
+          }
         }
 
         const buffer = await getFileContent(userId, noteId, filename)
