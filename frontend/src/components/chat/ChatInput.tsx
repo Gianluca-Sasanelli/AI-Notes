@@ -17,6 +17,7 @@ interface ChatInputProps {
   isLoading: boolean
   onStopGeneration?: () => void
   startingInput?: string
+  autoFocus?: boolean
 }
 
 interface FilePreview {
@@ -29,7 +30,8 @@ const ChatInput = React.memo(function ChatInput({
   onSendMessage,
   isLoading,
   onStopGeneration,
-  startingInput
+  startingInput,
+  autoFocus = false
 }: ChatInputProps) {
   const [input, setInput] = useState(startingInput || "")
   const taRef = useRef<HTMLTextAreaElement>(null)
@@ -59,6 +61,12 @@ const ChatInput = React.memo(function ChatInput({
     ta.style.height = "auto"
     ta.style.height = `${ta.scrollHeight}px`
   }, [input])
+
+  useEffect(() => {
+    if (autoFocus && taRef.current) {
+      taRef.current.focus()
+    }
+  }, [autoFocus])
 
   const handleUploadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
