@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Check, Copy } from "lucide-react"
 import Image from "next/image"
-
+import { toast } from "sonner"
 import type { ChatUIMessage, ChatUIMessagePart } from "@/lib/types/chat-types"
 import MessageReasoning from "./parts/messageReasoning"
 import MessageUI from "./parts/messageText"
@@ -91,13 +91,14 @@ export function MessageBubble(props: MessageBubbleProps) {
                 className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
                 onClick={() => {
                   const text = message.parts
-                    ?.filter((part) => part.type === "text")
+                    ?.filter((part) => part.type === "text" && "text" in part)
                     .map((part) => part.text)
                     .join("\n")
                   if (text) {
                     navigator.clipboard.writeText(text)
                     setCopied(true)
                     setTimeout(() => setCopied(false), 5000)
+                    toast.success("Copied to clipboard", { position: "top-center", duration: 2000 })
                   }
                 }}
               >

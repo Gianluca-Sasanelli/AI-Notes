@@ -35,6 +35,7 @@ export function ChatDropdown({
   className
 }: ChatDropdownProps) {
   const [isRenameOpen, setIsRenameOpen] = useState(false)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [newTitle, setNewTitle] = useState(currentTitle)
   const router = useRouter()
   const pathname = usePathname()
@@ -75,11 +76,12 @@ export function ChatDropdown({
     )
   }
 
-  const handleDelete = () => {
+  const confirmDelete = () => {
     const isCurrentChat = pathname === `/chat/${chatId}`
 
     deleteChatMutation(chatId, {
       onSuccess: () => {
+        setIsDeleteOpen(false)
         if (isCurrentChat) {
           router.push("/chat")
         }
@@ -92,28 +94,50 @@ export function ChatDropdown({
       <div className={`flex items-center bg-primary-muted rounded-md p-1 ${className}`}>
         {isMobile ? (
           <>
-            <button onClick={() => setIsRenameOpen(true)} className="p-2 rounded">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsRenameOpen(true)}
+              className="p-2 rounded"
+            >
               <Pencil className={`${iconsize} shrink-0 text-muted-foreground`} />
-            </button>
-            <button onClick={handleDelete} disabled={isDeletingChat} className="p-2 rounded">
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDeleteOpen(true)}
+              disabled={isDeletingChat}
+              className="p-2 rounded"
+            >
               <Trash2 className={`${iconsize} shrink-0 text-destructive`} />
-            </button>
+            </Button>
           </>
         ) : (
           <>
-            <Tooltip>
+            <Tooltip disableHoverableContent={true}>
               <TooltipTrigger asChild>
-                <button onClick={() => setIsRenameOpen(true)} className="p-2 rounded">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsRenameOpen(true)}
+                  className="p-2 rounded"
+                >
                   <Pencil className={`${iconsize} shrink-0 text-muted-foreground`} />
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">Rename</TooltipContent>
             </Tooltip>
-            <Tooltip>
+            <Tooltip disableHoverableContent={true}>
               <TooltipTrigger asChild>
-                <button onClick={handleDelete} disabled={isDeletingChat} className="p-2 rounded">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsDeleteOpen(true)}
+                  disabled={isDeletingChat}
+                  className="p-2 rounded"
+                >
                   <Trash2 className={`${iconsize} shrink-0 text-destructive`} />
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">Delete</TooltipContent>
             </Tooltip>
@@ -138,6 +162,25 @@ export function ChatDropdown({
             </Button>
             <Button onClick={handleRename} disabled={isUpdatingChat}>
               {isUpdatingChat ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="min-w-[30vw] max-w-[70vw]">
+          <DialogHeader>
+            <DialogTitle>Delete Chat</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground">
+            Are you sure you want to delete this chat? This action cannot be undone.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={isDeletingChat}>
+              {isDeletingChat ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
