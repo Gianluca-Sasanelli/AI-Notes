@@ -91,18 +91,18 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         )}
       </div>
 
-      <div className="h-[100px] min-h-0 flex-none mt-auto flex flex-col items-center justify-center">
+      <div className="h-[100px] min-h-0 flex-none mt-auto flex flex-col ">
         {(() => {
           const SettingsLink = (
             <Link
               href="/settings"
               onClick={onClose}
               className={cn(
-                "group inline-flex h-[50px] w-full items-center justify-center whitespace-nowrap bg-transparent text-sm font-medium text-foreground hover:bg-accent rounded-md",
+                "group inline-flex h-[50px] w-full items-center  justify-start p-2 pl-3 whitespace-nowrap bg-transparent text-sm font-medium text-foreground hover:bg-accent rounded-md",
                 pathname === "/settings" && "bg-accent text-accent-foreground"
               )}
             >
-              <div className="size-6 flex items-center justify-center">
+              <div className="size-6 flex items-center ">
                 <Settings />
               </div>
               {!isCollapsed && <span className="ml-2">Settings</span>}
@@ -121,7 +121,11 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
         <div className="h-[50px] w-full flex-none border-t" suppressHydrationWarning>
           {!isLoaded ? (
-            <div className={"flex items-center  size-full bg-muted animate-pulse rounded-md"}></div>
+            <div
+              className={
+                "flex items-center justify-start size-full bg-muted animate-pulse rounded-md"
+              }
+            ></div>
           ) : isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -130,7 +134,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                     appearance={{
                       elements: {
                         rootBox:
-                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-center rounded-md text-sm font-medium text-secondary-foreground [&_*]:!outline-none [&_*]:!ring-0",
+                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md text-sm font-medium text-secondary-foreground [&_*]:!outline-none [&_*]:!ring-0",
                         userButtonTrigger: "size-full cursor-pointer !outline-none !ring-0",
                         userButtonBox: "size-full !outline-none !ring-0",
                         userButtonAvatarBox:
@@ -156,7 +160,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 appearance={{
                   elements: {
                     rootBox:
-                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start rounded-md m-1 ",
+                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md ",
                     userButtonTrigger: "hidden",
                     userButtonBox: "size-full flex items-center !gap-0 focus:ring-0",
                     userButtonAvatarBox: "order-first !size-6",
