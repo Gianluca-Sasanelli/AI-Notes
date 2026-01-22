@@ -16,6 +16,7 @@ interface ChatInputProps {
   onSendMessage: (text: string, files?: FileList, context?: chatContext) => void
   isLoading: boolean
   onStopGeneration?: () => void
+  startingInput?: string
 }
 
 interface FilePreview {
@@ -27,9 +28,10 @@ interface FilePreview {
 const ChatInput = React.memo(function ChatInput({
   onSendMessage,
   isLoading,
-  onStopGeneration
+  onStopGeneration,
+  startingInput
 }: ChatInputProps) {
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState(startingInput || "")
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])

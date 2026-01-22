@@ -9,7 +9,7 @@ interface LastAssistantMessageProps {
 export function LastAssistantMessage({ message }: LastAssistantMessageProps) {
   return (
     <div className="flex flex-col">
-      <MessageBubble message={message} />
+      <MessageBubble message={message} onEditMessage={() => {}} />
     </div>
   )
 }

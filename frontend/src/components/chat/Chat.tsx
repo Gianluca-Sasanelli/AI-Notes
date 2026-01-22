@@ -22,7 +22,7 @@ export default function Chat({
   const inputRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
   const selectedModel = useModelStore((s) => s.selectedModel)
-  const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>({
+  const { messages, sendMessage, setMessages, status, stop, error } = useChat<ChatUIMessage>({
     ...(storedmessages && { messages: storedmessages }),
     id: chatId ?? backupChatId,
     onError: (error) => {
@@ -33,6 +33,23 @@ export default function Chat({
       api: "/api/chat"
     })
   })
+
+  const SendEditMessage = (
+    messageId: string,
+    newText: string,
+    files?: FileList,
+    context?: chatContext
+  ) => {
+    const messageIndex = messages.findIndex((m) => m.id === messageId)
+    if (messageIndex === -1) return
+
+    setMessages(messages.slice(0, messageIndex))
+
+    sendMessage(
+      { text: newText, files },
+      { body: { model: selectedModel, context: context || null } }
+    )
+  }
 
   const isLoadingFromSDK = useMemo(() => status === "streaming" || status === "submitted", [status])
   useEffect(() => {
@@ -84,6 +101,7 @@ export default function Chat({
           status={status}
           inputRef={inputRef}
           error={error || null}
+          onEditMessage={SendEditMessage}
           chatId={chatId ?? backupChatId}
         />
       </div>
@@ -94,8 +112,11 @@ export default function Chat({
         aria-label="Chat input"
       >
         <ChatInput
-          onSendMessage={(text: string, files?: FileList) =>
-            sendMessage({ text, files }, { body: { model: selectedModel } })
+          onSendMessage={(text: string, files?: FileList, context?: chatContext) =>
+            sendMessage(
+              { text, files },
+              { body: { model: selectedModel, context: context || null } }
+            )
           }
           isLoading={isLoadingFromSDK}
           onStopGeneration={stop}
