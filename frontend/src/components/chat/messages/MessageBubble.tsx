@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Check, Copy, Pencil, X } from "lucide-react"
+import { Check, Copy, Pencil, PencilOff } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
 import type { ChatUIMessage, ChatUIMessagePart, chatContext } from "@/lib/types/chat-types"
@@ -42,7 +42,7 @@ export function MessageBubble(props: MessageBubbleProps) {
         className={`flex flex-col group  ${isUser ? "max-w-full" : "gap-6 w-full"} ${isEditing ? "w-full" : ""}`}
       >
         {IsEditingBoundary ? (
-          <div className="w-full">
+          <div className="w-full transition-all transition-duration-300 ">
             <ChatInput
               onSendMessage={(text: string, files?: FileList, context?: chatContext) => {
                 onEditMessage(message.id, text, files, context || null)
@@ -50,6 +50,7 @@ export function MessageBubble(props: MessageBubbleProps) {
               }}
               isLoading={false}
               onStopGeneration={() => {}}
+              autoFocus
               startingInput={message.parts
                 ?.filter((part) => part.type === "text" && "text" in part)
                 .map((part) => (part.type === "text" ? part.text : ""))
@@ -116,7 +117,7 @@ export function MessageBubble(props: MessageBubbleProps) {
         )}
 
         <div
-          className={`flex my-1 opacity-0 ${isUser ? "justify-end gap-4" : ""} group-hover:opacity-100 transition-opacity duration-500`}
+          className={`flex my-1 opacity-0 ${isUser ? "justify-end gap-4" : ""} group-hover:opacity-100 transition-opacity duration-300`}
         >
           {canEdit && (
             <Tooltip delayDuration={500} disableHoverableContent={true}>
@@ -125,13 +126,13 @@ export function MessageBubble(props: MessageBubbleProps) {
                   variant="ghost"
                   size="sm"
                   className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => setIsEditing(!isEditing)}
                 >
-                  <Pencil size={16} />
+                  {isEditing ? <PencilOff size={16} /> : <Pencil size={16} />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="duration-1000">
-                Edit message
+                {isEditing ? "Cancel edit" : "Edit message"}
               </TooltipContent>
             </Tooltip>
           )}
@@ -141,6 +142,7 @@ export function MessageBubble(props: MessageBubbleProps) {
                 variant="ghost"
                 size="sm"
                 className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
+                disabled={isEditing}
                 onClick={() => {
                   const text = message.parts
                     ?.filter((part) => part.type === "text" && "text" in part)
