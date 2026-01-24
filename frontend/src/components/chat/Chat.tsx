@@ -35,17 +35,11 @@ export default function Chat({
   })
 
   const ResendMessage = (messageId: string, model?: string, isAssistant?: boolean) => {
-    console.log("Resending message", messageId, model, isAssistant)
     let messageIndex = messages.findIndex((m) => m.id === messageId)
 
-    console.log("Message index", messageIndex)
-    console.log("Is assistant", isAssistant)
     if (isAssistant) messageIndex--
-    const message = messages[messageIndex]
-    console.log("Message", message)
-    console.log("Message index after", messageIndex)
+
     const text = extractTextFromMessage(messages[messageIndex])
-    console.log("Text", text)
     if (text.length === 0 || text.trim() === "") return
     setMessages(messages.slice(0, messageIndex))
 
