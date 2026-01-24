@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, FileIcon, FolderIcon, Hash, Plus, Search, X } from "lucide-react"
+import { ChevronRight, FileIcon, FolderIcon, Plus, Search, X } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/schadcn/button"
@@ -73,7 +73,7 @@ export function ChatContextPopover({
                 className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-accent"
               >
                 <div className="flex items-center gap-2">
-                  <Hash className="size-4" />
+                  <FolderIcon className="size-4" />
                   <span>Add topic</span>
                 </div>
                 <ChevronRight className="size-4 text-muted-foreground" />
@@ -173,7 +173,7 @@ export function TopicSelectorPopover({
           className="flex items-center gap-1.5 rounded-full border border-dashed px-2.5 py-1 text-sm text-muted-foreground hover:border-solid hover:bg-muted/50 hover:text-foreground transition-colors disabled:opacity-50"
           disabled={disabled}
         >
-          <Hash className="size-3.5" />
+          <FolderIcon className="size-3.5" />
           <span>Add topic</span>
         </button>
       </PopoverTrigger>
