@@ -10,7 +10,7 @@ import { chatContext, ChatUIMessage } from "@/lib/types/chat-types"
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useModelStore } from "@/lib/stores/model-store"
-
+import { extractTextFromMessage } from "@/lib/types/chat-types"
 export default function Chat({
   chatId,
   storedmessages
@@ -33,6 +33,27 @@ export default function Chat({
       api: "/api/chat"
     })
   })
+
+  const ResendMessage = (messageId: string, model?: string, isAssistant?: boolean) => {
+    console.log("Resending message", messageId, model, isAssistant)
+    let messageIndex = messages.findIndex((m) => m.id === messageId)
+
+    console.log("Message index", messageIndex)
+    console.log("Is assistant", isAssistant)
+    if (isAssistant) messageIndex--
+    const message = messages[messageIndex]
+    console.log("Message", message)
+    console.log("Message index after", messageIndex)
+    const text = extractTextFromMessage(messages[messageIndex])
+    console.log("Text", text)
+    if (text.length === 0 || text.trim() === "") return
+    setMessages(messages.slice(0, messageIndex))
+
+    sendMessage(
+      { text: extractTextFromMessage(messages[messageIndex]) },
+      { body: { model: model ?? selectedModel } }
+    )
+  }
 
   const SendEditMessage = (
     messageId: string,
@@ -102,7 +123,7 @@ export default function Chat({
           inputRef={inputRef}
           error={error || null}
           onEditMessage={SendEditMessage}
-          chatId={chatId ?? backupChatId}
+          onResendMessage={ResendMessage}
         />
       </div>
       <div

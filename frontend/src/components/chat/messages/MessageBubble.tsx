@@ -1,8 +1,13 @@
 import { useState } from "react"
-import { Check, Copy, Pencil, PencilOff } from "lucide-react"
+import { Check, Copy, Pencil, PencilOff, RotateCcw } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
-import type { ChatUIMessage, ChatUIMessagePart, chatContext } from "@/lib/types/chat-types"
+import {
+  extractTextFromMessage,
+  type ChatUIMessage,
+  type ChatUIMessagePart,
+  type chatContext
+} from "@/lib/types/chat-types"
 import MessageReasoning from "./parts/messageReasoning"
 import MessageUI from "./parts/messageText"
 import ToolCallWidget from "./widgets/messageTool"
@@ -13,6 +18,7 @@ import ChatInput from "@/components/chat/ChatInput"
 interface MessageBubbleProps {
   message: ChatUIMessage
   messageRef?: React.RefObject<HTMLDivElement | null>
+  onResendMessage: (messageId: string, selectedModel?: string, isAssistant?: boolean) => void
   onEditMessage?: (
     messageId: string,
     newText: string,
@@ -27,7 +33,7 @@ function isToolPart(part: ChatUIMessagePart): part is ChatUIMessagePart & { type
   return part.type.startsWith("tool")
 }
 export function MessageBubble(props: MessageBubbleProps) {
-  const { message, messageRef, onEditMessage } = props
+  const { message, messageRef, onEditMessage, onResendMessage } = props
   const isUser = message.role === "user"
   const [copied, setCopied] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -51,10 +57,7 @@ export function MessageBubble(props: MessageBubbleProps) {
               isLoading={false}
               onStopGeneration={() => {}}
               autoFocus
-              startingInput={message.parts
-                ?.filter((part) => part.type === "text" && "text" in part)
-                .map((part) => (part.type === "text" ? part.text : ""))
-                .join("\n")}
+              startingInput={extractTextFromMessage(message)}
             />
           </div>
         ) : (
@@ -117,8 +120,24 @@ export function MessageBubble(props: MessageBubbleProps) {
         )}
 
         <div
-          className={`flex my-1 opacity-0 ${isUser ? "justify-end gap-4" : ""} group-hover:opacity-100 transition-opacity duration-300`}
+          className={`flex my-1 opacity-0 ${isUser ? "justify-end" : ""} group-hover:opacity-100 transition-opacity duration-300 gap-4`}
         >
+          <Tooltip delayDuration={500} disableHoverableContent={true}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
+                disabled={isEditing}
+                onClick={() => onResendMessage(message.id, undefined, !isUser)}
+              >
+                <RotateCcw size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="duration-1000">
+              Resend message
+            </TooltipContent>
+          </Tooltip>
           {canEdit && (
             <Tooltip delayDuration={500} disableHoverableContent={true}>
               <TooltipTrigger asChild>
@@ -144,10 +163,7 @@ export function MessageBubble(props: MessageBubbleProps) {
                 className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
                 disabled={isEditing}
                 onClick={() => {
-                  const text = message.parts
-                    ?.filter((part) => part.type === "text" && "text" in part)
-                    .map((part) => (part.type === "text" ? part.text : ""))
-                    .join("\n")
+                  const text = extractTextFromMessage(message)
                   if (text) {
                     navigator.clipboard.writeText(text)
                     setCopied(true)

@@ -2,7 +2,7 @@ import { db } from "@/index"
 import { chats } from "@/db/schema"
 import { desc, eq, and } from "drizzle-orm"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
-import { removeDataPartsFromMessages } from "@/lib/utils"
+import { removePartsFromMessages } from "@/lib/utils"
 import { generateTitle } from "@/lib/agents/title-generations"
 import { ModelMessage } from "ai"
 import { logger, withTiming } from "@/lib/logger"
@@ -24,7 +24,7 @@ export const createChat = async (
     await db.insert(chats).values({
       id,
       userId,
-      messages: removeDataPartsFromMessages(messages),
+      messages: removePartsFromMessages(messages, "data"),
       ...(title !== undefined ? { title } : {})
     })
   })
@@ -35,7 +35,7 @@ export const updateChat = async (userId: string, id: string, messages: ChatUIMes
   return withTiming("db", "updateChat", async () => {
     await db
       .update(chats)
-      .set({ messages: removeDataPartsFromMessages(messages), updatedAt: new Date() })
+      .set({ messages: removePartsFromMessages(messages, "data"), updatedAt: new Date() })
       .where(and(eq(chats.id, id), eq(chats.userId, userId)))
   })
 }

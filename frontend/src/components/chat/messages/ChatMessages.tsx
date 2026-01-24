@@ -13,7 +13,7 @@ export interface ChatMessagesProps {
   status: ChatStatus
   error: Error | null
   inputRef: React.RefObject<HTMLDivElement | null>
-  chatId: string
+  onResendMessage: (messageId: string, selectedModel?: string, isAssistant?: boolean) => void
   onEditMessage: (
     messageId: string,
     newText: string,
@@ -27,13 +27,12 @@ const ChatMessages = React.memo(function ChatMessages({
   status,
   error,
   onEditMessage,
-  inputRef,
-  chatId
+  onResendMessage,
+  inputRef
 }: ChatMessagesProps) {
   const PlaceholderRef = useRef<HTMLDivElement | null>(null)
   const assistantLastMsgRef = useRef<HTMLDivElement | null>(null)
   const userLastMsgRef = useRef<HTMLDivElement | null>(null)
-  const isReady = status === "ready"
   usePlaceholderUpdater(assistantLastMsgRef, userLastMsgRef, inputRef, PlaceholderRef, status)
 
   let lastAssistantMessage: ChatUIMessage | null
@@ -58,15 +57,15 @@ const ChatMessages = React.memo(function ChatMessages({
               : undefined
           }
           onEditMessage={onEditMessage}
+          onResendMessage={onResendMessage}
         />
       ))}
       <div ref={assistantLastMsgRef}>
         {lastAssistantMessage && (
           <LastAssistantMessage
-            key={lastAssistantMessage.id || "aaa"}
+            key={lastAssistantMessage.id}
             message={lastAssistantMessage}
-            canShowButtons={isReady}
-            chatId={chatId}
+            onResendMessage={onResendMessage}
           />
         )}
         <StatusIndicator
