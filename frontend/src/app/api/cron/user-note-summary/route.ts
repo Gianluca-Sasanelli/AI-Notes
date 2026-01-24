@@ -48,7 +48,7 @@ export async function POST() {
   let summary: string
   try {
     const { text } = await generateText({
-      model: getModelInstance(GOOGLE_MODEL.GEMINI_2_5_FLASH),
+      model: getModelInstance(GOOGLE_MODEL.GEMINI_2_5_FLASH).model,
       prompt
     })
     summary = text

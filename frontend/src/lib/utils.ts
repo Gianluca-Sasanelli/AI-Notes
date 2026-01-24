@@ -1,19 +1,31 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { APICallError } from "ai"
+import { APICallError, ModelMessage } from "ai"
 import { ChatUIMessage } from "./types/chat-types"
 import { TopicEdit } from "@/components/ui/topic-editor"
 import { TopicBody } from "@/lib/types/api-types"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-export function removeDataPartsFromMessages(messages: ChatUIMessage[]): ChatUIMessage[] {
+export function removePartsFromMessages(
+  messages: ChatUIMessage[],
+  partType: string
+): ChatUIMessage[] {
   return messages.map((message) => ({
     ...message,
-    parts: message.parts.filter((part) => !part.type.startsWith("data"))
+    parts: message.parts.filter((part) => !part.type.startsWith(partType))
   }))
 }
-
+export function RemoteReasoning(messages: ModelMessage[]): ModelMessage[] {
+  return messages.map((message) => {
+    if (message.role !== "assistant") return message
+    if (typeof message.content === "string") return message
+    return {
+      ...message,
+      content: message.content.filter((part) => part.type !== "reasoning")
+    }
+  })
+}
 export function handleAgentError(error: { error: unknown }, agentName: string): Error {
   if (APICallError.isInstance(error.error)) {
     console.error(`[${agentName}]`, error.error)

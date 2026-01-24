@@ -7,6 +7,7 @@ import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
 import { createChat, updateChat } from "@/db"
 import RetrieveContex from "@/lib/agents/context/context"
+import { RemoteReasoning } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {
@@ -28,12 +29,15 @@ export async function POST(req: NextRequest) {
 
   const { messages, id: chatId, model, context } = parseResult.data
   console.log("The context received is", context)
-  const modelInstance = getModelInstance(model)
+  const { model: modelInstance, hasReasoning } = getModelInstance(model)
   const isFirstUserMessage = messages.length === 1 && messages[0].role === "user"
 
-  const ServerMessages = await convertToModelMessages(messages, {
+  let ServerMessages = await convertToModelMessages(messages, {
     ignoreIncompleteToolCalls: true
   })
+  if (!hasReasoning) {
+    ServerMessages = RemoteReasoning(ServerMessages)
+  }
   const RetrievedContext = await RetrieveContex(context, userId)
   let hasError = false
 

@@ -1,4 +1,4 @@
-import type { DataUIPart, UIMessage, UIMessagePart } from "ai"
+import type { DataUIPart, UIMessage, UIMessagePart, TextUIPart } from "ai"
 import { z } from "zod/v4"
 import type { NotesToolsType } from "@/lib/agents/tools/notes-tools"
 import type { WebSearchToolsType } from "@/lib/agents/tools/web-search"
@@ -42,3 +42,8 @@ export const chatRequestSchema = z.object({
     .transform((v) => v ?? null)
     .describe("Chat context")
 })
+export const extractTextFromMessage = (message: ChatUIMessage) => {
+  const parts = message.parts.filter((part): part is TextUIPart => part.type === "text")
+  const text = parts.map((part) => part.text).join("\n")
+  return text
+}
