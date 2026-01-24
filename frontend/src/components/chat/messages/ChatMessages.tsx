@@ -44,7 +44,7 @@ const ChatMessages = React.memo(function ChatMessages({
     otherMessages = messages
     lastAssistantMessage = null
   }
-
+  const showMessageOptions = status === "ready"
   return (
     <div className="flex h-full flex-col space-y-6">
       {otherMessages.map((message, i) => (
@@ -66,6 +66,7 @@ const ChatMessages = React.memo(function ChatMessages({
             key={lastAssistantMessage.id}
             message={lastAssistantMessage}
             onResendMessage={onResendMessage}
+            showMessageOptions={showMessageOptions}
           />
         )}
         <StatusIndicator
