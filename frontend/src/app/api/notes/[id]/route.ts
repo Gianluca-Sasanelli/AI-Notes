@@ -54,9 +54,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (body.endTimestamp) {
     body.endTimestamp = new Date(body.endTimestamp)
   }
-  const createdId = await handleTopicCreationOrUpdateOrRemoval(userId, body.topic)
   logger.info("api", `PATCH /api/notes/${noteId}`)
   try {
+    const createdId = await handleTopicCreationOrUpdateOrRemoval(userId, body.topic)
     await withTiming("api", `PATCH /api/notes/${noteId}`, async () => {
       await updateNote(userId, noteId, { ...body, topicId: createdId })
     })

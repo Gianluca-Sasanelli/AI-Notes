@@ -6,7 +6,7 @@ import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
 import { createChat, updateChat } from "@/db"
-import RetrieveContex from "@/lib/agents/context/context"
+import RetrieveContext from "@/lib/agents/context/context"
 import { RemoteReasoning } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   if (!hasReasoning) {
     ServerMessages = RemoteReasoning(ServerMessages)
   }
-  const RetrievedContext = await RetrieveContex(context, userId)
+  const RetrievedContext = await RetrieveContext(context, userId)
   let hasError = false
 
   const response = createUIMessageStreamResponse({

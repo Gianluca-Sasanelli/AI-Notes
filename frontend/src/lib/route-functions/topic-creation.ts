@@ -10,10 +10,12 @@ export async function handleTopicCreationOrUpdateOrRemoval(userId: string, topic
   }
   if ("new" in topicEntry) {
     output = await createTopic(userId, topicEntry.new)
+    return output
   }
   if ("removed" in topicEntry) {
     //For the future delete the topic
     output = null
+    return output
   } else {
     for (const [id, data] of Object.entries(topicEntry)) {
       const parsedId = parseInt(id, 10)

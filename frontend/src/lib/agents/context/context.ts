@@ -4,7 +4,7 @@ import { getTopicById } from "@/db/db-topic"
 import { logger } from "@/lib/logger"
 import type { TimeNoteSummary } from "@/lib/types/database-types"
 
-export default async function RetrieveContex(
+export default async function RetrieveContext(
   chatcontext: chatContext,
   userId: string
 ): Promise<string | undefined> {
