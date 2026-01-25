@@ -201,7 +201,7 @@ export function DateTimePicker({
               className="p-3"
             />
             {granularity === "hour" && (
-              <div className="flex border-l max-w-[70dvh]">
+              <div className="flex border-l max-w-[70svh]">
                 <div className="flex flex-col">
                   <div className="px-3 py-2 text-xs text-muted-foreground border-b">Start</div>
                   <div className="h-[280px] overflow-y-auto">

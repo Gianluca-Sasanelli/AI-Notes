@@ -17,7 +17,7 @@ export default function ChatErrorPage({
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col items-center justify-center gap-6 bg-background px-4">
+    <div className="flex h-[100svh] flex-col items-center justify-center gap-6 bg-background px-4">
       <div className="bg-destructive/10 flex size-16 items-center justify-center rounded-full">
         <AlertCircle className="size-8 text-destructive" />
       </div>
