@@ -37,9 +37,9 @@ export function TopicEditor({
   value: TopicEdit
   onChange: (v: TopicEdit) => void
 }) {
+  const [isCreating, setIsCreating] = useState(false)
   const [localColor, setLocalColor] = useState(isEditableTopic(value) ? value.color : "#3b82f6")
   const [localName, setLocalName] = useState(isEditableTopic(value) ? value.name : "")
-  console.log("The value is:", value)
   const { data: topicsData } = useQuery({
     queryKey: ["topics"],
     queryFn: () => getTopics()
@@ -56,6 +56,7 @@ export function TopicEditor({
   }
 
   const selectExistingTopic = (topic: { id: number; name: string; color: string | null }) => {
+    setIsCreating(false)
     setLocalColor(topic.color ?? DEFAULT_TOPIC_COLOR)
     setLocalName(topic.name)
     onChange({
@@ -67,12 +68,14 @@ export function TopicEditor({
   }
 
   const startNewTopic = () => {
+    setIsCreating(true)
     setLocalColor(DEFAULT_TOPIC_COLOR)
     setLocalName("")
     onChange({ id: null, name: "", color: DEFAULT_TOPIC_COLOR })
   }
 
-  if (!isEditableTopic(value)) {
+  const showDropdown = !isEditableTopic(value) || (value.id === null && !isCreating)
+  if (showDropdown) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

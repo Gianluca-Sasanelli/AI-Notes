@@ -6,6 +6,9 @@ import { TopicDbData } from "@/lib/types/database-types"
 
 export const createTopic = async (userId: string, data: TopicDbData) => {
   logger.info("db", "Creating topic", { userId, data })
+  if (!data.name.trim()) {
+    throw new Error("Topic name cannot be empty")
+  }
   return withTiming("db", "createTopic", async () => {
     try {
       const [topic] = await db
@@ -70,6 +73,9 @@ export const deleteTopic = async (userId: string, id: number) => {
 }
 export const updateTopic = async (userId: string, id: number, data: TopicDbData) => {
   logger.debug("db", "Updating topic", { userId, id, data })
+  if (!data.name.trim()) {
+    throw new Error("Topic name cannot be empty")
+  }
   return withTiming("db", "updateTopic", async () => {
     try {
       await db
