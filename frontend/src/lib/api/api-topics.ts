@@ -21,3 +21,11 @@ export async function SearchTopics(query: string) {
   }
   return (await res.json()) as PaginatedResponse<TopicData>
 }
+
+export async function deleteTopic(topicId: number) {
+  const res = await fetch(`/api/topics/${topicId}`, { method: "DELETE" })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+}

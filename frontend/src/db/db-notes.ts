@@ -306,3 +306,14 @@ export const getNotesByTopicId = async (userId: string, topicId: number) => {
     return result as TimeNoteSummary[]
   })
 }
+
+export const countNotesByTopicId = async (userId: string, topicId: number) => {
+  logger.debug("db", "Counting notes by topic id", { userId, topicId })
+  return withTiming("db", "countNotesByTopicId", async () => {
+    const [result] = await db
+      .select({ count: count() })
+      .from(notes)
+      .where(and(eq(notes.userId, userId), eq(notes.topicId, topicId)))
+    return result.count
+  })
+}

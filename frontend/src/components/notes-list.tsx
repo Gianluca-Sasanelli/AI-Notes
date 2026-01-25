@@ -19,7 +19,13 @@ import { PaginationControls } from "@/components/pagination-controls"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
-import { getNotesClient, updateNoteClient, deleteNoteClient, uploadFileClient } from "@/lib/api"
+import {
+  getNotesClient,
+  updateNoteClient,
+  deleteNoteClient,
+  uploadFileClient,
+  deleteTopic
+} from "@/lib/api"
 import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
 import type { NoteMetadata } from "@/db/schema"
@@ -102,6 +108,21 @@ export function NotesList() {
     }
   })
 
+  const deleteTopicMutation = useMutation({
+    mutationFn: () => {
+      if (queryTopicId === null) return Promise.reject()
+      return deleteTopic(queryTopicId)
+    },
+    onSuccess: () => {
+      toast.success("Topic deleted")
+      setQueryTopic(null)
+      queryClient.invalidateQueries({ queryKey: ["topics"] })
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to delete topic")
+    }
+  })
+
   const handleParamsChange = (params: { skip?: number; limit?: number }) => {
     if (params.skip !== undefined) setSkip(params.skip)
     if (params.limit !== undefined) setLimit(params.limit)
@@ -145,6 +166,18 @@ export function NotesList() {
             <div className="text-center">
               <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
               <p className="text-muted-foreground">No notes yet</p>
+              {queryTopicId !== null && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => deleteTopicMutation.mutate()}
+                  disabled={deleteTopicMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {deleteTopicMutation.isPending ? "Deleting..." : "Delete Topic"}
+                </Button>
+              )}
             </div>
           </Card>
         </>

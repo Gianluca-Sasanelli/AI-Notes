@@ -17,7 +17,8 @@ export function Toaster() {
           border: "1px solid var(--border)"
         },
         classNames: {
-          error: "!bg-destructive !text-destructive-foreground !border-destructive"
+          error: "!bg-destructive !text-destructive-foreground !border-destructive",
+          success: "!bg-primary !text-primary-foreground !border-primary"
         }
       }}
     />
