@@ -78,11 +78,12 @@ export function NotesList() {
     },
     onSuccess: () => {
       toast.success("Note updated")
+      const noteId = editingNote?.id
       setEditingNote(null)
       setPendingFiles([])
       setTopicEdit(null)
       queryClient.invalidateQueries({ queryKey: ["notes", skip, limit] })
-      queryClient.invalidateQueries({ queryKey: ["note-files", editingNote?.id] })
+      queryClient.invalidateQueries({ queryKey: ["note-files", noteId] })
       queryClient.invalidateQueries({ queryKey: ["topics"] })
     },
     onError: (error) => {
