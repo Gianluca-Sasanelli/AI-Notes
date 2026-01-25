@@ -15,6 +15,9 @@ export function Toaster() {
           background: "var(--background)",
           color: "var(--foreground)",
           border: "1px solid var(--border)"
+        },
+        classNames: {
+          error: "!bg-destructive !text-destructive-foreground !border-destructive"
         }
       }}
     />
