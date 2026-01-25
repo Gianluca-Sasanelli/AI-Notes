@@ -1,6 +1,6 @@
 # AI Notes
 
-An note-taking application with AI-chat capabilities.
+A note-taking application with AI-chat capabilities.
 
 ## Live Deploy
 
