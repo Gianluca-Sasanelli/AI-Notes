@@ -231,7 +231,7 @@ export function NotesList() {
           }
         }}
       >
-        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[95dvh] flex flex-col overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[95svh] flex flex-col overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Note</DialogTitle>
           </DialogHeader>
