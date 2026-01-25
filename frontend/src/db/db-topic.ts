@@ -7,14 +7,24 @@ import { TopicDbData } from "@/lib/types/database-types"
 export const createTopic = async (userId: string, data: TopicDbData) => {
   logger.info("db", "Creating topic", { userId, data })
   return withTiming("db", "createTopic", async () => {
-    const [topic] = await db
-      .insert(topics)
-      .values({
-        userId,
-        ...data
-      })
-      .returning({ id: topics.id })
-    return topic.id
+    try {
+      const [topic] = await db
+        .insert(topics)
+        .values({
+          userId,
+          ...data
+        })
+        .returning({ id: topics.id })
+      return topic.id
+    } catch (error) {
+      if (error instanceof Error && "cause" in error) {
+        const cause = error.cause as { code?: string }
+        if (cause?.code === "23505") {
+          throw new Error(`Topic "${data.name}" already exists`)
+        }
+      }
+      throw error
+    }
   })
 }
 export const getTopicById = async (userId: string, id: number) => {
@@ -61,10 +71,20 @@ export const deleteTopic = async (userId: string, id: number) => {
 export const updateTopic = async (userId: string, id: number, data: TopicDbData) => {
   logger.debug("db", "Updating topic", { userId, id, data })
   return withTiming("db", "updateTopic", async () => {
-    await db
-      .update(topics)
-      .set(data)
-      .where(and(eq(topics.userId, userId), eq(topics.id, id)))
+    try {
+      await db
+        .update(topics)
+        .set(data)
+        .where(and(eq(topics.userId, userId), eq(topics.id, id)))
+    } catch (error) {
+      if (error instanceof Error && "cause" in error) {
+        const cause = error.cause as { code?: string }
+        if (cause?.code === "23505") {
+          throw new Error(`Topic "${data.name}" already exists`)
+        }
+      }
+      throw error
+    }
   })
 }
 export const searchTopics = async (userId: string, query: string) => {
