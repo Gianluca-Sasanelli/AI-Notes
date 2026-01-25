@@ -160,7 +160,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 appearance={{
                   elements: {
                     rootBox:
-                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md ",
+                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md [&_*]:!outline-none [&_*]:!ring-0",
                     userButtonTrigger: "hidden",
                     userButtonBox: "size-full flex items-center !gap-0 focus:ring-0",
                     userButtonAvatarBox: "order-first !size-6",

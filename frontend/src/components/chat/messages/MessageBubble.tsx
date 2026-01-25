@@ -130,16 +130,23 @@ export function MessageBubble(props: MessageBubbleProps) {
             className={`flex my-1 opacity-0 ${isUser ? "justify-end" : ""} group-hover:opacity-100 transition-opacity duration-300 gap-4`}
           >
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
-                  disabled={isEditing}
-                >
-                  <RotateCcw size={16} />
-                </Button>
-              </DropdownMenuTrigger>
+              <Tooltip delayDuration={500} disableHoverableContent={true}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
+                      disabled={isEditing}
+                    >
+                      <RotateCcw size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="duration-1000">
+                  Retry
+                </TooltipContent>
+              </Tooltip>
               <DropdownMenuContent side="bottom" align="start">
                 {Object.entries(USER_MODELS).map(([modelId, displayName]) => (
                   <DropdownMenuItem
