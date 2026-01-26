@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/schadcn/badge"
 import { useState } from "react"
 import type { NoteMetadata } from "@/db/schema"
 import { useQuickTagsStore } from "@/lib/stores/metadata-store"
+import { T, useGT } from "gt-react"
 
 interface MetadataEditorProps {
   value: NoteMetadata
@@ -20,6 +21,7 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [newKey, setNewKey] = useState("")
   const [newValue, setNewValue] = useState("")
+  const gt = useGT()
 
   const entries = Object.entries(value)
 
@@ -75,7 +77,7 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
           className="gap-2 text-muted-foreground hover:text-foreground w-full justify-center"
         >
           <Tag className="h-4 w-4" />
-          Add Tag
+          <T>Add Tag</T>
         </Button>
       ) : (
         <div className="border rounded-lg p-4 pt-10 bg-muted/30 space-y-4 relative">
@@ -90,14 +92,14 @@ export function MetadataEditor({ value, onChange }: MetadataEditorProps) {
           </Button>
           <div className="flex gap-2">
             <Input
-              placeholder="Name"
+              placeholder={gt("Name")}
               value={newKey}
               onChange={(e) => setNewKey(e.target.value)}
               onKeyDown={handleKeyDown}
               className="flex-1"
             />
             <Input
-              placeholder="Value"
+              placeholder={gt("Value")}
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
               onKeyDown={handleKeyDown}

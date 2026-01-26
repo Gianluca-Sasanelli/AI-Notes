@@ -33,6 +33,7 @@ import { formatTimestampRange } from "@/lib/notes-utils"
 import { TopicEditor, type TopicEdit, isEditableTopic } from "@/components/ui/topic-editor"
 import { TopicSelector } from "@/components/ui/topic-selector"
 import { transformTopicEditToTopicBody } from "@/lib/utils"
+import { T, useGT, Var } from "gt-react"
 export function NotesList() {
   const [skip, setSkip] = useState(0)
   const [limit, setLimit] = useState(10)
@@ -47,6 +48,7 @@ export function NotesList() {
   const [topicEdit, setTopicEdit] = useState<TopicEdit>(null)
   const [queryTopicId, setQueryTopic] = useState<number | null>(null)
   const queryClient = useQueryClient()
+  const gt = useGT()
 
   const { data, isLoading } = useQuery({
     queryKey: ["notes", skip, limit, queryTopicId],
@@ -57,7 +59,7 @@ export function NotesList() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (editingNote === null) {
-        toast.error("No note selected")
+        toast.error(gt("No note selected"))
         return Promise.reject()
       }
       const topic = transformTopicEditToTopicBody(topicEdit)
@@ -77,7 +79,7 @@ export function NotesList() {
       }
     },
     onSuccess: () => {
-      toast.success("Note updated")
+      toast.success(gt("Note updated"))
       const noteId = editingNote?.id
       setEditingNote(null)
       setPendingFiles([])
@@ -87,25 +89,25 @@ export function NotesList() {
       queryClient.invalidateQueries({ queryKey: ["topics"] })
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Failed to update")
+      toast.error(error instanceof Error ? error.message : gt("Failed to update"))
     }
   })
 
   const deleteMutation = useMutation({
     mutationFn: () => {
       if (deletingNoteId === null) {
-        toast.error("No note selected")
+        toast.error(gt("No note selected"))
         return Promise.reject()
       }
       return deleteNoteClient(deletingNoteId)
     },
     onSuccess: () => {
-      toast.success("Note deleted")
+      toast.success(gt("Note deleted"))
       setDeletingNoteId(null)
       queryClient.invalidateQueries({ queryKey: ["notes"] })
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Failed to delete")
+      toast.error(error instanceof Error ? error.message : gt("Failed to delete"))
     }
   })
 
@@ -115,12 +117,12 @@ export function NotesList() {
       return deleteTopic(queryTopicId)
     },
     onSuccess: () => {
-      toast.success("Topic deleted")
+      toast.success(gt("Topic deleted"))
       setQueryTopic(null)
       queryClient.invalidateQueries({ queryKey: ["topics"] })
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Failed to delete topic")
+      toast.error(error instanceof Error ? error.message : gt("Failed to delete topic"))
     }
   })
 
@@ -166,7 +168,9 @@ export function NotesList() {
           <Card className="p-12">
             <div className="text-center">
               <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-              <p className="text-muted-foreground">No notes yet</p>
+              <p className="text-muted-foreground">
+                <T>No notes yet</T>
+              </p>
               {queryTopicId !== null && (
                 <Button
                   variant="destructive"
@@ -176,7 +180,7 @@ export function NotesList() {
                   disabled={deleteTopicMutation.isPending}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {deleteTopicMutation.isPending ? "Deleting..." : "Delete Topic"}
+                  {deleteTopicMutation.isPending ? <T>Deleting...</T> : <T>Delete Topic</T>}
                 </Button>
               )}
             </div>
@@ -233,7 +237,9 @@ export function NotesList() {
       >
         <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[95svh] flex flex-col overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Note</DialogTitle>
+            <DialogTitle>
+              <T>Edit Note</T>
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 w-full min-w-0 flex-1">
             <DateTimePicker
@@ -272,7 +278,7 @@ export function NotesList() {
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditingNote(null)}>
-                Cancel
+                <T>Cancel</T>
               </Button>
               <Button
                 onClick={() => updateMutation.mutate()}
@@ -282,7 +288,7 @@ export function NotesList() {
                   (isEditableTopic(topicEdit) && topicEdit.name.trim() === "")
                 }
               >
-                {updateMutation.isPending ? "Saving..." : "Save"}
+                {updateMutation.isPending ? <T>Saving...</T> : <T>Save</T>}
               </Button>
             </div>
           </div>
@@ -295,19 +301,23 @@ export function NotesList() {
       >
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Note</DialogTitle>
-            <DialogDescription>This action cannot be undone.</DialogDescription>
+            <DialogTitle>
+              <T>Delete Note</T>
+            </DialogTitle>
+            <DialogDescription>
+              <T>This action cannot be undone.</T>
+            </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center lg:justify-end gap-2">
             <Button variant="outline" onClick={() => setDeletingNoteId(null)}>
-              Cancel
+              <T>Cancel</T>
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? <T>Deleting...</T> : <T>Delete</T>}
             </Button>
           </div>
         </DialogContent>
@@ -371,7 +381,11 @@ function TimeNoteCard({
               {note.files.length <= 2 ? (
                 <span>{note.files.join(", ")}</span>
               ) : (
-                <span>{note.files.length} files</span>
+                <T>
+                  <span>
+                    <Var>{note.files.length}</Var> files
+                  </span>
+                </T>
               )}
             </div>
           )}

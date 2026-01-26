@@ -18,6 +18,7 @@ import { deleteChatClient, updateChatClient } from "@/lib/api"
 import { useIsMobile } from "@/lib/hooks"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useGT } from "gt-react"
 
 interface ChatDropdownProps {
   chatId: string
@@ -41,16 +42,17 @@ export function ChatDropdown({
   const pathname = usePathname()
   const queryClient = useQueryClient()
   const isMobile = useIsMobile()
+  const gt = useGT()
 
   const { mutate: updateChatMutation, isPending: isUpdatingChat } = useMutation({
     mutationFn: ({ chatId, title }: { chatId: string; title: string }) =>
       updateChatClient(chatId, title),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chats"] })
-      toast.success("Chat renamed")
+      toast.success(gt("Chat renamed"))
     },
     onError: () => {
-      toast.error("Failed to rename chat")
+      toast.error(gt("Failed to rename chat"))
     }
   })
 
@@ -58,10 +60,10 @@ export function ChatDropdown({
     mutationFn: (chatId: string) => deleteChatClient(chatId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chats"] })
-      toast.success("Chat deleted")
+      toast.success(gt("Chat deleted"))
     },
     onError: () => {
-      toast.error("Failed to delete chat")
+      toast.error(gt("Failed to delete chat"))
     }
   })
 
@@ -125,7 +127,7 @@ export function ChatDropdown({
                   <Pencil className={`${iconsize} shrink-0 text-muted-foreground`} />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">Rename</TooltipContent>
+              <TooltipContent side="bottom">{gt("Rename")}</TooltipContent>
             </Tooltip>
             <Tooltip disableHoverableContent={true}>
               <TooltipTrigger asChild>
@@ -139,7 +141,7 @@ export function ChatDropdown({
                   <Trash2 className={`${iconsize} shrink-0 text-destructive`} />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">Delete</TooltipContent>
+              <TooltipContent side="bottom">{gt("Delete")}</TooltipContent>
             </Tooltip>
           </>
         )}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "entries": {
+    "brc_ne2m2155qaivv1vw255vhigj": {
+      "879f3a5f954ee8b75bf1e91f4ea9916b41c933e5beba7eb6362647a637c9c66d": {
+        "185bdc9b5d6f75d042de7e8badc098f153a8defdb60818f62d9ea7a434a633e0": {
+          "es": {
+            "updatedAt": "2026-01-26T15:13:45.411Z",
+            "postProcessHash": "f3f17c5ccbd9159e8c64bdfb458c9eeb88a2e2f403a6b84f7524f9d0950a451e"
+          },
+          "it": {
+            "updatedAt": "2026-01-26T15:13:45.412Z",
+            "postProcessHash": "367e8305674e217cd1ba7e79a99b0e15adcf76e74d8c65f7e9cd51b3a0b0c66f"
+          }
+        }
+      }
+    }
+  }
+}

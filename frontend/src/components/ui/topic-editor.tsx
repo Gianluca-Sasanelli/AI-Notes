@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/schadcn/dropdown-menu"
 import { getTopics } from "@/lib/api"
+import { T, useGT } from "gt-react"
 
 export type TopicEdit =
   | { id: number; name: string; color: string; modified: boolean }
@@ -40,6 +41,7 @@ export function TopicEditor({
   const [isCreating, setIsCreating] = useState(false)
   const [localColor, setLocalColor] = useState(isEditableTopic(value) ? value.color : "#3b82f6")
   const [localName, setLocalName] = useState(isEditableTopic(value) ? value.name : "")
+  const gt = useGT()
   const { data: topicsData } = useQuery({
     queryKey: ["topics"],
     queryFn: () => getTopics()
@@ -81,14 +83,14 @@ export function TopicEditor({
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="outline" size="sm" className="h-8 w-full">
             <Plus className="h-3.5 w-3.5 mr-1" />
-            Topic
+            <T>Topic</T>
             <ChevronDown className="h-3.5 w-3.5 ml-1" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
           <DropdownMenuItem onClick={startNewTopic}>
             <Plus className="h-4 w-4 mr-2" />
-            Create new topic
+            <T>Create new topic</T>
           </DropdownMenuItem>
           {topics.length > 0 && (
             <>
@@ -124,7 +126,7 @@ export function TopicEditor({
       </label>
 
       <Input
-        placeholder="Topic name"
+        placeholder={gt("Topic name")}
         value={localName}
         onChange={(e) => syncName(e.target.value)}
         className="h-8 flex-1 text-sm border-0 focus-visible:ring-0"

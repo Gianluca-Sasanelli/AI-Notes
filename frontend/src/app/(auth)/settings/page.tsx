@@ -7,7 +7,19 @@ import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
 import { Input } from "@/components/ui/schadcn/input"
 import { toast } from "sonner"
-import { Loader2, Sun, Moon, Monitor, RefreshCw, Plus, Pencil, Trash2, X, Tag } from "lucide-react"
+import {
+  Loader2,
+  Sun,
+  Moon,
+  Monitor,
+  RefreshCw,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Tag,
+  Globe
+} from "lucide-react"
 import {
   getUserSummaryClient,
   updateUserSummaryClient,
@@ -27,6 +39,7 @@ import {
 } from "@/components/ui/schadcn/dialog"
 import type { TimelessNote } from "@/lib/types/database-types"
 import { useQuickTagsStore } from "@/lib/stores/metadata-store"
+import { T, useGT, useLocaleSelector } from "gt-react"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -44,6 +57,8 @@ export default function SettingsPage() {
   const [newTag, setNewTag] = useState("")
   const [editingTagNewName, setEditingTagNewName] = useState<string | null>(null)
   const editingTagOldName = useRef<string | null>(null)
+  const gt = useGT()
+  const { locale, locales, setLocale, getLocaleProperties } = useLocaleSelector()
 
   useEffect(() => {
     queueMicrotask(() => setMounted(true))
@@ -62,36 +77,36 @@ export default function SettingsPage() {
   const { mutate: updateSummary, isPending: isSaving } = useMutation({
     mutationFn: updateUserSummaryClient,
     onSuccess: () => {
-      toast.success("Summary saved")
+      toast.success(gt("Summary saved"))
       queryClient.invalidateQueries({ queryKey: ["userSummary"] })
       setEditedSummary(null)
     },
     onError: () => {
-      toast.error("Failed to save summary")
+      toast.error(gt("Failed to save summary"))
     }
   })
 
   const { mutate: regenerateSummary, isPending: isRegenerating } = useMutation({
     mutationFn: regenerateUserSummaryClient,
     onSuccess: () => {
-      toast.success("Summary regenerated from your notes")
+      toast.success(gt("Summary regenerated from your notes"))
       queryClient.invalidateQueries({ queryKey: ["userSummary"] })
       setEditedSummary(null)
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to regenerate summary")
+      toast.error(error.message || gt("Failed to regenerate summary"))
     }
   })
 
   const createNoteMutation = useMutation({
     mutationFn: () => createTimelessNoteClient(newNoteContent.trim(), {}),
     onSuccess: () => {
-      toast.success("Note added")
+      toast.success(gt("Note added"))
       setNewNoteContent("")
       queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
     },
     onError: () => {
-      toast.error("Failed to add note")
+      toast.error(gt("Failed to add note"))
     }
   })
 
@@ -104,12 +119,12 @@ export default function SettingsPage() {
       })
     },
     onSuccess: () => {
-      toast.success("Note updated")
+      toast.success(gt("Note updated"))
       setEditingNote(null)
       queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
     },
     onError: () => {
-      toast.error("Failed to update note")
+      toast.error(gt("Failed to update note"))
     }
   })
 
@@ -119,12 +134,12 @@ export default function SettingsPage() {
       return deleteNoteClient(deletingNoteId)
     },
     onSuccess: () => {
-      toast.success("Note deleted")
+      toast.success(gt("Note deleted"))
       setDeletingNoteId(null)
       queryClient.invalidateQueries({ queryKey: ["timelessNotes"] })
     },
     onError: () => {
-      toast.error("Failed to delete note")
+      toast.error(gt("Failed to delete note"))
     }
   })
 
@@ -149,7 +164,7 @@ export default function SettingsPage() {
   }
   const handleEditTagOpen = (tag: string) => {
     if (!tag) {
-      toast.error("No tag selected")
+      toast.error(gt("No tag selected"))
       return
     }
     setEditingTagNewName(tag)
@@ -157,7 +172,7 @@ export default function SettingsPage() {
   }
   const OnEditTagSave = () => {
     if (!editingTagNewName || !editingTagOldName.current) {
-      toast.error("There is an error in the tag editing")
+      toast.error(gt("There is an error in the tag editing"))
       return
     }
     updateTag(editingTagOldName.current, editingTagNewName)
@@ -167,14 +182,22 @@ export default function SettingsPage() {
   return (
     <div className="w-full max-w-3xl mx-auto py-10 px-4 min-dvh-screen overflow-y-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-primary">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your preferences</p>
+        <h1 className="text-2xl font-bold text-primary">
+          <T>Settings</T>
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          <T>Manage your preferences</T>
+        </p>
       </div>
 
       <div className="space-y-6">
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">Theme</h2>
-          <p className="text-sm text-muted-foreground mb-4">Choose your preferred color scheme.</p>
+          <h2 className="text-lg font-semibold mb-2">
+            <T>Theme</T>
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            <T>Choose your preferred color scheme.</T>
+          </p>
           <div className="flex gap-2">
             <Button
               variant={mounted && theme === "light" ? "default" : "outline"}
@@ -183,7 +206,7 @@ export default function SettingsPage() {
               size={isMobile ? "icon" : "default"}
             >
               <Sun className={isMobile ? "size-4" : "size-4 mr-2"} />
-              {!isMobile && "Light"}
+              {!isMobile && <T>Light</T>}
             </Button>
             <Button
               variant={mounted && theme === "dark" ? "default" : "outline"}
@@ -192,7 +215,7 @@ export default function SettingsPage() {
               size={isMobile ? "icon" : "default"}
             >
               <Moon className={isMobile ? "size-4" : "size-4 mr-2"} />
-              {!isMobile && "Dark"}
+              {!isMobile && <T>Dark</T>}
             </Button>
             <Button
               variant={mounted && theme === "system" ? "default" : "outline"}
@@ -201,15 +224,49 @@ export default function SettingsPage() {
               size={isMobile ? "icon" : "default"}
             >
               <Monitor className={isMobile ? "size-4" : "size-4 mr-2"} />
-              {!isMobile && "System"}
+              {!isMobile && <T>System</T>}
             </Button>
           </div>
         </div>
 
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">Context Notes</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            <T>Language</T>
+          </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            These notes are always available to the AI as context about you.
+            <T>Choose your preferred language.</T>
+          </p>
+          <div className="flex gap-2">
+            {(locales ?? []).map((loc) => {
+              const props = getLocaleProperties(loc)
+              return (
+                <Button
+                  key={loc}
+                  variant={mounted && locale === loc ? "default" : "outline"}
+                  onClick={() => setLocale(loc)}
+                  className="flex-1"
+                  size={isMobile ? "icon" : "default"}
+                >
+                  {isMobile ? (
+                    <span className="text-xs">{loc.toUpperCase()}</span>
+                  ) : (
+                    <>
+                      <Globe className="size-4 mr-2" />
+                      {props.nativeName}
+                    </>
+                  )}
+                </Button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-2">
+            <T>Context Notes</T>
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            <T>These notes are always available to the AI as context about you.</T>
           </p>
 
           {notesLoading ? (
@@ -245,7 +302,7 @@ export default function SettingsPage() {
                 ))}
                 {(contextNotes?.data ?? []).length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No context notes yet
+                    <T>No context notes yet</T>
                   </p>
                 )}
               </div>
@@ -254,7 +311,7 @@ export default function SettingsPage() {
                 <Textarea
                   value={newNoteContent}
                   onChange={(e) => setNewNoteContent(e.target.value)}
-                  placeholder="Add a note about yourself..."
+                  placeholder={gt("Add a note about yourself...")}
                   className="min-h-[80px] resize-y bg-secondary focus:border-primary focus:outline-none"
                 />
               </div>
@@ -269,7 +326,7 @@ export default function SettingsPage() {
                   ) : (
                     <Plus className="size-4 mr-2" />
                   )}
-                  Add Note
+                  <T>Add Note</T>
                 </Button>
               </div>
             </>
@@ -277,10 +334,14 @@ export default function SettingsPage() {
         </div>
 
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">AI Summary</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            <T>AI Summary</T>
+          </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            This summary is used as context when you chat with the AI assistant. It&apos;s
-            automatically generated from your notes but you can edit it.
+            <T>
+              This summary is used as context when you chat with the AI assistant. It&apos;s
+              automatically generated from your notes but you can edit it.
+            </T>
           </p>
 
           {isLoading ? (
@@ -292,12 +353,14 @@ export default function SettingsPage() {
               <Textarea
                 value={currentValue}
                 onChange={(e) => setEditedSummary(e.target.value)}
-                placeholder="No summary yet. Add at least 5 notes to generate one automatically."
+                placeholder={gt(
+                  "No summary yet. Add at least 5 notes to generate one automatically."
+                )}
                 className="min-h-[200px] resize-y bg-secondary focus:border-primary focus:outline-none"
               />
               {summary && (
                 <p className="text-xs text-muted-foreground mt-2">
-                  Last updated: {new Date(summary.updatedAt).toLocaleString()}
+                  {gt("Last updated:")} {new Date(summary.updatedAt).toLocaleString()}
                 </p>
               )}
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
@@ -312,7 +375,7 @@ export default function SettingsPage() {
                   ) : (
                     <RefreshCw className="size-4 mr-2" />
                   )}
-                  {isMobile ? "Regenerate" : "Regenerate from Notes"}
+                  {isMobile ? <T>Regenerate</T> : <T>Regenerate from Notes</T>}
                 </Button>
                 <Button
                   onClick={handleSave}
@@ -320,7 +383,7 @@ export default function SettingsPage() {
                   size={isMobile ? "sm" : "default"}
                 >
                   {isSaving && <Loader2 className="size-4 mr-2 animate-spin" />}
-                  Save Changes
+                  <T>Save Changes</T>
                 </Button>
               </div>
             </>
@@ -328,7 +391,7 @@ export default function SettingsPage() {
         </div>
         <div className="rounded-lg border bg-card p-6">
           <p className="text-sm text-muted-foreground mb-4">
-            Tags you can quickly add to your notes.
+            <T>Tags you can quickly add to your notes.</T>
           </p>
 
           <div className="space-y-2 mb-4">
@@ -359,7 +422,7 @@ export default function SettingsPage() {
             ))}
             {tags.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
-                No quick tags configured
+                <T>No quick tags configured</T>
               </p>
             )}
           </div>
@@ -368,7 +431,7 @@ export default function SettingsPage() {
             <Input
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
-              placeholder="Tag name"
+              placeholder={gt("Tag name")}
               className="flex-1"
             />
             <Button onClick={handleAddTag} disabled={!newTag.trim()} size="icon">
@@ -381,7 +444,9 @@ export default function SettingsPage() {
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
         <DialogContent className="w-[90dvh]">
           <DialogHeader>
-            <DialogTitle>Edit Note</DialogTitle>
+            <DialogTitle>
+              <T>Edit Note</T>
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Textarea
@@ -392,13 +457,13 @@ export default function SettingsPage() {
             />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditingNote(null)}>
-                Cancel
+                <T>Cancel</T>
               </Button>
               <Button
                 onClick={() => updateNoteMutation.mutate()}
                 disabled={!editingContent.trim() || updateNoteMutation.isPending}
               >
-                {updateNoteMutation.isPending ? "Saving..." : "Save"}
+                {updateNoteMutation.isPending ? <T>Saving...</T> : <T>Save</T>}
               </Button>
             </div>
           </div>
@@ -411,19 +476,23 @@ export default function SettingsPage() {
       >
         <DialogContent className="w-[70dvh]">
           <DialogHeader>
-            <DialogTitle>Delete Note</DialogTitle>
-            <DialogDescription>This action cannot be undone.</DialogDescription>
+            <DialogTitle>
+              <T>Delete Note</T>
+            </DialogTitle>
+            <DialogDescription>
+              <T>This action cannot be undone.</T>
+            </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center lg:justify-end gap-2">
             <Button variant="outline" onClick={() => setDeletingNoteId(null)}>
-              Cancel
+              <T>Cancel</T>
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteNoteMutation.mutate()}
               disabled={deleteNoteMutation.isPending}
             >
-              {deleteNoteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteNoteMutation.isPending ? <T>Deleting...</T> : <T>Delete</T>}
             </Button>
           </div>
         </DialogContent>
@@ -435,17 +504,19 @@ export default function SettingsPage() {
       >
         <DialogContent className="w-[90dvh]">
           <DialogHeader>
-            <DialogTitle>Edit Tag</DialogTitle>
+            <DialogTitle>
+              <T>Edit Tag</T>
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
               value={editingTagNewName ?? ""}
               onChange={(e) => setEditingTagNewName(e.target.value)}
-              placeholder="Tag name"
+              placeholder={gt("Tag name")}
               className="flex-1"
             />
             <Button onClick={OnEditTagSave} disabled={!editingTagNewName?.trim()}>
-              Save
+              <T>Save</T>
             </Button>
           </div>
         </DialogContent>

@@ -11,6 +11,7 @@ import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useModelStore } from "@/lib/stores/model-store"
 import { extractTextFromMessage } from "@/lib/types/chat-types"
+import { T } from "gt-react"
 export default function Chat({
   chatId,
   storedmessages
@@ -82,7 +83,7 @@ export default function Chat({
         <div className="flex h-[100svh] flex-col items-center justify-center gap-6 bg-background mx-10">
           <h1 className="text-center text-4xl font-bold tracking-tight text-primary">AI Notes</h1>
           <p className="text-base text-muted-foreground">
-            Ask about your notes and general questions.
+            <T>Ask about your notes and general questions.</T>
           </p>
           <div className="flex w-full max-w-3xl sm:max-w-2xl min-h-[15svh] flex-col rounded-xl">
             <ChatInput
