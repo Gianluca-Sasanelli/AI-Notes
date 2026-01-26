@@ -1,13 +1,7 @@
 import type { AgentStatusData, ChatUIMessage } from "@/lib/types/chat-types"
 import type { ChatStatus, DataUIPart } from "ai"
 import { useMemo } from "react"
-export function RoutingIndicator() {
-  return (
-    <>
-      <span className="mr-2 text-sm font-semibold">Sending</span>
-    </>
-  )
-}
+
 
 interface StatusIndicatorProps {
   lastAssistantMessage: ChatUIMessage | null
@@ -52,7 +46,7 @@ export function StatusIndicator({ lastAssistantMessage, chatStatus, error }: Sta
             {latestDataStatus ? (
               <span className="text-sm font-semibold">{latestDataStatus.frontend_message}</span>
             ) : (
-              <RoutingIndicator />
+              <span className="text-sm font-semibold">Sending</span>
             )}
           </div>
         </div>
