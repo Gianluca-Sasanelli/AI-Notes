@@ -12,6 +12,7 @@ import { ModelSelector } from "./ModelSelector"
 import Image from "next/image"
 import React from "react"
 import { chatContext } from "@/lib/types/chat-types"
+import { useGT } from "gt-react"
 interface ChatInputProps {
   onSendMessage: (text: string, files?: FileList, context?: chatContext) => void
   isLoading: boolean
@@ -38,8 +39,9 @@ const ChatInput = React.memo(function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])
   const [selectedTopic, setSelectedTopic] = useState<TopicData | null>(null)
+  const gt = useGT()
   console.log("Selected topic in ChatInput is", selectedTopic)
-  let placeholdertext = "Ask about your notes, or health issues..."
+  let placeholdertext = gt("Ask about your notes, or health issues...")
   if (attachedFiles.length > 0) {
     placeholdertext = ""
   }
@@ -218,7 +220,7 @@ const ChatInput = React.memo(function ChatInput({
                 variant="ghost"
                 size="icon"
                 className="hover:bg-destructive/10 rounded-md"
-                title="Stop Generation"
+                title={gt("Stop Generation")}
               >
                 <StopCircle className="size-6" />
               </Button>
@@ -231,7 +233,7 @@ const ChatInput = React.memo(function ChatInput({
                 variant="ghost"
                 size="icon"
                 className="hover:bg-primary/10 rounded-md"
-                title={isLoading ? "Generating..." : "Send Message"}
+                title={isLoading ? gt("Generating...") : gt("Send Message")}
               >
                 {isLoading ? (
                   <Loader2 className="size-6 animate-spin" />

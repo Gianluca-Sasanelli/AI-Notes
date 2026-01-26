@@ -10,9 +10,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
 import { ChatDropdown } from "./ChatDropdown"
+import { useGT } from "gt-react"
 
 type DateGroup = {
-  label: string
+  labelKey: string
   chats: ChatHistoryItem[]
 }
 
@@ -24,31 +25,31 @@ function groupChatsByDate(chats: ChatHistoryItem[]): DateGroup[] {
   const last30DaysStart = new Date(todayStart.getTime() - 30 * 24 * 60 * 60 * 1000)
 
   const groups: Record<string, ChatHistoryItem[]> = {
-    Today: [],
-    Yesterday: [],
-    "Last 7 Days": [],
-    "Last 30 Days": [],
-    Older: []
+    today: [],
+    yesterday: [],
+    last7Days: [],
+    last30Days: [],
+    older: []
   }
 
   for (const chat of chats) {
     const updatedAt = new Date(chat.updatedAt)
     if (updatedAt >= todayStart) {
-      groups["Today"].push(chat)
+      groups["today"].push(chat)
     } else if (updatedAt >= yesterdayStart) {
-      groups["Yesterday"].push(chat)
+      groups["yesterday"].push(chat)
     } else if (updatedAt >= last7DaysStart) {
-      groups["Last 7 Days"].push(chat)
+      groups["last7Days"].push(chat)
     } else if (updatedAt >= last30DaysStart) {
-      groups["Last 30 Days"].push(chat)
+      groups["last30Days"].push(chat)
     } else {
-      groups["Older"].push(chat)
+      groups["older"].push(chat)
     }
   }
 
   return Object.entries(groups)
     .filter(([, chats]) => chats.length > 0)
-    .map(([label, chats]) => ({ label, chats }))
+    .map(([labelKey, chats]) => ({ labelKey, chats }))
 }
 
 export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
@@ -61,19 +62,30 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
   const isMobile = useIsMobile()
   const groupedChats = useMemo(() => (data ? groupChatsByDate(data.data) : []), [data])
+  const gt = useGT()
+
+  const dateLabels: Record<string, string> = {
+    today: gt("Today"),
+    yesterday: gt("Yesterday"),
+    last7Days: gt("Last 7 Days"),
+    last30Days: gt("Last 30 Days"),
+    older: gt("Older")
+  }
+
+  const untitledText = gt("Untitled")
 
   if (isLoading || !data) return null
 
   return (
     <div className="flex flex-col gap-1">
       {data.data.length === 0 ? (
-        <span className="px-2 text-md text-secondary-foreground">No chat history</span>
+        <span className="px-2 text-md text-secondary-foreground">{gt("No chat history")}</span>
       ) : (
         <>
           {groupedChats.map((group) => (
-            <div key={group.label}>
+            <div key={group.labelKey}>
               <span className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {group.label}
+                {dateLabels[group.labelKey]}
               </span>
               {group.chats.map((chat) => {
                 const isActive = pathname === `/chat/${chat.id}`
@@ -90,8 +102,8 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                         isActive && "bg-accent "
                       )}
                     >
-                      <span className="truncate" title={chat.title || "Untitled"}>
-                        {chat.title || "Untitled"}
+                      <span className="truncate" title={chat.title || untitledText}>
+                        {chat.title || untitledText}
                       </span>
                     </Link>
                     <div
@@ -100,7 +112,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                         !isMobile && "opacity-0 group-hover:opacity-100"
                       )}
                     >
-                      <ChatDropdown chatId={chat.id} currentTitle={chat.title || "Untitled"} />
+                      <ChatDropdown chatId={chat.id} currentTitle={chat.title || untitledText} />
                     </div>
                   </div>
                 )
@@ -114,7 +126,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
               className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:bg-accent"
             >
               <History className="mr-2 size-4 shrink-0 text-sidebar-foreground/60" />
-              <span className="block text-lg">All Chats</span>
+              <span className="block text-lg">{gt("All Chats")}</span>
             </Link>
           )}
         </>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/schadcn/input"
 import { deleteFileClient, getFileUrlClient } from "@/lib/api"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { T, useGT } from "gt-react"
 
 const MAX_FILE_SIZE_MB = 10
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
@@ -42,6 +43,7 @@ export function FileUpload(props: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { compact = false } = props
+  const gt = useGT()
 
   const hasNoteId = props.noteId !== undefined
 
@@ -54,12 +56,12 @@ export function FileUpload(props: FileUploadProps) {
       if (props.onDeleteFile) {
         props.onDeleteFile(filename)
       }
-      toast.success("File deleted")
+      toast.success(gt("File deleted"))
       queryClient.invalidateQueries({ queryKey: ["note-files", props.noteId] })
       queryClient.invalidateQueries({ queryKey: ["notes"] })
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Delete failed")
+      toast.error(error instanceof Error ? error.message : gt("Delete failed"))
     }
   })
 
@@ -70,11 +72,11 @@ export function FileUpload(props: FileUploadProps) {
     for (const file of files) {
       console.log("File selected:", { name: file.name, size: file.size, type: file.type })
       if (!file.size || file.size === 0) {
-        toast.error(`Cannot read file: ${file.name}`)
+        toast.error(gt("Cannot read file:") + ` ${file.name}`)
         continue
       }
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(`${file.name} exceeds ${MAX_FILE_SIZE_MB}MB limit`)
+        toast.error(`${file.name} ` + gt("exceeds") + ` ${MAX_FILE_SIZE_MB}MB ` + gt("limit"))
         continue
       }
       validFiles.push(file)
@@ -118,7 +120,7 @@ export function FileUpload(props: FileUploadProps) {
       const { url } = await getFileUrlClient(props.noteId!, filename)
       window.open(url, "_blank")
     } catch {
-      toast.error("Failed to get file")
+      toast.error(gt("Failed to get file"))
     }
   }
 
@@ -148,7 +150,7 @@ export function FileUpload(props: FileUploadProps) {
           className="gap-2 text-muted-foreground hover:text-foreground w-full justify-center"
         >
           <Upload className="h-4 w-4" />
-          Add File
+          <T>Add File</T>
         </Button>
       ) : (
         <div
@@ -167,7 +169,9 @@ export function FileUpload(props: FileUploadProps) {
           onClick={() => inputRef.current?.click()}
         >
           <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-          <p className="mt-2 text-sm text-muted-foreground">Drop files here or click to upload</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            <T>Drop files here or click to upload</T>
+          </p>
         </div>
       )}
 

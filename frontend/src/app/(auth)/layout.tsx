@@ -3,7 +3,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
-
+import { GTProvider } from "gt-react"
+import gtConfig from "../../../gt.config.json"
+import loadTranslations from "@/lib/utils"
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -22,10 +24,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-svh">
-        <Sidebar />
-        <div className="flex-1 overflow-y-auto bg-background h-svh">{children}</div>
-      </div>
+      <GTProvider config={gtConfig} loadTranslations={loadTranslations}>
+        <div className="flex h-svh">
+          <Sidebar />
+          <div className="flex-1 overflow-y-auto bg-background h-svh">{children}</div>
+        </div>
+      </GTProvider>
     </QueryClientProvider>
   )
 }

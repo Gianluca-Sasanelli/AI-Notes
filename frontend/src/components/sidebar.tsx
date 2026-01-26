@@ -16,23 +16,24 @@ import { cn } from "@/lib/utils"
 import { Notebook, Plus, Pencil, PanelLeft, Settings } from "lucide-react"
 import { ChatHistory } from "@/components/chat/ChatHistory"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
+import { useGT } from "gt-react"
 
 const navigationItems = [
   {
     href: "/notes",
-    title: "Notes",
+    titleKey: "nav.notes",
     icon: <Notebook className="size-6" />,
     testId: "nav-notes"
   },
   {
     href: "/new",
-    title: "New Note",
+    titleKey: "nav.newNote",
     icon: <Pencil className="size-6" />,
     testId: "nav-new"
   },
   {
     href: "/chat",
-    title: "New Chat",
+    titleKey: "nav.newChat",
     icon: <Plus className="size-6" />,
     testId: "nav-chat"
   }
@@ -41,6 +42,13 @@ const navigationItems = [
 function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClose?: () => void }) {
   const pathname = usePathname()
   const { isLoaded } = useUser()
+  const gt = useGT()
+
+  const navTitles: Record<string, string> = {
+    "nav.notes": gt("Notes"),
+    "nav.newNote": gt("New Note"),
+    "nav.newChat": gt("New Chat")
+  }
 
   return (
     <>
@@ -48,6 +56,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         <div className="flex-none p-1">
           <nav className="flex flex-col space-y-1">
             {navigationItems.map((item) => {
+              const title = navTitles[item.titleKey]
               const LinkContent = (
                 <Link
                   key={item.href}
@@ -59,7 +68,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                   )}
                 >
                   <div className="size-6 justify-start">{item.icon}</div>
-                  {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                  {!isCollapsed && <span className="ml-2">{title}</span>}
                 </Link>
               )
 
@@ -69,7 +78,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                     <Tooltip>
                       <TooltipTrigger asChild>{LinkContent}</TooltipTrigger>
                       <TooltipContent side="right">
-                        <p>{item.title}</p>
+                        <p>{title}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -92,6 +101,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
       <div className="h-[100px] min-h-0 flex-none mt-auto flex flex-col ">
         {(() => {
+          const settingsText = gt("Settings")
           const SettingsLink = (
             <Link
               href="/settings"
@@ -104,14 +114,14 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
               <div className="size-6 flex items-center ">
                 <Settings />
               </div>
-              {!isCollapsed && <span className="ml-2">Settings</span>}
+              {!isCollapsed && <span className="ml-2">{settingsText}</span>}
             </Link>
           )
 
           return isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>{SettingsLink}</TooltipTrigger>
-              <TooltipContent side="right">Settings</TooltipContent>
+              <TooltipContent side="right">{settingsText}</TooltipContent>
             </Tooltip>
           ) : (
             SettingsLink
@@ -151,7 +161,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                   />
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right">Profile</TooltipContent>
+              <TooltipContent side="right">{gt("Profile")}</TooltipContent>
             </Tooltip>
           ) : (
             <div className="size-full cursor-pointer">
@@ -184,6 +194,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
 function DesktopSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true)
+  const gt = useGT()
 
   return (
     <aside
@@ -210,7 +221,9 @@ function DesktopSidebar() {
               <PanelLeft className="size-5 " />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">{isCollapsed ? "Expand" : "Collapse"}</TooltipContent>
+          <TooltipContent side="right">
+            {isCollapsed ? gt("Expand") : gt("Collapse")}
+          </TooltipContent>
         </Tooltip>
       </div>
       <SidebarContent isCollapsed={isCollapsed} />
@@ -220,6 +233,7 @@ function DesktopSidebar() {
 
 function MobileSidebar() {
   const [open, setOpen] = useState(false)
+  const gt = useGT()
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -230,7 +244,7 @@ function MobileSidebar() {
       </SheetTrigger>
       <SheetContent side="left" className="w-[80%] max-w-[280px] bg-secondary p-0 py-2">
         <VisuallyHidden.Root>
-          <SheetTitle>Navigation Menu</SheetTitle>
+          <SheetTitle>{gt("Navigation Menu")}</SheetTitle>
         </VisuallyHidden.Root>
         <div className="flex items-center px-4 pb-2">
           <span className="font-semibold text-foreground text-xl text-primary">AI Notes</span>

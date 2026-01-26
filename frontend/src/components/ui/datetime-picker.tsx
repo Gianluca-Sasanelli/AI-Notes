@@ -11,6 +11,7 @@ import type { NoteGranularity } from "@/lib/types/database-types"
 import { cn } from "@/lib/utils"
 import { formatTimestampRange } from "@/lib/notes-utils"
 import { useIsMobile } from "@/lib/hooks"
+import { useGT } from "gt-react"
 
 interface DateTimePickerProps {
   startTimestamp: Date
@@ -40,12 +41,6 @@ const isSameTimestamp = (date1: Date, date2: Date, granularity: NoteGranularity 
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
-const GRANULARITY_OPTIONS = [
-  { value: "hour", label: "Hour" },
-  { value: "day", label: "Day" },
-  { value: "month", label: "Month" }
-]
-
 export function DateTimePicker({
   startTimestamp,
   endTimestamp,
@@ -55,6 +50,13 @@ export function DateTimePicker({
   onGranularityChange
 }: DateTimePickerProps) {
   const isMobile = useIsMobile()
+  const gt = useGT()
+
+  const GRANULARITY_OPTIONS = [
+    { value: "hour", label: gt("Hour") },
+    { value: "day", label: gt("Day") },
+    { value: "month", label: gt("Month") }
+  ]
 
   const handleRangeSelect = (range: DateRange | undefined) => {
     if (!range) return
@@ -119,7 +121,7 @@ export function DateTimePicker({
         <Sheet>
           <SheetTrigger asChild>{triggerButton}</SheetTrigger>
           <SheetContent side="bottom" className="px-0 pb-8">
-            <SheetTitle className="sr-only">Select date</SheetTitle>
+            <SheetTitle className="sr-only">{gt("Select date")}</SheetTitle>
             <div className="flex flex-col items-center overflow-auto max-h-[70vh]">
               <div className="py-3">{granularityToggle}</div>
               <Calendar
@@ -133,7 +135,7 @@ export function DateTimePicker({
                 <div className="flex border-t w-full">
                   <div className="flex flex-col flex-1">
                     <div className="px-3 py-2 text-xs text-muted-foreground border-b text-center">
-                      Start
+                      {gt("Start")}
                     </div>
                     <div className="h-[120px] overflow-y-auto">
                       {HOURS.map((hour) => (
@@ -154,7 +156,7 @@ export function DateTimePicker({
                   </div>
                   <div className="flex flex-col flex-1 border-l">
                     <div className="px-3 py-2 text-xs text-muted-foreground border-b text-center">
-                      End
+                      {gt("End")}
                     </div>
                     <div className="h-[120px] overflow-y-auto">
                       {HOURS.map((hour) => (
@@ -203,7 +205,9 @@ export function DateTimePicker({
             {granularity === "hour" && (
               <div className="flex border-l max-w-[70svh]">
                 <div className="flex flex-col">
-                  <div className="px-3 py-2 text-xs text-muted-foreground border-b">Start</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground border-b">
+                    {gt("Start")}
+                  </div>
                   <div className="h-[280px] overflow-y-auto">
                     {HOURS.map((hour) => (
                       <button
@@ -221,7 +225,9 @@ export function DateTimePicker({
                   </div>
                 </div>
                 <div className="flex flex-col border-l">
-                  <div className="px-3 py-2 text-xs text-muted-foreground border-b">End</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground border-b">
+                    {gt("End")}
+                  </div>
                   <div className="h-[280px] overflow-y-auto">
                     {HOURS.map((hour) => (
                       <button
