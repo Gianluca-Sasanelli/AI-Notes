@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/schadcn/select"
-import { useIsMobile } from "@/lib/hooks"
 import { cn } from "@/lib/utils"
 
 interface PaginationControlsProps {
@@ -27,11 +26,8 @@ export function PaginationControls({
   onParamsChange,
   className
 }: PaginationControlsProps) {
-  const isMobile = useIsMobile()
-  console.log("IsMobbile:", isMobile)
   return (
-    <div className={cn("flex items-center space-x-4", className)}>
-      {!isMobile && (
+    <div className={cn("flex items-center space-x-4 hidden md:block", className)}>
         <Select
           value={limit.toString()}
           onValueChange={(value) => onParamsChange({ limit: Number(value), skip: 0 })}
@@ -45,7 +41,6 @@ export function PaginationControls({
             {(hasNext || limit >= 50) && <SelectItem value="50">50 per page</SelectItem>}
           </SelectContent>
         </Select>
-      )}
 
       <div className="flex items-center gap-3">
         <div className="flex gap-2">
