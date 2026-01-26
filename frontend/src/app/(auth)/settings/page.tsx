@@ -18,8 +18,7 @@ import {
   Trash2,
   X,
   Tag,
-  Globe
-} from "lucide-react"
+  Languages } from "lucide-react"
 import {
   getUserSummaryClient,
   updateUserSummaryClient,
@@ -230,7 +229,8 @@ export default function SettingsPage() {
         </div>
 
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">
+          <h2 className="text-lg font-semibold mb-2 flex items-center">
+            <Languages className="size-4 mr-2" />
             <T>Language</T>
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
@@ -250,10 +250,7 @@ export default function SettingsPage() {
                   {isMobile ? (
                     <span className="text-xs">{loc.toUpperCase()}</span>
                   ) : (
-                    <>
-                      <Globe className="size-4 mr-2" />
-                      {props.nativeName}
-                    </>
+                    <>{props.nativeName.charAt(0).toUpperCase() + props.nativeName.slice(1)}</>
                   )}
                 </Button>
               )
