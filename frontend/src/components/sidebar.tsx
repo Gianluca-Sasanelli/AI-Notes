@@ -258,10 +258,10 @@ function MobileSidebar() {
 export function Sidebar() {
   return (
     <>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <DesktopSidebar />
       </div>
-      <div className="block md:hidden">
+      <div className="block lg:hidden">
         <MobileSidebar />
       </div>
     </>
