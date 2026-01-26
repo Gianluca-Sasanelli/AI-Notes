@@ -13,7 +13,6 @@ import {
   TooltipTrigger
 } from "@/components/ui/schadcn/tooltip"
 import { cn } from "@/lib/utils"
-import { useIsMobile } from "@/lib/hooks"
 import { Notebook, Plus, Pencil, PanelLeft, Settings } from "lucide-react"
 import { ChatHistory } from "@/components/chat/ChatHistory"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
@@ -243,7 +242,14 @@ function MobileSidebar() {
 }
 
 export function Sidebar() {
-  const isMobile = useIsMobile()
-
-  return isMobile ? <MobileSidebar /> : <DesktopSidebar />
+  return (
+    <>
+      <div className="hidden md:block">
+        <DesktopSidebar />
+      </div>
+      <div className="block md:hidden">
+        <MobileSidebar />
+      </div>
+    </>
+  )
 }
