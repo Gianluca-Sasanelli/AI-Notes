@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             enableSystem
             disableTransitionOnChange
           >
-            <main className="min-h-screen flex-1 bg-background">
+            <main className="min-h-svh flex-1 bg-background">
               <SpeedInsights />
               <Analytics />
               {children}
