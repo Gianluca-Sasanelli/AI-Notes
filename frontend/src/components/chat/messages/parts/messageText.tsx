@@ -64,9 +64,9 @@ export default function MessageUI({ message, isUser }: { message: string; isUser
   // A "" message even if not visible ruin the UI
   if (message === "") return null
   return (
-    <div>
+    <div className={isUser ? "flex justify-end" : ""}>
       {isUser ? (
-        <div className="break-words rounded-2xl border bg-muted p-2 text-base text-muted-foreground [word-break:break-word]">
+        <div className="break-words rounded-2xl border bg-muted p-2  text-muted-foreground [word-break:break-word]">
           {message}
         </div>
       ) : (
