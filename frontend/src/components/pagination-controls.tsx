@@ -27,7 +27,8 @@ export function PaginationControls({
   className
 }: PaginationControlsProps) {
   return (
-    <div className={cn("flex items-center space-x-4 hidden md:block", className)}>
+    <div className={cn("flex items-center gap-4", className)}>
+      <div className="hidden md:block">
         <Select
           value={limit.toString()}
           onValueChange={(value) => onParamsChange({ limit: Number(value), skip: 0 })}
@@ -41,26 +42,25 @@ export function PaginationControls({
             {(hasNext || limit >= 50) && <SelectItem value="50">50 per page</SelectItem>}
           </SelectContent>
         </Select>
+      </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onParamsChange({ skip: Math.max(0, skip - limit) })}
-            disabled={skip === 0}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onParamsChange({ skip: skip + limit })}
-            disabled={!hasNext}
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onParamsChange({ skip: Math.max(0, skip - limit) })}
+          disabled={skip === 0}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onParamsChange({ skip: skip + limit })}
+          disabled={!hasNext}
+        >
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   )

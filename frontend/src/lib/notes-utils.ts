@@ -21,7 +21,7 @@ export const formatTimestampRange = (
   const startStr = format(startTimestamp, pattern)
   if (endTimestamp) {
     const endStr = format(endTimestamp, pattern)
-    return `${startStr} → ${endStr}`
+    return `${startStr} to ${endStr}`
   }
   return startStr
 }
