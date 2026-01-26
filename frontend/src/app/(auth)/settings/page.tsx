@@ -18,7 +18,8 @@ import {
   Trash2,
   X,
   Tag,
-  Languages } from "lucide-react"
+  Languages
+} from "lucide-react"
 import {
   getUserSummaryClient,
   updateUserSummaryClient,
