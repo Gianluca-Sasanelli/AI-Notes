@@ -51,11 +51,11 @@ export function MessageBubble(props: MessageBubbleProps) {
   const setSelectedModel = useModelStore((s) => s.setSelectedModel)
   return (
     <div
-      className={`flex flex-col ${isUser ? "items-end" : "items-start"} pt-2`}
+      className={`flex flex-col group ${isUser ? "items-end" : "items-start"} pt-2`}
       ref={messageRef ?? undefined}
     >
       <div
-        className={`flex flex-col group  ${isUser ? "max-w-full" : "gap-6 w-full"} ${isEditing ? "w-full" : ""}`}
+        className={`flex flex-col  ${isUser ? "max-w-full" : "gap-4 w-full"} ${isEditing ? "w-full" : ""}`}
       >
         {IsEditingBoundary ? (
           <div className="w-full transition-all transition-duration-300 ">
@@ -124,6 +124,7 @@ export function MessageBubble(props: MessageBubbleProps) {
             })}
           </>
         )}
+        </div>
 
         {showMessageOptions && (
           <div
@@ -207,7 +208,6 @@ export function MessageBubble(props: MessageBubbleProps) {
             </Tooltip>
           </div>
         )}
-      </div>
     </div>
   )
 }
