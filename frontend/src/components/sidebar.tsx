@@ -207,7 +207,7 @@ function DesktopSidebar() {
         {!isCollapsed && (
           <span className="font-semibold  whitespace-nowrap text-2xl text-primary">AI Notes</span>
         )}
-        <Tooltip>
+        <Tooltip disableHoverableContent={true}>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
