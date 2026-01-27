@@ -46,7 +46,7 @@ const ChatMessages = React.memo(function ChatMessages({
   }
   const showMessageOptions = status === "ready"
   return (
-    <div className="flex h-full flex-col space-y-6">
+    <div className="flex h-full flex-col space-y-4">
       {otherMessages.map((message, i) => (
         <MessageBubble
           key={message.id ?? `message-${i}`}
