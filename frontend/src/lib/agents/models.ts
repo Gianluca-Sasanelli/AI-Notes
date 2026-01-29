@@ -1,4 +1,5 @@
 import type { LanguageModelV3 } from "@ai-sdk/provider"
+import type { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google"
 import { google } from "@ai-sdk/google"
 import { groq } from "@ai-sdk/groq"
 export enum GOOGLE_MODEL {
@@ -22,16 +23,31 @@ export const isGroqModel = (model: AIModel): model is GROQ_MODEL => {
 export const isGoogleModel = (model: AIModel): model is GOOGLE_MODEL => {
   return Object.values(GOOGLE_MODEL).includes(model as GOOGLE_MODEL)
 }
+
+const googleProviderOptions: GoogleGenerativeAIProviderOptions = {
+  thinkingConfig: {
+    thinkingBudget: 8192,
+    includeThoughts: true
+  }
+}
+
+export type ProviderOptions = { google: GoogleGenerativeAIProviderOptions } | undefined
+
 export function getModelInstance(model: AIModel): {
   model: LanguageModelV3
   hasReasoning: boolean
+  providerOptions: ProviderOptions
 } {
   console.log(`The model is ${model}`)
   if (isGoogleModel(model)) {
-    return { model: google(model), hasReasoning: hasReasoning(model) }
+    return {
+      model: google(model),
+      hasReasoning: hasReasoning(model),
+      providerOptions: { google: googleProviderOptions }
+    }
   }
   if (isGroqModel(model)) {
-    return { model: groq(model), hasReasoning: hasReasoning(model) }
+    return { model: groq(model), hasReasoning: hasReasoning(model), providerOptions: undefined }
   }
   console.error(`The error in getmodelinstance is ${model}`)
   throw new Error(`Model ${model} not supported`)

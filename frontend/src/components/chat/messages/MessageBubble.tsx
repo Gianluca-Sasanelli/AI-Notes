@@ -49,9 +49,10 @@ export function MessageBubble(props: MessageBubbleProps) {
   const IsEditingBoundary = isEditing && onEditMessage !== undefined
   const canEdit = isUser && onEditMessage !== undefined
   const setSelectedModel = useModelStore((s) => s.setSelectedModel)
+  console.log("The message is", message)
   return (
     <div
-      className={`flex flex-col group ${isUser ? "items-end" : "items-start"} pt-2`}
+      className={`flex flex-col group ${isUser ? "items-end" : "items-start"}`}
       ref={messageRef ?? undefined}
     >
       <div

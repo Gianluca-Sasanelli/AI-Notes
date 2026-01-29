@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   const { messages, id: chatId, model, context } = parseResult.data
   console.log("The context received is", context)
-  const { model: modelInstance, hasReasoning } = getModelInstance(model)
+  const { model: modelInstance, hasReasoning, providerOptions } = getModelInstance(model)
   const isFirstUserMessage = messages.length === 1 && messages[0].role === "user"
 
   let ServerMessages = await convertToModelMessages(messages, {
@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
         const streamAssistant = await runAssistantAgent(
           ServerMessages,
           modelInstance,
-          RetrievedContext
+          RetrievedContext,
+          providerOptions
         )
         writer.merge(streamAssistant.toUIMessageStream())
       },
