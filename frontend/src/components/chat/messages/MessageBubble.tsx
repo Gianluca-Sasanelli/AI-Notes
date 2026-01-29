@@ -75,7 +75,12 @@ export function MessageBubble(props: MessageBubbleProps) {
             {message?.parts?.map((part, index) => {
               if (part.type === "text") {
                 return (
-                  <MessageUI key={`${message.id}-${index}`} message={part.text} isUser={isUser} />
+                  <MessageUI
+                    key={`${message.id}-${index}`}
+                    message={part.text}
+                    isUser={isUser}
+                    id={`${message.id}-${index}`}
+                  />
                 )
               }
 

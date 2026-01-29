@@ -1,4 +1,5 @@
-import type { ReactNode } from "react"
+import { marked } from "marked"
+import { memo, useMemo, type ReactNode } from "react"
 import Markdown from "markdown-to-jsx"
 
 const markdownOptions = {
@@ -60,8 +61,41 @@ const markdownOptions = {
   }
 }
 
-export default function MessageUI({ message, isUser }: { message: string; isUser: boolean }) {
-  // A "" message even if not visible ruin the UI
+function parseMarkdownIntoBlocks(markdown: string): string[] {
+  const tokens = marked.lexer(markdown)
+  return tokens.map((token) => token.raw)
+}
+
+const MemoizedMarkdownBlock = memo(
+  function MemoizedMarkdownBlock({ content }: { content: string }) {
+    return <Markdown options={markdownOptions}>{content}</Markdown>
+  },
+  (prevProps, nextProps) => prevProps.content === nextProps.content
+)
+
+const MemoizedMarkdown = memo(function MemoizedMarkdown({
+  content,
+  id
+}: {
+  content: string
+  id: string
+}) {
+  const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content])
+
+  return blocks.map((block, index) => (
+    <MemoizedMarkdownBlock content={block} key={`${id}-block_${index}`} />
+  ))
+})
+
+export default function MessageUI({
+  message,
+  isUser,
+  id
+}: {
+  message: string
+  isUser: boolean
+  id: string
+}) {
   if (message === "") return null
   return (
     <div className={isUser ? "flex justify-end" : ""}>
@@ -72,7 +106,7 @@ export default function MessageUI({ message, isUser }: { message: string; isUser
       ) : (
         <div className="min-w-0 w-full overflow-hidden text-base leading-relaxed tracking-wide text-foreground">
           <div className="min-w-0 max-w-full break-words [word-break:break-word]">
-            <Markdown options={markdownOptions}>{message}</Markdown>
+            <MemoizedMarkdown content={message} id={id} />
           </div>
         </div>
       )}
