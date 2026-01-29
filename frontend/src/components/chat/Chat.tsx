@@ -30,6 +30,7 @@ export default function Chat({
       console.log("The error is", error)
       toast.error(error.message)
     },
+    experimental_throttle:100,
     transport: new DefaultChatTransport({
       api: "/api/chat"
     })
