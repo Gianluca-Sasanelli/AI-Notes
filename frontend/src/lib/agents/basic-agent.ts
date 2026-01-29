@@ -7,11 +7,13 @@ import { buildAssistantSystemPrompt } from "./system-prompts/prompts"
 import { getUserSummary, getLatestTimelessNotes } from "@/db"
 import { auth } from "@clerk/nextjs/server"
 import { WebSearchTools } from "./tools/web-search"
+import type { ProviderOptions } from "./models"
 
 export async function runAssistantAgent(
   messages: ModelMessage[],
   model: LanguageModelV3,
-  context?: string
+  context?: string,
+  providerOptions?: ProviderOptions
 ) {
   const { userId } = await auth()
   if (!userId) {
@@ -37,6 +39,7 @@ export async function runAssistantAgent(
     messages,
     tools: { ...tools, ...webSearchTools },
     stopWhen: stepCountIs(10),
+    providerOptions,
     onError: (error) => {
       throw handleAgentError(error, "ASSISTANT AGENT")
     }
