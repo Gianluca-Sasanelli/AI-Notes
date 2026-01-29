@@ -39,7 +39,7 @@ const markdownOptions = {
     },
     table: {
       component: ({ children }: { children: ReactNode }) => (
-        <div className="my-4 w-0 min-w-full overflow-x-auto rounded-lg border border-border/80">
+        <div className="my-4 w-0 min-w-full overflow-x-auto border border-border/80">
           <table className="w-full text-sm">{children}</table>
         </div>
       )
