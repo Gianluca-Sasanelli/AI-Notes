@@ -54,6 +54,7 @@ export const chats = pgTable(
     userId: text().notNull(),
     messages: jsonb().$type<ChatUIMessage[]>().notNull(),
     title: text(),
+    activeStreamId: text(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
   },

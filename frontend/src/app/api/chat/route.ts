@@ -1,13 +1,19 @@
-import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse } from "ai"
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  generateId
+} from "ai"
 import { type NextRequest } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 
 import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
-import { createChat, updateChat } from "@/db"
+import { createChat, updateChat, setActiveStreamId, clearActiveStreamId } from "@/db"
 import RetrieveContext from "@/lib/agents/context/context"
 import { RemoteReasoning } from "@/lib/utils"
+import { getStreamContext } from "@/lib/resumable-stream"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {
@@ -41,64 +47,87 @@ export async function POST(req: NextRequest) {
   const RetrievedContext = await RetrieveContext(context, userId)
   let hasError = false
 
-  const response = createUIMessageStreamResponse({
-    status: 200,
-    stream: createUIMessageStream<ChatUIMessage>({
-      originalMessages: messages,
-      async execute({ writer }) {
-        writer.write({
-          type: "data-ai-status",
-          data: {
-            frontend_message: "Thinking..."
-          }
-        })
-        const streamAssistant = await runAssistantAgent(
-          ServerMessages,
-          modelInstance,
-          RetrievedContext,
-          providerOptions
-        )
-        writer.merge(streamAssistant.toUIMessageStream())
-      },
-      onError: (error) => {
-        hasError = true
-        if (error instanceof Error && error.message && error.message.length < 250) {
-          console.error("The error message is", error.message)
-          return error.message
+  const stream = createUIMessageStream<ChatUIMessage>({
+    originalMessages: messages,
+    async execute({ writer }) {
+      writer.write({
+        type: "data-ai-status",
+        data: {
+          frontend_message: "Thinking..."
         }
-        console.error("The error is", error)
-        return "An error has occurred while executing the strategy"
-      },
-      onFinish: async ({ messages }) => {
-        console.info("ON FINISH CALLED")
+      })
+      const streamAssistant = await runAssistantAgent(
+        ServerMessages,
+        modelInstance,
+        RetrievedContext,
+        providerOptions
+      )
+      writer.merge(streamAssistant.toUIMessageStream())
+    },
+    onError: (error) => {
+      hasError = true
+      if (error instanceof Error && error.message && error.message.length < 250) {
+        console.error("The error message is", error.message)
+        return error.message
+      }
+      console.error("The error is", error)
+      return "An error has occurred while executing the strategy"
+    },
+    onFinish: async ({ messages }) => {
+      console.info("ON FINISH CALLED")
 
-        if (hasError) {
-          console.warn("hasError is true. Returning early")
-          return
-        }
+      // Clear the active stream ID since streaming is done
+      try {
+        await clearActiveStreamId(chatId)
+      } catch (error) {
+        console.error("Error clearing active stream ID", error)
+      }
 
-        if (isFirstUserMessage) {
-          try {
-            await createChat(userId, chatId, messages, ServerMessages)
-          } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : String(error)
-            console.error("Error creating chat", errorMsg)
-          }
-          return
-        }
+      if (hasError) {
+        console.warn("hasError is true. Returning early")
+        return
+      }
 
+      if (isFirstUserMessage) {
         try {
-          await updateChat(userId, chatId, messages)
+          await createChat(userId, chatId, messages, ServerMessages)
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
-          console.error(
-            "Error saving chat",
-            errorMsg.length > 400 ? errorMsg.slice(0, 400) + "..." : errorMsg
-          )
+          console.error("Error creating chat", errorMsg)
         }
         return
       }
-    })
+
+      try {
+        await updateChat(userId, chatId, messages)
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        console.error(
+          "Error saving chat",
+          errorMsg.length > 400 ? errorMsg.slice(0, 400) + "..." : errorMsg
+        )
+      }
+      return
+    }
+  })
+
+  const response = createUIMessageStreamResponse({
+    status: 200,
+    stream,
+    async consumeSseStream({ stream: sseStream }) {
+      const streamId = generateId()
+      const streamContext = getStreamContext()
+
+      // Store the stream in Redis for resumability
+      await streamContext.createNewResumableStream(streamId, () => sseStream)
+
+      // Persist the active stream ID so clients can reconnect
+      try {
+        await setActiveStreamId(chatId, streamId)
+      } catch (error) {
+        console.error("Error setting active stream ID", error)
+      }
+    }
   })
   return response
 }

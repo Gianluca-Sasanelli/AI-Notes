@@ -20,7 +20,11 @@ export {
   getChat,
   getChats,
   updateChatTitle,
-  deleteChat
+  deleteChat,
+  setActiveStreamId,
+  clearActiveStreamId,
+  getActiveStreamId,
+  getActiveStreams
 } from "@/db/db-chats"
 
 export { getUserSummary, upsertUserSummary } from "@/db/db-user-summaries"

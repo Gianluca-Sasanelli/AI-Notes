@@ -1,6 +1,6 @@
 import { db } from "@/index"
 import { chats } from "@/db/schema"
-import { desc, eq, and } from "drizzle-orm"
+import { desc, eq, and, sql } from "drizzle-orm"
 import type { ChatUIMessage } from "@/lib/types/chat-types"
 import { removePartsFromMessages } from "@/lib/utils"
 import { generateTitle } from "@/lib/agents/title-generations"
@@ -88,5 +88,46 @@ export const deleteChat = async (userId: string, id: string) => {
   logger.debug("db", "Deleting chat", { chatId: id })
   return withTiming("db", "deleteChat", async () => {
     await db.delete(chats).where(and(eq(chats.id, id), eq(chats.userId, userId)))
+  })
+}
+
+export const setActiveStreamId = async (chatId: string, streamId: string) => {
+  logger.debug("db", "Setting active stream ID", { chatId, streamId })
+  return withTiming("db", "setActiveStreamId", async () => {
+    await db.update(chats).set({ activeStreamId: streamId }).where(eq(chats.id, chatId))
+  })
+}
+
+export const clearActiveStreamId = async (chatId: string) => {
+  logger.debug("db", "Clearing active stream ID", { chatId })
+  return withTiming("db", "clearActiveStreamId", async () => {
+    await db.update(chats).set({ activeStreamId: null }).where(eq(chats.id, chatId))
+  })
+}
+
+export const getActiveStreamId = async (userId: string, chatId: string) => {
+  logger.debug("db", "Getting active stream ID", { chatId })
+  return withTiming("db", "getActiveStreamId", async () => {
+    const [result] = await db
+      .select({ activeStreamId: chats.activeStreamId })
+      .from(chats)
+      .where(and(eq(chats.id, chatId), eq(chats.userId, userId)))
+    return result?.activeStreamId ?? null
+  })
+}
+
+export const getActiveStreams = async (userId: string) => {
+  logger.debug("db", "Getting active streams for user")
+  return withTiming("db", "getActiveStreams", async () => {
+    const results = await db
+      .select({
+        chatId: chats.id,
+        activeStreamId: chats.activeStreamId,
+        title: chats.title,
+        updatedAt: chats.updatedAt
+      })
+      .from(chats)
+      .where(and(eq(chats.userId, userId), sql`${chats.activeStreamId} IS NOT NULL`))
+    return results
   })
 }

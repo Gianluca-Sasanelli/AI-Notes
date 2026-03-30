@@ -23,16 +23,23 @@ export default function Chat({
   const inputRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
   const selectedModel = useModelStore((s) => s.selectedModel)
+  const activeChatId = chatId ?? backupChatId
   const { messages, sendMessage, setMessages, status, stop, error } = useChat<ChatUIMessage>({
     ...(storedmessages && { messages: storedmessages }),
-    id: chatId ?? backupChatId,
+    id: activeChatId,
+    resume: true,
     onError: (error) => {
       console.log("The error is", error)
       toast.error(error.message)
     },
-    experimental_throttle:100,
+    experimental_throttle: 100,
     transport: new DefaultChatTransport({
-      api: "/api/chat"
+      api: "/api/chat",
+      prepareReconnectToStreamRequest({ id }) {
+        return {
+          api: `/api/chat/${id}/stream`
+        }
+      }
     })
   })
 
