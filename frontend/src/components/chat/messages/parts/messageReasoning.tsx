@@ -7,11 +7,7 @@ import {
 import { ChevronRight, Brain } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
-export default function MessageReasoning({
-  part
-}: {
-  part: ReasoningUIPart 
-}) {
+export default function MessageReasoning({ part }: { part: ReasoningUIPart }) {
   const [isOpen, setIsOpen] = useState(false)
   console.log("part", part)
   const [thinkingTime, setThinkingTime] = useState<number | null>(null)
@@ -24,7 +20,6 @@ export default function MessageReasoning({
     } else if (part.state === "done" && initialTime.current !== null) {
       setThinkingTime(Math.round((Date.now() - initialTime.current) / 1000))
       initialTime.current = null
-    
     }
   }, [part.state])
 

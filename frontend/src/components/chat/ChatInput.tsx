@@ -13,6 +13,8 @@ import Image from "next/image"
 import React from "react"
 import { chatContext } from "@/lib/types/chat-types"
 import { useGT } from "gt-react"
+import { useModelStore } from "@/lib/stores/model-store"
+import { supportsFiles as modelSupportsFiles } from "@/lib/agents/models"
 interface ChatInputProps {
   onSendMessage: (text: string, files?: FileList, context?: chatContext) => void
   isLoading: boolean
@@ -40,7 +42,10 @@ const ChatInput = React.memo(function ChatInput({
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])
   const [selectedTopic, setSelectedTopic] = useState<TopicData | null>(null)
   const gt = useGT()
+  const selectedModel = useModelStore((s) => s.selectedModel)
+  const canAttachFiles = modelSupportsFiles(selectedModel)
   console.log("Selected topic in ChatInput is", selectedTopic)
+
   let placeholdertext = gt("Ask about your notes, or health issues...")
   if (attachedFiles.length > 0) {
     placeholdertext = ""
@@ -106,7 +111,7 @@ const ChatInput = React.memo(function ChatInput({
 
   const handleSendMessage = (input: string) => {
     let fileListToSend: FileList | undefined = undefined
-    if (attachedFiles && attachedFiles.length > 0) {
+    if (canAttachFiles && attachedFiles && attachedFiles.length > 0) {
       const dataTransfer = new DataTransfer()
       attachedFiles.forEach((file) => dataTransfer.items.add(file.file))
       fileListToSend = dataTransfer.files
@@ -209,6 +214,7 @@ const ChatInput = React.memo(function ChatInput({
             <ChatContextPopover
               disabled={isLoading}
               selectedTopicId={selectedTopic?.id}
+              canAddFile={canAttachFiles}
               onAddFile={triggerFileInput}
               onSelectTopic={(topic) => {
                 setSelectedTopic(topic)

@@ -59,3 +59,16 @@ export const USER_MODELS: Record<AIModel, string> = {
   [GROQ_MODEL.GPT_OSS_20B]: "GPT OSS 20B",
   [GROQ_MODEL.KIMI_K2]: "Kimi K2"
 }
+
+interface ModelCapabilities {
+  supportsFiles: boolean
+}
+
+const MODEL_CAPABILITIES: Record<AIModel, ModelCapabilities> = {
+  [GOOGLE_MODEL.GEMINI_2_5_FLASH]: { supportsFiles: true },
+  [GROQ_MODEL.GPT_OSS_120B]: { supportsFiles: false },
+  [GROQ_MODEL.GPT_OSS_20B]: { supportsFiles: false },
+  [GROQ_MODEL.KIMI_K2]: { supportsFiles: false }
+}
+
+export const supportsFiles = (model: AIModel) => MODEL_CAPABILITIES[model].supportsFiles

@@ -13,6 +13,7 @@ import { useIsMobile } from "@/lib/hooks"
 interface ChatContextPopoverProps {
   disabled?: boolean
   selectedTopicId?: number | null
+  canAddFile?: boolean
   onAddFile: () => void
   onSelectTopic: (topic: TopicData) => void
 }
@@ -20,6 +21,7 @@ interface ChatContextPopoverProps {
 export function ChatContextPopover({
   disabled,
   selectedTopicId,
+  canAddFile = true,
   onAddFile,
   onSelectTopic
 }: ChatContextPopoverProps) {
@@ -55,16 +57,18 @@ export function ChatContextPopover({
       </PopoverTrigger>
       <PopoverContent side="top" align="end" className="w-52 p-1">
         <div className="flex flex-col">
-          <button
-            onClick={() => {
-              onAddFile()
-              setOpen(false)
-            }}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
-          >
-            <FileIcon className="size-4" />
-            <span>Add file</span>
-          </button>
+          {canAddFile && (
+            <button
+              onClick={() => {
+                onAddFile()
+                setOpen(false)
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+            >
+              <FileIcon className="size-4" />
+              <span>Add file</span>
+            </button>
+          )}
 
           <Popover open={topicSubmenuOpen} onOpenChange={setTopicSubmenuOpen}>
             <PopoverTrigger asChild>

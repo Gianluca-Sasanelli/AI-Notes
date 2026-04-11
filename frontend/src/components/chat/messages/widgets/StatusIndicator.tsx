@@ -2,7 +2,6 @@ import type { AgentStatusData, ChatUIMessage } from "@/lib/types/chat-types"
 import type { ChatStatus, DataUIPart } from "ai"
 import { useMemo } from "react"
 
-
 interface StatusIndicatorProps {
   lastAssistantMessage: ChatUIMessage | null
   chatStatus: ChatStatus

@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <html lang="en" suppressHydrationWarning>
         <head>
-        {process.env.NODE_ENV === "development" && (
+          {process.env.NODE_ENV === "development" && (
             // eslint-disable-next-line @next/next/no-sync-scripts
             <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
           )}

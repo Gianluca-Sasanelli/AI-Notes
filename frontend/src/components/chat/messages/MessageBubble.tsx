@@ -130,90 +130,90 @@ export function MessageBubble(props: MessageBubbleProps) {
             })}
           </>
         )}
-        </div>
+      </div>
 
-        {showMessageOptions && (
-          <div
-            className={`flex my-1 opacity-0 ${isUser ? "justify-end" : ""} group-hover:opacity-100 transition-opacity duration-300 gap-4`}
-          >
-            <DropdownMenu>
-              <Tooltip delayDuration={500} disableHoverableContent={true}>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
-                      disabled={isEditing}
-                    >
-                      <RotateCcw size={16} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="duration-1000">
-                  Retry
-                </TooltipContent>
-              </Tooltip>
-              <DropdownMenuContent side="bottom" align="start">
-                {Object.entries(USER_MODELS).map(([modelId, displayName]) => (
-                  <DropdownMenuItem
-                    key={modelId}
-                    onClick={() => {
-                      setSelectedModel(modelId as AIModel)
-                      onResendMessage(message.id, modelId, !isUser)
-                    }}
-                  >
-                    {displayName}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {canEdit && (
-              <Tooltip delayDuration={500} disableHoverableContent={true}>
-                <TooltipTrigger asChild>
+      {showMessageOptions && (
+        <div
+          className={`flex my-1 opacity-0 ${isUser ? "justify-end" : ""} group-hover:opacity-100 transition-opacity duration-300 gap-4`}
+        >
+          <DropdownMenu>
+            <Tooltip delayDuration={500} disableHoverableContent={true}>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
-                    onClick={() => setIsEditing(!isEditing)}
+                    disabled={isEditing}
                   >
-                    {isEditing ? <PencilOff size={16} /> : <Pencil size={16} />}
+                    <RotateCcw size={16} />
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="duration-1000">
-                  {isEditing ? "Cancel edit" : "Edit message"}
-                </TooltipContent>
-              </Tooltip>
-            )}
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="duration-1000">
+                Retry
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent side="bottom" align="start">
+              {Object.entries(USER_MODELS).map(([modelId, displayName]) => (
+                <DropdownMenuItem
+                  key={modelId}
+                  onClick={() => {
+                    setSelectedModel(modelId as AIModel)
+                    onResendMessage(message.id, modelId, !isUser)
+                  }}
+                >
+                  {displayName}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {canEdit && (
             <Tooltip delayDuration={500} disableHoverableContent={true}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
-                  disabled={isEditing}
-                  onClick={() => {
-                    const text = extractTextFromMessage(message)
-                    if (text) {
-                      navigator.clipboard.writeText(text)
-                      setCopied(true)
-                      setTimeout(() => setCopied(false), 5000)
-                      toast.success("Copied to clipboard", {
-                        position: "top-center",
-                        duration: 2000
-                      })
-                    }
-                  }}
+                  onClick={() => setIsEditing(!isEditing)}
                 >
-                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {isEditing ? <PencilOff size={16} /> : <Pencil size={16} />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="duration-1000">
-                Copy message
+                {isEditing ? "Cancel edit" : "Edit message"}
               </TooltipContent>
             </Tooltip>
-          </div>
-        )}
+          )}
+          <Tooltip delayDuration={500} disableHoverableContent={true}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="!bg-transparent hover:!bg-transparent !p-0 !m-0"
+                disabled={isEditing}
+                onClick={() => {
+                  const text = extractTextFromMessage(message)
+                  if (text) {
+                    navigator.clipboard.writeText(text)
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 5000)
+                    toast.success("Copied to clipboard", {
+                      position: "top-center",
+                      duration: 2000
+                    })
+                  }
+                }}
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="duration-1000">
+              Copy message
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
     </div>
   )
 }
