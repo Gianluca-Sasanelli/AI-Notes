@@ -27,7 +27,7 @@ export default function NewNotePage() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const isMobile = useIsMobile()
-  const [topic, setTopic] = useState<TopicEdit>({ id: null, name: "", color: "#3b82f6" })
+  const [topic, setTopic] = useState<TopicEdit>(null)
   const gt = useGT()
 
   const mutation = useMutation({
