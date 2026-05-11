@@ -4,6 +4,9 @@ import { APICallError, ModelMessage } from "ai"
 import { ChatUIMessage } from "./types/chat-types"
 import { TopicEdit } from "@/components/ui/topic-editor"
 import { TopicBody } from "@/lib/types/api-types"
+import { generateTitle } from "@/lib/agents/title-generations"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -16,7 +19,7 @@ export function removePartsFromMessages(
     parts: message.parts.filter((part) => !part.type.startsWith(partType))
   }))
 }
-export function RemoteReasoning(messages: ModelMessage[]): ModelMessage[] {
+export function RemoveReasoning(messages: ModelMessage[]): ModelMessage[] {
   return messages.map((message) => {
     if (message.role !== "assistant") return message
     if (typeof message.content === "string") return message
@@ -38,11 +41,33 @@ export function handleAgentError(error: { error: unknown }, agentName: string): 
 }
 export function transformTopicEditToTopicBody(topic: TopicEdit | undefined | null): TopicBody {
   if (!topic) return undefined
-  if (topic.id === null) return { new: { name: topic.name, color: topic.color } }
+  if (topic._id === null) return { new: { name: topic.name, color: topic.color } }
   if ("removed" in topic) {
-    return { removed: topic.id }
+    return { removed: topic._id }
   }
-  return { [topic.id]: { name: topic.name, color: topic.color, modified: topic.modified } }
+  return { [topic._id]: { name: topic.name, color: topic.color, modified: topic.modified } }
+}
+
+export async function createChatWithTitle(
+  userId: string,
+  chatId: string,
+  messages: ChatUIMessage[],
+  serverMessages: ModelMessage[]
+) {
+  await convex.mutation(api.chats.createChat, {
+    userId,
+    clientId: chatId,
+    messages
+  })
+  void generateTitle(serverMessages)
+    .then((title) =>
+      convex.mutation(api.chats.updateChatTitle, {
+        userId,
+        clientId: chatId,
+        title
+      })
+    )
+    .catch((e) => console.warn("Title generation/update failed", e))
 }
 export default async function loadTranslations(locale: string) {
   try {

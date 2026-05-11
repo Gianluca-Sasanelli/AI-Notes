@@ -16,9 +16,9 @@ import { getTopics } from "@/lib/api"
 import { T, useGT } from "gt-react"
 
 export type TopicEdit =
-  | { id: string; name: string; color: string | undefined; modified: boolean }
-  | { id: string; removed: true }
-  | { id: null; name: string; color: string | undefined; modified?: boolean }
+  | { _id: string; name: string; color: string | undefined; modified: boolean }
+  | { _id: string; removed: true }
+  | { _id: null; name: string; color: string | undefined; modified?: boolean }
   | null
 
 type EditableTopic = Exclude<TopicEdit, null | { removed: true }>
@@ -27,7 +27,7 @@ export const isEditableTopic = (t: TopicEdit): t is EditableTopic => t !== null 
 
 const DEFAULT_TOPIC_COLOR = "#3b82f6"
 const isModified = (initialvalue: TopicEdit, newName: string, newColor: string): boolean => {
-  if (!initialvalue || initialvalue.id === null) return true
+  if (!initialvalue || initialvalue._id === null) return true
   if ("removed" in initialvalue) return false
   return initialvalue.name !== newName || initialvalue.color !== newColor
 }
@@ -59,12 +59,12 @@ export function TopicEditor({
     if (value) onChange({ ...value, name, modified: isModified(value, name, localColor) })
   }
 
-  const selectExistingTopic = (topic: { id: string; name: string; color: string | undefined }) => {
+  const selectExistingTopic = (topic: { _id: string; name: string; color: string | undefined }) => {
     setIsCreating(false)
     setLocalColor(topic.color ?? DEFAULT_TOPIC_COLOR)
     setLocalName(topic.name)
     onChange({
-      id: topic.id,
+      _id: topic._id,
       name: topic.name,
       color: topic.color ?? DEFAULT_TOPIC_COLOR,
       modified: false
@@ -75,10 +75,10 @@ export function TopicEditor({
     setIsCreating(true)
     setLocalColor(DEFAULT_TOPIC_COLOR)
     setLocalName("")
-    onChange({ id: null, name: "", color: DEFAULT_TOPIC_COLOR })
+    onChange({ _id: null, name: "", color: DEFAULT_TOPIC_COLOR })
   }
 
-  const showDropdown = !isEditableTopic(value) || (value.id === null && !isCreating)
+  const showDropdown = !isEditableTopic(value) || (value._id === null && !isCreating)
   if (showDropdown) {
     return (
       <DropdownMenu>
@@ -98,7 +98,7 @@ export function TopicEditor({
             <>
               <DropdownMenuSeparator />
               {topics.map((topic) => (
-                <DropdownMenuItem key={topic.id} onClick={() => selectExistingTopic(topic)}>
+                <DropdownMenuItem key={topic._id} onClick={() => selectExistingTopic(topic)}>
                   <Circle
                     className="h-4 w-4 mr-2"
                     fill={topic.color ?? undefined}
@@ -139,9 +139,9 @@ export function TopicEditor({
         size="icon"
         onClick={() => {
           console.log("Current value before removal:", value)
-          if (value.id !== null) {
-            console.log("Removing topic with id:", value.id)
-            onChange({ id: value.id, removed: true })
+          if (value._id !== null) {
+            console.log("Removing topic with id:", value._id)
+            onChange({ _id: value._id, removed: true })
           } else {
             onChange(null)
           }

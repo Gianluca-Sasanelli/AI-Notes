@@ -46,7 +46,7 @@ const ChatInput = React.memo(function ChatInput({
   const canAttachFiles = modelSupportsFiles(selectedModel)
   console.log("Selected topic in ChatInput is", selectedTopic)
 
-  let placeholdertext = gt("Ask about your notes, or health issues...")
+  let placeholdertext = gt("Ask about your notes.")
   if (attachedFiles.length > 0) {
     placeholdertext = ""
   }
@@ -116,7 +116,7 @@ const ChatInput = React.memo(function ChatInput({
       attachedFiles.forEach((file) => dataTransfer.items.add(file.file))
       fileListToSend = dataTransfer.files
     }
-    const context: chatContext = selectedTopic ? { topicId: selectedTopic.id.toString() } : null
+    const context: chatContext = selectedTopic ? { topicId: selectedTopic._id.toString() } : null
     console.log("The context being sent is", context)
     onSendMessage(input, fileListToSend, context)
 
@@ -213,7 +213,7 @@ const ChatInput = React.memo(function ChatInput({
           <div className="flex items-center gap-2">
             <ChatContextPopover
               disabled={isLoading}
-              selectedTopicId={selectedTopic?.id}
+              selectedTopicId={selectedTopic?._id}
               canAddFile={canAttachFiles}
               onAddFile={triggerFileInput}
               onSelectTopic={(topic) => {

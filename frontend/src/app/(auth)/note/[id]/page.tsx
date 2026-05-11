@@ -89,7 +89,7 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
         queryKey: ["notes"]
       })
       for (const [, data] of queries) {
-        const found = data?.data.find((n) => n.id === noteId)
+        const found = data?.data.find((n) => n._id === noteId)
         if (found) return found
       }
       return undefined

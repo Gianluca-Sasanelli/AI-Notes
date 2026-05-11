@@ -60,7 +60,7 @@ export function NotesList() {
       }
       const topic = transformTopicEditToTopicBody(topicEdit)
       await updateNoteClient(
-        editingNote.id,
+        editingNote._id,
         {
           content: editingContent.trim(),
           startTimestamp: editingStartTimestamp.getTime(),
@@ -70,12 +70,12 @@ export function NotesList() {
         topic
       )
       for (const pf of pendingFiles) {
-        await uploadFileClient(editingNote.id, pf.file, pf.filename)
+        await uploadFileClient(editingNote._id, pf.file, pf.filename)
       }
     },
     onSuccess: () => {
       toast.success(gt("Note updated"))
-      const noteId = editingNote?.id
+      const noteId = editingNote?._id
       setEditingNote(null)
       setPendingFiles([])
       setTopicEdit(null)
@@ -133,7 +133,7 @@ export function NotesList() {
     setEditingGranularity(note.granularity)
     setTopicEdit(
       note.topic
-        ? { id: note.topic.id, name: note.topic.name, color: note.topic.color, modified: false }
+        ? { _id: note.topic._id, name: note.topic.name, color: note.topic.color, modified: false }
         : null
     )
     setEditingNote(note)
@@ -200,7 +200,7 @@ export function NotesList() {
           <div className="space-y-3">
             {notes.map((note) => (
               <TimeNoteCard
-                key={note.id}
+                key={note._id}
                 note={note}
                 onEdit={handleEditOpen}
                 onDelete={setDeletingNoteId}
@@ -254,7 +254,7 @@ export function NotesList() {
               <TopicEditor value={topicEdit} onChange={setTopicEdit} />
               {editingNote && (
                 <FileUpload
-                  noteId={editingNote.id}
+                  noteId={editingNote._id}
                   noteFiles={editingNote.files}
                   pendingFilestoUpload={pendingFiles}
                   onPendingFilesChange={setPendingFiles}
@@ -334,7 +334,7 @@ function TimeNoteCard({
       style={note.topic ? { backgroundColor: `${note.topic.color}20` } : undefined}
     >
       <div className="flex items-start justify-between gap-4">
-        <Link href={`/note/${note.id}`} className="min-w-0 flex-1 space-y-2">
+        <Link href={`/note/${note._id}`} className="min-w-0 flex-1 space-y-2">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
@@ -378,7 +378,7 @@ function TimeNoteCard({
             variant="destructive"
             size="icon"
             className="!bg-transparent !hover:bg-destructive/50"
-            onClick={() => onDelete(note.id)}
+            onClick={() => onDelete(note._id)}
           >
             <Trash2 className="h-4 w-4 text-destructive" />
           </Button>

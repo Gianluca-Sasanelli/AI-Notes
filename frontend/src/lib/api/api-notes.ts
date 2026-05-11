@@ -14,8 +14,8 @@ export async function createTimeNoteClient(NoteCreateData: CreateNoteBody) {
     const error = await res.json()
     throw new Error(error.message)
   }
-  const data = (await res.json()) as { id: string }
-  return data.id
+  const data = (await res.json()) as { _id: string }
+  return data._id
 }
 
 export async function createTimelessNoteClient(content: string) {
@@ -31,8 +31,8 @@ export async function createTimelessNoteClient(content: string) {
     const error = await res.json()
     throw new Error(error.message)
   }
-  const data = (await res.json()) as { id: string }
-  return data.id
+  const data = (await res.json()) as { _id: string }
+  return data._id
 }
 
 type GetNotesOptions<T extends boolean> = PaginationOptions & { timeless?: T } & {

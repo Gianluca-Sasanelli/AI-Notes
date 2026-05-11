@@ -9,7 +9,7 @@ export type PaginatedResponse<T> = {
 }
 
 type BaseNoteData = {
-  id: string
+  _id: string
   topicId: string | null
   startTimestamp: number | null
   endTimestamp: number | null
@@ -26,7 +26,7 @@ export type DbTimeNote = BaseNoteData & {
 }
 
 export type TimeNote = DbTimeNote & {
-  topic: { id: string; name: string; color: string | undefined } | null
+  topic: { _id: string; name: string; color: string | undefined } | null
 }
 
 export type TimelessNote = BaseNoteData & {
@@ -37,13 +37,13 @@ export type TimelessNote = BaseNoteData & {
 
 export type NoteData = TimeNote | TimelessNote
 
-export type UpdateNoteData = Partial<Omit<BaseNoteData, "id">> & {
+export type UpdateNoteData = Partial<Omit<BaseNoteData, "_id">> & {
   content?: Exclude<BaseNoteData["content"], "">
 }
 
 export type TimeNoteSummary = Pick<
   DbTimeNote,
-  "id" | "content" | "startTimestamp" | "endTimestamp" | "updatedAt"
+  "_id" | "content" | "startTimestamp" | "endTimestamp" | "updatedAt"
 >
 
 export type ChatData = {
@@ -64,7 +64,7 @@ export type UserSummaryData = {
 }
 
 export type TopicData = {
-  id: string
+  _id: string
   name: string
   color: string | undefined
   createdAt: number

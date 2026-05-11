@@ -66,7 +66,7 @@ export const getTimeNotes = query({
         let topic = null
         if (note.topicId) {
           const t = await ctx.db.get(note.topicId)
-          if (t) topic = { id: t._id, name: t.name, color: t.color }
+          if (t) topic = { _id: t._id, name: t.name, color: t.color }
         }
         return { ...note, topic }
       })

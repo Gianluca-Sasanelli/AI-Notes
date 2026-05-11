@@ -105,7 +105,7 @@ export default function SettingsPage() {
   const updateNoteMutation = useMutation({
     mutationFn: () => {
       if (!editingNote) return Promise.reject()
-      return updateNoteClient(editingNote.id, {
+      return updateNoteClient(editingNote._id, {
         content: editingContent.trim()
       })
     },
@@ -233,7 +233,7 @@ export default function SettingsPage() {
               <div className="space-y-2 mb-4">
                 {(contextNotes?.data ?? []).map((note) => (
                   <div
-                    key={note.id}
+                    key={note._id}
                     className="flex items-start gap-2 p-3 rounded-md bg-secondary border-l-4 border-l-primary/50"
                   >
                     <p className="flex-1 text-sm">{note.content}</p>
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                       variant="ghost"
                       size="icon"
                       className="size-8"
-                      onClick={() => setDeletingNoteId(note.id)}
+                      onClick={() => setDeletingNoteId(note._id)}
                     >
                       <Trash2 className="size-4" />
                     </Button>

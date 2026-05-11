@@ -22,7 +22,7 @@ export type UpdateNoteBody = Partial<TimeNoteBody> & {
 
 export type CreateNoteBody = Omit<
   TimeNoteBody | TimelessNoteBody,
-  "createdAt" | "updatedAt" | "files" | "id"
+  "createdAt" | "updatedAt" | "files" | "_id"
 > & {
   topic?: TopicBody
 }

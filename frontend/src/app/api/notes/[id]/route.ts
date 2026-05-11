@@ -22,7 +22,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     }
     return NextResponse.json({
       ...note,
-      id: note._id,
       files: note.files.map((f) => f.filename)
     })
   } catch (error) {

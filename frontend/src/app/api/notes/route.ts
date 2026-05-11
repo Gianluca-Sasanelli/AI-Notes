@@ -31,7 +31,7 @@ export async function GET(request: Request) {
           includeTotal,
           topicId: topicIdParam
         })
-    const data = result.data.map((n) => ({ ...n, id: n._id, files: n.files.map((f) => f.filename) }))
+    const data = result.data.map((n) => ({ ...n, files: n.files.map((f) => f.filename) }))
     return NextResponse.json({ data, hasNext: result.hasNext, total: result.total })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch notes"
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       topicId: (topicId ?? undefined) as Id<"topics"> | undefined
     })
 
-    return NextResponse.json({ id }, { status: 201, headers: { "created-id": String(id) } })
+    return NextResponse.json({ _id: id }, { status: 201, headers: { "created-id": String(id) } })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to create note"
     logger.error("api", "POST /api/notes failed", { error: errorMessage })

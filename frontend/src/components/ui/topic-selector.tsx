@@ -31,7 +31,7 @@ export function TopicSelector({ value, onChange }: TopicSelectorProps) {
       <SelectContent>
         <SelectItem value="all">All topics</SelectItem>
         {topics.map((topic) => (
-          <SelectItem key={topic.id} value={topic.id}>
+          <SelectItem key={topic._id} value={topic._id}>
             <span className="flex items-center gap-2">
               <Circle
                 className="h-3 w-3"

@@ -96,13 +96,13 @@ export function ChatContextPopover({
                   ) : (
                     topics.map((topic) => (
                       <button
-                        key={topic.id}
+                        key={topic._id}
                         onClick={() => {
                           onSelectTopic(topic)
                           setOpen(false)
                           setTopicSubmenuOpen(false)
                         }}
-                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent ${selectedTopicId === topic.id ? "bg-accent" : ""}`}
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent ${selectedTopicId === topic._id ? "bg-accent" : ""}`}
                       >
                         <FolderIcon
                           className="size-4"
@@ -198,7 +198,7 @@ export function TopicSelectorPopover({
             ) : (
               filteredTopics.map((topic) => (
                 <button
-                  key={topic.id}
+                  key={topic._id}
                   onClick={() => {
                     onSelectTopic(topic)
                     setOpen(false)

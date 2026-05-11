@@ -5,12 +5,11 @@ import { auth } from "@clerk/nextjs/server"
 import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
-import { generateTitle } from "@/lib/agents/title-generations"
-import { removePartsFromMessages } from "@/lib/utils"
+import { removePartsFromMessages, createChatWithTitle } from "@/lib/utils"
 import { convex } from "@/lib/convex-server"
 import { api } from "@convex/_generated/api"
 import RetrieveContext from "@/lib/agents/context/context"
-import { RemoteReasoning } from "@/lib/utils"
+import { RemoveReasoning } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {
@@ -37,7 +36,7 @@ export async function POST(req: NextRequest) {
     ignoreIncompleteToolCalls: true
   })
   if (!hasReasoning) {
-    ServerMessages = RemoteReasoning(ServerMessages)
+    ServerMessages = RemoveReasoning(ServerMessages)
   }
   const RetrievedContext = await RetrieveContext(context, userId)
   let hasError = false
@@ -79,18 +78,7 @@ export async function POST(req: NextRequest) {
 
         if (isFirstUserMessage) {
           try {
-            let title: string | undefined
-            try {
-              title = await generateTitle(ServerMessages)
-            } catch (e) {
-              console.warn("Title generation failed", e)
-            }
-            await convex.mutation(api.chats.createChat, {
-              userId,
-              clientId: chatId,
-              messages: processedMessages,
-              title
-            })
+            await createChatWithTitle(userId, chatId, processedMessages, ServerMessages)
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error)
             console.error("Error creating chat", errorMsg)
