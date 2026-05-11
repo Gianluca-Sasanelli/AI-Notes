@@ -56,7 +56,7 @@ export default function MessageReasoning({ part }: { part: ReasoningUIPart }) {
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent className="pl-5 pt-2">
-        <div className="[&_a:hover]:text-info/80 prose prose-sm max-w-none prose-headings:mb-1 prose-headings:mt-2 prose-headings:text-sm prose-headings:text-muted-foreground prose-p:mb-1 prose-p:whitespace-normal prose-p:text-muted-foreground prose-strong:text-muted-foreground prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-pre:my-2 prose-pre:bg-muted prose-pre:p-3 prose-pre:text-xs prose-li:text-muted-foreground [&_a]:break-all [&_a]:text-info [&_a]:underline">
+        <div className="[&_a:hover]:text-primary/80 prose prose-sm max-w-none prose-headings:mb-1 prose-headings:mt-2 prose-headings:text-sm prose-headings:text-muted-foreground prose-p:mb-1 prose-p:whitespace-normal prose-p:text-muted-foreground prose-strong:text-muted-foreground prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-pre:my-2 prose-pre:bg-muted prose-pre:p-3 prose-pre:text-xs prose-li:text-muted-foreground [&_a]:break-all [&_a]:text-primary [&_a]:underline">
           <MemoizedReasoningMarkdown content={part.text} />
         </div>
       </CollapsibleContent>

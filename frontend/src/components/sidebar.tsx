@@ -218,7 +218,7 @@ function DesktopSidebar() {
                 !isCollapsed && "ml-auto"
               )}
             >
-              <PanelLeft className="size-5 " />
+              <PanelLeft className="size-6 " />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
@@ -239,7 +239,7 @@ function MobileSidebar() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="fixed top-2 left-2 z-40">
-          <PanelLeft className="size-5 " />
+          <PanelLeft className="size-6 " />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[80%] max-w-[280px] bg-secondary p-0 py-2">
