@@ -402,7 +402,6 @@ export default function SettingsPage() {
           </div>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

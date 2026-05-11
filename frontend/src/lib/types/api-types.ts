@@ -1,9 +1,4 @@
-import {
-  NoteData,
-  TimeNote,
-  TopicDbData,
-  DbTimeNote
-} from "@/lib/types/database-types"
+import { NoteData, TimeNote, TopicDbData, DbTimeNote } from "@/lib/types/database-types"
 
 export type TimeNoteBody = Omit<DbTimeNote, "topicId"> & {
   timeless: false
