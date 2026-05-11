@@ -1,112 +1,42 @@
+"use client"
+
+import DOMPurify from "isomorphic-dompurify"
 import { marked } from "marked"
-import { memo, useMemo, type ReactNode } from "react"
-import Markdown from "markdown-to-jsx"
+import { memo } from "react"
 
-const markdownOptions = {
-  overrides: {
-    a: {
-      props: {
-        className: "underline text-info hover:text-info/80 break-all",
-        target: "_blank",
-        rel: "noopener noreferrer"
-      }
-    },
-    p: { props: { className: "whitespace-normal break-words" } },
-    ul: { props: { className: "list-disc my-2 pl-6 max-w-full" } },
-    ol: { props: { className: "list-decimal my-2 pl-6 max-w-full" } },
-    li: { props: { className: "whitespace-normal break-words" } },
-    strong: { props: { className: "font-semibold break-words" } },
-    em: { props: { className: "italic break-words" } },
-    code: {
-      props: {
-        className: "rounded bg-muted px-1 py-0.5 text-sm font-mono break-all inline-block"
-      }
-    },
-    pre: {
-      props: {
-        className: "mb-6 rounded bg-muted p-4 text-sm overflow-x-auto "
-      }
-    },
-    h1: { props: { className: "text-2xl font-bold mb-2 mt-4" } },
-    h2: { props: { className: "text-xl font-bold mb-2 mt-4" } },
-    h3: { props: { className: "text-lg font-semibold mb-2 mt-4" } },
-    hr: { props: { className: "hidden" } },
-    blockquote: {
-      props: {
-        className:
-          "pl-6 pr-4 border-l-4 border-primary bg-primary/5 py-3 italic my-6 rounded-r-md text-muted-foreground"
-      }
-    },
-    table: {
-      component: ({ children }: { children: ReactNode }) => (
-        <div className="my-4 w-0 min-w-full overflow-x-auto border border-border/80">
-          <table className="w-full text-sm">{children}</table>
-        </div>
-      )
-    },
-    thead: {
-      props: { className: "bg-secondary text-secondary-foreground px-2 whitespace-nowrap" }
-    },
-    th: {
-      props: {
-        className: "border-b border-border/60 py-2 px-2 align-top font-bold whitespace-nowrap"
-      }
-    },
-    td: {
-      props: {
-        className: "border-b border-border/30 py-2 px-2 align-top whitespace-nowrap"
-      }
-    },
-    tr: { props: {} }
-  }
+function toHtml(content: string): string {
+  const parsed = marked.parse(content, { async: false })
+  const raw = typeof parsed === "string" ? parsed : ""
+  const clean = DOMPurify.sanitize(raw, { ADD_ATTR: ["target", "rel"] })
+  return clean.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ')
 }
 
-function parseMarkdownIntoBlocks(markdown: string): string[] {
-  const tokens = marked.lexer(markdown)
-  return tokens.map((token) => token.raw)
-}
-
-const MemoizedMarkdownBlock = memo(
-  function MemoizedMarkdownBlock({ content }: { content: string }) {
-    return <Markdown options={markdownOptions}>{content}</Markdown>
+const MemoizedMarkdown = memo(
+  function MemoizedMarkdown({ content }: { content: string }) {
+    return <div className="contents" dangerouslySetInnerHTML={{ __html: toHtml(content) }} />
   },
   (prevProps, nextProps) => prevProps.content === nextProps.content
 )
 
-const MemoizedMarkdown = memo(function MemoizedMarkdown({
-  content,
-  id
-}: {
-  content: string
-  id: string
-}) {
-  const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content])
-
-  return blocks.map((block, index) => (
-    <MemoizedMarkdownBlock content={block} key={`${id}-block_${index}`} />
-  ))
-})
-
 export default function MessageUI({
   message,
-  isUser,
-  id
+  isUser
 }: {
   message: string
   isUser: boolean
-  id: string
+  id?: string
 }) {
   if (message === "") return null
   return (
     <div className={isUser ? "flex justify-end" : ""}>
       {isUser ? (
-        <div className="break-words rounded-2xl border bg-muted p-2  text-muted-foreground [word-break:break-word]">
+        <div className="break-words rounded-2xl border bg-muted p-2 text-muted-foreground [word-break:break-word]">
           {message}
         </div>
       ) : (
-        <div className="min-w-0 w-full overflow-hidden text-base leading-relaxed tracking-wide text-foreground">
-          <div className="min-w-0 max-w-full break-words [word-break:break-word]">
-            <MemoizedMarkdown content={message} id={id} />
+        <div className="w-full min-w-0 overflow-hidden text-base leading-relaxed tracking-wide text-foreground">
+          <div className="[&_a:hover]:text-info/80 prose min-w-0 max-w-none break-words [word-break:break-word] prose-headings:mb-2 prose-headings:mt-4 prose-p:my-2 prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:before:content-none prose-code:after:content-none prose-pre:bg-muted prose-pre:text-sm [&_a]:break-all [&_a]:text-info [&_a]:underline">
+            <MemoizedMarkdown content={message} />
           </div>
         </div>
       )}
