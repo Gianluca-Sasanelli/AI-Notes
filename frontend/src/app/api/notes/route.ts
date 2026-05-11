@@ -31,7 +31,7 @@ export async function GET(request: Request) {
           includeTotal,
           topicId: topicIdParam
         })
-    const data = result.data.map((n) => ({ ...n, files: n.files.map((f) => f.filename) }))
+    const data = result.data.map((n) => ({ ...n, id: n._id, files: n.files.map((f) => f.filename) }))
     return NextResponse.json({ data, hasNext: result.hasNext, total: result.total })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch notes"
