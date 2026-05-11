@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/app/providers"
 import { Toaster } from "@/components/toaster"
 import { ClerkProvider } from "@clerk/nextjs"
 import { Analytics } from "@vercel/analytics/react"
+import { ConvexClientProvider } from "@/components/ConvexClientProvider"
 import type { Metadata } from "next"
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] })
 
@@ -30,19 +31,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           )}
         </head>
         <body className={jakarta.className}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <main className="min-h-svh flex-1 bg-background">
-              <SpeedInsights />
-              <Analytics />
-              {children}
-            </main>
-            <Toaster />
-          </ThemeProvider>
+          <ConvexClientProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <main className="min-h-svh flex-1 bg-background">
+                <SpeedInsights />
+                <Analytics />
+                {children}
+              </main>
+              <Toaster />
+            </ThemeProvider>
+          </ConvexClientProvider>
         </body>
       </html>
     </ClerkProvider>

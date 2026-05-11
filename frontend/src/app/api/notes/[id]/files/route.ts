@@ -1,9 +1,11 @@
 import { auth } from "@clerk/nextjs/server"
 import { ErrorData } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
-import { logger, withTiming } from "@/lib/logger"
+import { logger } from "@/lib/logger"
 import { uploadFile, deleteFile, getFileUrl, sanitizeFilename } from "@/lib/storage"
-import { addFileToNote, removeFileFromNote, getNoteFiles } from "@/db"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
+import { Id } from "@convex/_generated/dataModel"
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()
@@ -11,13 +13,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const { id } = await params
-  const noteId = parseInt(id, 10)
-
-  if (isNaN(noteId)) {
-    return NextResponse.json<ErrorData>({ message: "Invalid note ID" }, { status: 400 })
-  }
-
+  const { id: noteId } = await params
   const formData = await request.formData()
   const file = formData.get("file") as File | null
   const customFilename = formData.get("filename") as string | null
@@ -27,17 +23,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const filename = sanitizeFilename(customFilename || file.name)
-  logger.info("api", `POST /api/notes/${noteId}/files`, {
-    original: file.name,
-    custom: customFilename,
-    filename
-  })
+  logger.info("api", `POST /api/notes/${noteId}/files`, { filename })
   try {
     const buffer = Buffer.from(await file.arrayBuffer())
-    await withTiming("api", `POST /api/notes/${noteId}/files`, async () => {
-      await uploadFile(userId, noteId, filename, buffer, file.type)
-      await addFileToNote(userId, noteId, filename)
-    })
+    await uploadFile(userId, noteId, filename, buffer, file.type)
     return NextResponse.json({ filename }, { status: 201 })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to upload file"
@@ -52,13 +41,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const { id } = await params
-  const noteId = parseInt(id, 10)
-
-  if (isNaN(noteId)) {
-    return NextResponse.json<ErrorData>({ message: "Invalid note ID" }, { status: 400 })
-  }
-
+  const { id: noteId } = await params
   const { searchParams } = new URL(request.url)
   const filename = searchParams.get("filename")
 
@@ -76,8 +59,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   logger.info("api", `GET /api/notes/${noteId}/files (list)`)
   try {
-    const files = await getNoteFiles(userId, noteId)
-    return NextResponse.json({ files })
+    const files = await convex.query(api.notes.getNoteFiles, {
+      userId,
+      noteId: noteId as Id<"notes">
+    })
+    return NextResponse.json({ files: files.map((f) => f.filename) })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to list files"
     logger.error("api", `GET /api/notes/${noteId}/files failed`, { error: errorMessage })
@@ -91,13 +77,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const { id } = await params
-  const noteId = parseInt(id, 10)
-
-  if (isNaN(noteId)) {
-    return NextResponse.json<ErrorData>({ message: "Invalid note ID" }, { status: 400 })
-  }
-
+  const { id: noteId } = await params
   const { searchParams } = new URL(request.url)
   const filename = searchParams.get("filename")
 
@@ -107,10 +87,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   logger.info("api", `DELETE /api/notes/${noteId}/files`, { filename })
   try {
-    await withTiming("api", `DELETE /api/notes/${noteId}/files`, async () => {
-      await deleteFile(userId, noteId, filename)
-      await removeFileFromNote(userId, noteId, filename)
-    })
+    await deleteFile(userId, noteId, filename)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to delete file"

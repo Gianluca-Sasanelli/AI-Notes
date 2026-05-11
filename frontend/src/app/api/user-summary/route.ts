@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { getUserSummary, upsertUserSummary } from "@/db"
 import { ErrorData } from "@/lib/types/api-types"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
 
 export async function GET() {
   const { userId } = await auth()
@@ -9,7 +10,7 @@ export async function GET() {
     return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
   }
 
-  const summary = await getUserSummary(userId)
+  const summary = await convex.query(api.userSummaries.getUserSummary, { userId })
   return NextResponse.json({ summary })
 }
 
@@ -24,6 +25,6 @@ export async function PUT(request: Request) {
     return NextResponse.json<ErrorData>({ message: "Invalid summary" }, { status: 400 })
   }
 
-  await upsertUserSummary(userId, notesSummary)
+  await convex.mutation(api.userSummaries.upsertUserSummary, { userId, notesSummary })
   return NextResponse.json({ message: "Summary updated" })
 }

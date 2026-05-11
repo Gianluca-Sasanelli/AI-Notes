@@ -1,6 +1,6 @@
 export const buildAssistantSystemPrompt = (
   summary: string | null,
-  timelessNotes: { id: number; content: string }[],
+  timelessNotes: { content: string }[],
   context?: string
 ) => {
   const summarySection = summary
@@ -35,37 +35,30 @@ export const buildAssistantSystemPrompt = (
 </context>
 
 <db-schema>
-  Schema of the notes and topics: export const topics = pgTable(
-    "topics",
-    {
-      id: integer().primaryKey().generatedAlwaysAsIdentity(),
-      userId: text().notNull(),
-      name: text().notNull(),
-      color: varchar({ length: 7 }),
-      createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-      updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
-    },
-    (table) => [unique().on(table.userId, table.name)]
-  )
-  
-  // When start timestamp is null the granularity is null. The note is considered timeless in the frontend types.
-  export const notes = pgTable(
-    "notes",
-    {
-      id: integer().primaryKey().generatedAlwaysAsIdentity(),
-      userId: text().notNull(),
-      topicId: integer().references(() => topics.id, { onDelete: "set null" }),
-      startTimestamp: timestamp({ withTimezone: true }),
-      endTimestamp: timestamp({ withTimezone: true }),
-      granularity: granularityEnum(),
-      createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-      updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-      content: text().notNull(),
-      metadata: jsonb().$type<NoteMetadata>(),
-      files: varchar({ length: 255 }).array().notNull().default([])
-    },
-    (table) => [index("notes_start_timestamp_idx").on(table.startTimestamp)]
-  )
+  The data is stored in Convex. All ids are opaque strings (Convex document ids).
+  All timestamps (createdAt, updatedAt, startTimestamp, endTimestamp) are Unix milliseconds (number).
+
+  topics:
+    - _id: Id<"topics">
+    - userId: string
+    - name: string
+    - color?: string  (hex like "#3b82f6")
+    - createdAt: number
+    - updatedAt: number
+    Indexes: by_user (userId), by_user_name (userId, name)
+
+  notes:
+    - _id: Id<"notes">
+    - userId: string
+    - topicId?: Id<"topics">  (a note may be untagged)
+    - startTimestamp?: number  (when missing, the note is "timeless")
+    - endTimestamp?: number
+    - granularity?: "hour" | "day" | "month"  (absent iff startTimestamp is absent)
+    - content: string
+    - files: Array<{ storageId: Id<"_storage">, filename: string, contentType?: string }>
+    - createdAt: number
+    - updatedAt: number
+    Indexes: by_user (userId), by_user_start_timestamp (userId, startTimestamp)
 </db-schema>
 
 

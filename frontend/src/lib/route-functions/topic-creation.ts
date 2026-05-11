@@ -1,34 +1,44 @@
 import { TopicBody } from "../types/api-types"
-import { createTopic, updateTopic } from "@/db/db-topic"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
+import { Id } from "@convex/_generated/dataModel"
 import { logger } from "@/lib/logger"
 
-export async function handleTopicCreationOrUpdateOrRemoval(userId: string, topicEntry: TopicBody) {
-  console.log("In handletopicCreationOrUpdate with topicEntry:", topicEntry)
-  let output: number | undefined | null = undefined
-  if (!topicEntry) {
-    return output
-  }
+export async function handleTopicCreationOrUpdateOrRemoval(
+  userId: string,
+  topicEntry: TopicBody
+): Promise<string | undefined | null> {
+  if (!topicEntry) return undefined
+
   if ("new" in topicEntry) {
-    output = await createTopic(userId, topicEntry.new)
-    return output
+    const id = await convex.mutation(api.topics.createTopic, {
+      userId,
+      name: topicEntry.new.name,
+      color: topicEntry.new.color ?? undefined
+    })
+    return id as string
   }
+
   if ("removed" in topicEntry) {
-    //For the future delete the topic
-    output = null
-    return output
-  } else {
-    for (const [id, data] of Object.entries(topicEntry)) {
-      const parsedId = parseInt(id, 10)
-      try {
-        await updateTopic(userId, parsedId, data)
-      } catch (error) {
-        logger.error(
-          "api",
-          `Failed to update topic with id ${id}: ${error instanceof Error ? error.message : String(error)}`
-        )
-        throw new Error("An error occurred while processing the topic update.")
-      }
-      output = parsedId
+    return null
+  }
+
+  let output: string | undefined = undefined
+  for (const [id, data] of Object.entries(topicEntry)) {
+    try {
+      await convex.mutation(api.topics.updateTopic, {
+        userId,
+        id: id as Id<"topics">,
+        name: data.name,
+        color: data.color ?? undefined
+      })
+      output = id
+    } catch (error) {
+      logger.error(
+        "api",
+        `Failed to update topic with id ${id}: ${error instanceof Error ? error.message : String(error)}`
+      )
+      throw new Error("An error occurred while processing the topic update.")
     }
   }
   return output

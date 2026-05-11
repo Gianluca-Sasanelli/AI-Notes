@@ -12,7 +12,7 @@ import { TopicData } from "@/lib/types/database-types"
 import { useIsMobile } from "@/lib/hooks"
 interface ChatContextPopoverProps {
   disabled?: boolean
-  selectedTopicId?: number | null
+  selectedTopicId?: string | null
   canAddFile?: boolean
   onAddFile: () => void
   onSelectTopic: (topic: TopicData) => void

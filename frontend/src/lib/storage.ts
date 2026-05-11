@@ -1,98 +1,71 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand
-} from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
+import { Id } from "@convex/_generated/dataModel"
 
 export const sanitizeFilename = (filename: string): string => {
   const ext = filename.split(".").pop() || ""
   const name = filename.slice(0, filename.length - ext.length - 1)
   const sanitized = name
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-zA-Z0-9._-]/g, "_")
     .replace(/_+/g, "_")
     .replace(/^_|_$/g, "")
   return sanitized ? `${sanitized}.${ext}` : `file_${Date.now()}.${ext}`
 }
 
-const S3_ENDPOINT = process.env.S3_ENDPOINT
-const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY
-const S3_SECRET_KEY = process.env.S3_SECRET_KEY
-const S3_BUCKET = process.env.S3_BUCKET
-
-if (!S3_ENDPOINT) {
-  throw new Error("Missing required environment variable: S3_ENDPOINT")
-}
-if (!S3_ACCESS_KEY) {
-  throw new Error("Missing required environment variable: S3_ACCESS_KEY")
-}
-if (!S3_SECRET_KEY) {
-  throw new Error("Missing required environment variable: S3_SECRET_KEY")
-}
-if (!S3_BUCKET) {
-  throw new Error("Missing required environment variable: S3_BUCKET")
-}
-
-const s3Client = new S3Client({
-  region: "auto",
-  endpoint: S3_ENDPOINT,
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY,
-    secretAccessKey: S3_SECRET_KEY
-  },
-  forcePathStyle: true
-})
-
 export const uploadFile = async (
   userId: string,
-  noteId: number,
+  noteId: string,
   filename: string,
   file: Buffer,
   contentType: string
 ) => {
-  const key = `${userId}/notes/${noteId}/${filename}`
-  await s3Client.send(
-    new PutObjectCommand({
-      Bucket: S3_BUCKET,
-      Key: key,
-      Body: file,
-      ContentType: contentType
-    })
-  )
-  return key
-}
-
-export const deleteFile = async (userId: string, noteId: number, filename: string) => {
-  const key = `${userId}/notes/${noteId}/${filename}`
-  await s3Client.send(
-    new DeleteObjectCommand({
-      Bucket: S3_BUCKET,
-      Key: key
-    })
-  )
-}
-
-export const getFileUrl = async (userId: string, noteId: number, filename: string) => {
-  const key = `${userId}/notes/${noteId}/${filename}`
-  const command = new GetObjectCommand({
-    Bucket: S3_BUCKET,
-    Key: key
+  const uploadUrl = await convex.mutation(api.files.generateUploadUrl, {
+    userId,
+    noteId: noteId as Id<"notes">
   })
-  return getSignedUrl(s3Client, command, { expiresIn: 3600 })
+  const res = await fetch(uploadUrl, {
+    method: "POST",
+    headers: { "Content-Type": contentType },
+    body: new Uint8Array(file)
+  })
+  if (!res.ok) throw new Error(`Upload failed: ${res.status} ${await res.text()}`)
+  const { storageId } = (await res.json()) as { storageId: Id<"_storage"> }
+  await convex.mutation(api.notes.addFileToNote, {
+    userId,
+    noteId: noteId as Id<"notes">,
+    storageId,
+    filename,
+    contentType
+  })
+  return filename
 }
 
-export const getFileContent = async (userId: string, noteId: number, filename: string) => {
-  const key = `${userId}/notes/${noteId}/${filename}`
-  const response = await s3Client.send(
-    new GetObjectCommand({
-      Bucket: S3_BUCKET,
-      Key: key
-    })
-  )
-  const byteArray = await response.Body?.transformToByteArray()
-  if (!byteArray) throw new Error("Failed to read file content")
-  return Buffer.from(byteArray)
+export const deleteFile = async (userId: string, noteId: string, filename: string) => {
+  await convex.mutation(api.notes.removeFileFromNote, {
+    userId,
+    noteId: noteId as Id<"notes">,
+    filename
+  })
+}
+
+export const getFileUrl = async (userId: string, noteId: string, filename: string) => {
+  const url = await convex.query(api.files.getFileUrl, {
+    userId,
+    noteId: noteId as Id<"notes">,
+    filename
+  })
+  if (!url) throw new Error("File not found")
+  return url
+}
+
+export const getFileContent = async (userId: string, noteId: string, filename: string) => {
+  const result = await convex.action(api.files.getFileContent, {
+    userId,
+    noteId: noteId as Id<"notes">,
+    filename
+  })
+  if (!result) throw new Error("File not found")
+  return Buffer.from(result.bytes)
 }

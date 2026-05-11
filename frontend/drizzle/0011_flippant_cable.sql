@@ -1,1 +1,0 @@
-ALTER TABLE "topics" ADD CONSTRAINT "topics_userId_name_unique" UNIQUE("userId","name");

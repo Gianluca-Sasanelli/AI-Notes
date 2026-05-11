@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server"
-import { updateChatTitle, deleteChat } from "@/db"
 import { ErrorData } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ chatId: string }> }) {
   const { userId } = await auth()
@@ -12,7 +13,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ch
   const { chatId } = await params
   try {
     const { title } = await request.json()
-    await updateChatTitle(userId, chatId, title)
+    await convex.mutation(api.chats.updateChatTitle, { userId, clientId: chatId, title })
     return NextResponse.json({ success: true })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to update chat"
@@ -31,7 +32,7 @@ export async function DELETE(
 
   const { chatId } = await params
   try {
-    await deleteChat(userId, chatId)
+    await convex.mutation(api.chats.deleteChat, { userId, clientId: chatId })
     return NextResponse.json({ success: true })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to delete chat"

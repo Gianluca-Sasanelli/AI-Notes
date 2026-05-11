@@ -1,1 +1,0 @@
-ALTER TABLE "topics" ADD COLUMN "color" varchar(7);

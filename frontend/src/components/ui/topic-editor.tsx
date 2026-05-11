@@ -16,9 +16,9 @@ import { getTopics } from "@/lib/api"
 import { T, useGT } from "gt-react"
 
 export type TopicEdit =
-  | { id: number; name: string; color: string; modified: boolean }
-  | { id: number; removed: true }
-  | { id: null; name: string; color: string; modified?: boolean }
+  | { id: string; name: string; color: string | undefined; modified: boolean }
+  | { id: string; removed: true }
+  | { id: null; name: string; color: string | undefined; modified?: boolean }
   | null
 
 type EditableTopic = Exclude<TopicEdit, null | { removed: true }>
@@ -39,7 +39,9 @@ export function TopicEditor({
   onChange: (v: TopicEdit) => void
 }) {
   const [isCreating, setIsCreating] = useState(false)
-  const [localColor, setLocalColor] = useState(isEditableTopic(value) ? value.color : "#3b82f6")
+  const [localColor, setLocalColor] = useState(
+    (isEditableTopic(value) ? value.color : undefined) ?? "#3b82f6"
+  )
   const [localName, setLocalName] = useState(isEditableTopic(value) ? value.name : "")
   const gt = useGT()
   const { data: topicsData } = useQuery({
@@ -57,7 +59,7 @@ export function TopicEditor({
     if (value) onChange({ ...value, name, modified: isModified(value, name, localColor) })
   }
 
-  const selectExistingTopic = (topic: { id: number; name: string; color: string | null }) => {
+  const selectExistingTopic = (topic: { id: string; name: string; color: string | undefined }) => {
     setIsCreating(false)
     setLocalColor(topic.color ?? DEFAULT_TOPIC_COLOR)
     setLocalName(topic.name)

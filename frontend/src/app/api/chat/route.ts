@@ -5,7 +5,10 @@ import { auth } from "@clerk/nextjs/server"
 import { runAssistantAgent } from "@/lib/agents/basic-agent"
 import { getModelInstance } from "@/lib/agents/models"
 import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
-import { createChat, updateChat } from "@/db"
+import { generateTitle } from "@/lib/agents/title-generations"
+import { removePartsFromMessages } from "@/lib/utils"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
 import RetrieveContext from "@/lib/agents/context/context"
 import { RemoteReasoning } from "@/lib/utils"
 
@@ -22,9 +25,7 @@ export async function POST(req: NextRequest) {
     console.error("The request is not valid")
     console.error("The parse result is ", parseResult)
     console.error("The json is ", json)
-    return new Response("Bad Request", {
-      status: 400
-    })
+    return new Response("Bad Request", { status: 400 })
   }
 
   const { messages, id: chatId, model, context } = parseResult.data
@@ -48,9 +49,7 @@ export async function POST(req: NextRequest) {
       async execute({ writer }) {
         writer.write({
           type: "data-ai-status",
-          data: {
-            frontend_message: "Thinking..."
-          }
+          data: { frontend_message: "Thinking..." }
         })
         const streamAssistant = await runAssistantAgent(
           ServerMessages,
@@ -71,15 +70,27 @@ export async function POST(req: NextRequest) {
       },
       onFinish: async ({ messages }) => {
         console.info("ON FINISH CALLED")
-
         if (hasError) {
           console.warn("hasError is true. Returning early")
           return
         }
 
+        const processedMessages = removePartsFromMessages(messages, "data")
+
         if (isFirstUserMessage) {
           try {
-            await createChat(userId, chatId, messages, ServerMessages)
+            let title: string | undefined
+            try {
+              title = await generateTitle(ServerMessages)
+            } catch (e) {
+              console.warn("Title generation failed", e)
+            }
+            await convex.mutation(api.chats.createChat, {
+              userId,
+              clientId: chatId,
+              messages: processedMessages,
+              title
+            })
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error)
             console.error("Error creating chat", errorMsg)
@@ -88,7 +99,11 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-          await updateChat(userId, chatId, messages)
+          await convex.mutation(api.chats.updateChat, {
+            userId,
+            clientId: chatId,
+            messages: processedMessages
+          })
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
           console.error(
@@ -96,7 +111,6 @@ export async function POST(req: NextRequest) {
             errorMsg.length > 400 ? errorMsg.slice(0, 400) + "..." : errorMsg
           )
         }
-        return
       }
     })
   })

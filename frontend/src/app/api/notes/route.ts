@@ -1,9 +1,11 @@
 import { auth } from "@clerk/nextjs/server"
-import { createNote, getTimeNotes, getTimelessNotes } from "@/db"
 import { ErrorData, CreateNoteBody } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
-import { logger, withTiming } from "@/lib/logger"
+import { logger } from "@/lib/logger"
 import { handleTopicCreationOrUpdateOrRemoval } from "@/lib/route-functions/topic-creation"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
+import { Id } from "@convex/_generated/dataModel"
 
 export async function GET(request: Request) {
   const { userId } = await auth()
@@ -16,20 +18,21 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50)
   const includeTotal = searchParams.get("total") === "true"
   const timeless = searchParams.get("timeless") === "true"
-  const topicIdParam = parseInt(searchParams.get("topicId") || "0", 10) || undefined
+  const topicIdParam = (searchParams.get("topicId") || undefined) as Id<"topics"> | undefined
 
   logger.info("api", "GET /api/notes", { skip, limit, includeTotal, timeless })
   try {
-    const result = await withTiming("api", "GET /api/notes", async () => {
-      return timeless
-        ? getTimelessNotes(userId, skip, limit, includeTotal)
-        : getTimeNotes(userId, skip, limit, includeTotal, topicIdParam)
-    })
-    return NextResponse.json({
-      data: result.data,
-      hasNext: result.hasNext,
-      total: result.total
-    })
+    const result = timeless
+      ? await convex.query(api.notes.getTimelessNotes, { userId, skip, limit, includeTotal })
+      : await convex.query(api.notes.getTimeNotes, {
+          userId,
+          skip,
+          limit,
+          includeTotal,
+          topicId: topicIdParam
+        })
+    const data = result.data.map((n) => ({ ...n, files: n.files.map((f) => f.filename) }))
+    return NextResponse.json({ data, hasNext: result.hasNext, total: result.total })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch notes"
     logger.error("api", "GET /api/notes failed", { error: errorMessage })
@@ -47,28 +50,19 @@ export async function POST(request: Request) {
 
   logger.info("api", "POST /api/notes", { timeless: body.timeless })
   try {
-    const id = await withTiming("api", "POST /api/notes", async () => {
-      if (body.timeless) {
-        return createNote(userId, body.content, body.metadata ?? {}, null, null, null)
-      }
-      const createdId = await handleTopicCreationOrUpdateOrRemoval(userId, body.topic)
-      return createNote(
-        userId,
-        body.content,
-        body.metadata ?? {},
-        new Date(body.startTimestamp),
-        body.endTimestamp ? new Date(body.endTimestamp) : null,
-        body.granularity,
-        createdId
-      )
+    const topicId = await handleTopicCreationOrUpdateOrRemoval(userId, body.topic)
+
+    const id = await convex.mutation(api.notes.createNote, {
+      userId,
+      content: body.content,
+      startTimestamp: body.timeless ? undefined : new Date(body.startTimestamp).getTime(),
+      endTimestamp:
+        body.timeless || !body.endTimestamp ? undefined : new Date(body.endTimestamp).getTime(),
+      granularity: body.timeless ? undefined : (body.granularity ?? undefined),
+      topicId: (topicId ?? undefined) as Id<"topics"> | undefined
     })
-    return NextResponse.json(
-      { id },
-      {
-        status: 201,
-        headers: { "created-id": String(id) }
-      }
-    )
+
+    return NextResponse.json({ id }, { status: 201, headers: { "created-id": String(id) } })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to create note"
     logger.error("api", "POST /api/notes failed", { error: errorMessage })

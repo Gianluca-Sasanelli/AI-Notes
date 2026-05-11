@@ -6,11 +6,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
-import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
 import { toast } from "sonner"
 import { createTimeNoteClient, uploadFileClient } from "@/lib/api"
-import type { NoteMetadata } from "@/db/schema"
 import type { NoteGranularity } from "@/lib/types/database-types"
 import { useIsMobile } from "@/lib/hooks"
 import { TopicEdit, TopicEditor } from "@/components/ui/topic-editor"
@@ -22,7 +20,6 @@ export default function NewNotePage() {
   const [startTimestamp, setStartTimestamp] = useState<Date>(new Date())
   const [endTimestamp, setEndTimestamp] = useState<Date | null>(null)
   const [granularity, setGranularity] = useState<NoteGranularity>("day")
-  const [metadata, setMetadata] = useState<NoteMetadata>({})
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -35,10 +32,9 @@ export default function NewNotePage() {
       const noteId = await createTimeNoteClient({
         timeless: false,
         content: content.trim(),
-        metadata,
-        startTimestamp,
+        startTimestamp: startTimestamp.getTime(),
         granularity,
-        endTimestamp: endTimestamp ?? null,
+        endTimestamp: endTimestamp ? endTimestamp.getTime() : null,
         topic: transformTopicEditToTopicBody(topic)
       })
       for (const pf of pendingFiles) {
@@ -89,7 +85,6 @@ export default function NewNotePage() {
         />
 
         <div className="flex flex-col gap-3 w-full">
-          <MetadataEditor value={metadata} onChange={setMetadata} />
           <FileUpload
             pendingFilestoUpload={pendingFiles}
             onPendingFilesChange={setPendingFiles}

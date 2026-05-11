@@ -1,4 +1,4 @@
-export async function uploadFileClient(noteId: number, file: File, filename: string) {
+export async function uploadFileClient(noteId: string, file: File, filename: string) {
   const formData = new FormData()
   formData.append("file", file)
   formData.append("filename", filename)
@@ -24,7 +24,7 @@ export async function uploadFileClient(noteId: number, file: File, filename: str
   return (await res.json()) as { filename: string }
 }
 
-export async function getNoteFilesClient(noteId: number) {
+export async function getNoteFilesClient(noteId: string) {
   const res = await fetch(`/api/notes/${noteId}/files`)
   if (!res.ok) {
     const error = await res.json()
@@ -33,7 +33,7 @@ export async function getNoteFilesClient(noteId: number) {
   return (await res.json()) as { files: string[] }
 }
 
-export async function getFileUrlClient(noteId: number, filename: string) {
+export async function getFileUrlClient(noteId: string, filename: string) {
   const params = new URLSearchParams({ filename })
   const res = await fetch(`/api/notes/${noteId}/files?${params.toString()}`)
   if (!res.ok) {
@@ -43,7 +43,7 @@ export async function getFileUrlClient(noteId: number, filename: string) {
   return (await res.json()) as { url: string }
 }
 
-export async function deleteFileClient(noteId: number, filename: string) {
+export async function deleteFileClient(noteId: string, filename: string) {
   const params = new URLSearchParams({ filename })
   const res = await fetch(`/api/notes/${noteId}/files?${params.toString()}`, {
     method: "DELETE"

@@ -1,24 +1,34 @@
-import { InferSelectModel, InferInsertModel } from "drizzle-orm"
-import { notes, chats, userSummaries, topics } from "@/db/schema"
+// All IDs are Convex ID strings. All timestamps are Unix ms (number).
+
+export type NoteGranularity = "hour" | "day" | "month"
 
 export type PaginatedResponse<T> = {
   data: T[]
   hasNext: boolean
   total?: number
 }
-type BaseNoteData = Omit<InferSelectModel<typeof notes>, "userId">
+
+type BaseNoteData = {
+  id: string
+  topicId: string | null
+  startTimestamp: number | null
+  endTimestamp: number | null
+  granularity: NoteGranularity | null
+  createdAt: number
+  updatedAt: number
+  content: string
+  files: string[]
+}
 
 export type DbTimeNote = BaseNoteData & {
-  startTimestamp: Date
-  granularity: "hour" | "day" | "month"
+  startTimestamp: number
+  granularity: NoteGranularity
 }
+
 export type TimeNote = DbTimeNote & {
-  topic: {
-    id: number
-    name: string
-    color: string
-  } | null
+  topic: { id: string; name: string; color: string | undefined } | null
 }
+
 export type TimelessNote = BaseNoteData & {
   startTimestamp: null
   granularity: null
@@ -26,20 +36,39 @@ export type TimelessNote = BaseNoteData & {
 }
 
 export type NoteData = TimeNote | TimelessNote
-export type NewNoteData = Omit<InferInsertModel<typeof notes>, "userId">
+
 export type UpdateNoteData = Partial<Omit<BaseNoteData, "id">> & {
   content?: Exclude<BaseNoteData["content"], "">
 }
 
-export type NoteGranularity = "hour" | "day" | "month"
 export type TimeNoteSummary = Pick<
-  TimeNote,
+  DbTimeNote,
   "id" | "content" | "startTimestamp" | "endTimestamp" | "updatedAt"
 >
 
-export type ChatData = Omit<InferSelectModel<typeof chats>, "userId">
-export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
-export type UserSummaryData = InferSelectModel<typeof userSummaries>
+export type ChatData = {
+  id: string
+  messages: unknown[]
+  title: string | undefined
+  createdAt: number
+  updatedAt: number
+}
 
-export type TopicData = Omit<InferSelectModel<typeof topics>, "userId">
-export type TopicDbData = Omit<TopicData, "id" | "createdAt" | "updatedAt">
+export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
+
+export type UserSummaryData = {
+  userId: string
+  notesSummary: string
+  createdAt: number
+  updatedAt: number
+}
+
+export type TopicData = {
+  id: string
+  name: string
+  color: string | undefined
+  createdAt: number
+  updatedAt: number
+}
+
+export type TopicDbData = Pick<TopicData, "name" | "color">

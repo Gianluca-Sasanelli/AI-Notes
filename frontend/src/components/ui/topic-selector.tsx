@@ -12,8 +12,8 @@ import {
 import { getTopics } from "@/lib/api"
 
 interface TopicSelectorProps {
-  value: number | null
-  onChange: (topicId: number | null) => void
+  value: string | null
+  onChange: (topicId: string | null) => void
 }
 
 export function TopicSelector({ value, onChange }: TopicSelectorProps) {
@@ -24,17 +24,14 @@ export function TopicSelector({ value, onChange }: TopicSelectorProps) {
   const topics = topicsData?.data ?? []
 
   return (
-    <Select
-      value={value?.toString() ?? "all"}
-      onValueChange={(v) => onChange(v === "all" ? null : Number(v))}
-    >
+    <Select value={value ?? "all"} onValueChange={(v) => onChange(v === "all" ? null : v)}>
       <SelectTrigger className="w-[180px] rounded-md">
         <SelectValue placeholder="All topics" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All topics</SelectItem>
         {topics.map((topic) => (
-          <SelectItem key={topic.id} value={topic.id.toString()}>
+          <SelectItem key={topic.id} value={topic.id}>
             <span className="flex items-center gap-2">
               <Circle
                 className="h-3 w-3"

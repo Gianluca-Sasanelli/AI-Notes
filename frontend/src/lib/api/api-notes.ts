@@ -1,5 +1,4 @@
 import { PaginatedResponse, TimeNote, TimelessNote } from "@/lib/types/database-types"
-import type { NoteMetadata } from "@/db/schema"
 import { UpdateNoteBody, PaginationOptions, CreateNoteBody } from "@/lib/types/api-types"
 import { TopicBody } from "@/lib/types/api-types"
 type UpdateNoteFront = Omit<UpdateNoteBody, "topic">
@@ -15,30 +14,29 @@ export async function createTimeNoteClient(NoteCreateData: CreateNoteBody) {
     const error = await res.json()
     throw new Error(error.message)
   }
-  const data = (await res.json()) as { id: number }
+  const data = (await res.json()) as { id: string }
   return data.id
 }
 
-export async function createTimelessNoteClient(content: string, metadata: NoteMetadata) {
+export async function createTimelessNoteClient(content: string) {
   const res = await fetch("/api/notes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       timeless: true,
-      content,
-      metadata
+      content
     })
   })
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.message)
   }
-  const data = (await res.json()) as { id: number }
+  const data = (await res.json()) as { id: string }
   return data.id
 }
 
 type GetNotesOptions<T extends boolean> = PaginationOptions & { timeless?: T } & {
-  topicId?: number | null
+  topicId?: string | null
 }
 
 export async function getNotesClient(
@@ -56,7 +54,7 @@ export async function getNotesClient(
   if (limit !== undefined) params.set("limit", limit.toString())
   if (includeTotal) params.set("total", "true")
   if (timeless) params.set("timeless", "true")
-  if (topicId) params.set("topicId", topicId.toString())
+  if (topicId) params.set("topicId", topicId)
 
   const url = params.toString() ? `/api/notes?${params.toString()}` : "/api/notes"
   const res = await fetch(url)
@@ -67,7 +65,7 @@ export async function getNotesClient(
   return await res.json()
 }
 
-export async function getNoteClient(id: number) {
+export async function getNoteClient(id: string) {
   const res = await fetch(`/api/notes/${id}`)
   if (!res.ok) {
     const error = await res.json()
@@ -76,7 +74,7 @@ export async function getNoteClient(id: number) {
   return (await res.json()) as TimeNote | TimelessNote
 }
 
-export async function updateNoteClient(id: number, data: UpdateNoteFront, topic?: TopicBody) {
+export async function updateNoteClient(id: string, data: UpdateNoteFront, topic?: TopicBody) {
   const body: UpdateNoteBody = {
     ...data,
     topic
@@ -92,7 +90,7 @@ export async function updateNoteClient(id: number, data: UpdateNoteFront, topic?
   }
 }
 
-export async function deleteNoteClient(id: number) {
+export async function deleteNoteClient(id: string) {
   const res = await fetch(`/api/notes/${id}`, {
     method: "DELETE"
   })

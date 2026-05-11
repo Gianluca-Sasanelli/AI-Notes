@@ -1,8 +1,15 @@
 import { chatContext } from "@/lib/types/chat-types"
-import { getNotesByTopicId } from "@/db/db-notes"
-import { getTopicById } from "@/db/db-topic"
 import { logger } from "@/lib/logger"
-import type { TimeNoteSummary } from "@/lib/types/database-types"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
+import { Id } from "@convex/_generated/dataModel"
+
+type FormattableNote = {
+  id: string
+  content: string
+  startTimestamp?: number
+  endTimestamp?: number
+}
 
 export default async function RetrieveContext(
   chatcontext: chatContext,
@@ -12,35 +19,45 @@ export default async function RetrieveContext(
     return undefined
   }
   if ("noteIds" in chatcontext) {
-    // Not implemented
     return undefined
   }
-  const topicId = parseInt(chatcontext.topicId, 10)
-  if (isNaN(topicId)) {
-    throw new Error("Error parsing the topic Id, please try again.")
-  }
-  let [notes, { name }] = await Promise.all([
-    getNotesByTopicId(userId, topicId),
-    getTopicById(userId, topicId)
+  const topicId = chatcontext.topicId as Id<"topics">
+
+  const [notes, topic] = await Promise.all([
+    convex.query(api.notes.getNotesByTopicId, { userId, topicId }),
+    convex.query(api.topics.getTopicById, { userId, id: topicId })
   ])
+
   if (!notes || notes.length === 0) {
     logger.error("context", "No notes found for topic", { topicId, userId })
     return undefined
   }
-  if (!name) {
+
+  const name = topic?.name ?? "Unnamed Topic"
+  if (!topic) {
     logger.warn("context", "No topic found with the given ID", { topicId, userId })
-    name = "Unnamed Topic"
   }
 
-  const LLMContext = FormatMultipleNotes(notes, name)
-  return LLMContext
+  return FormatMultipleNotes(
+    notes.map((n) => ({
+      id: n._id,
+      content: n.content,
+      startTimestamp: n.startTimestamp,
+      endTimestamp: n.endTimestamp
+    })),
+    name
+  )
 }
 
-export function FormatMultipleNotes(notes: TimeNoteSummary[], topicName: string): string {
+export function FormatMultipleNotes(notes: FormattableNote[], topicName: string): string {
   let formatted = `Topic: ${topicName}\n`
   notes.forEach((note) => {
-    const start = note.startTimestamp.toISOString().split("T")[0]
-    const end = note.endTimestamp ? ` → ${note.endTimestamp.toISOString().split("T")[0]}` : ""
+    const start = note.startTimestamp
+      ? new Date(note.startTimestamp).toISOString().split("T")[0]
+      : ""
+    const end = note.endTimestamp
+      ? ` → ${new Date(note.endTimestamp).toISOString().split("T")[0]}`
+      : ""
     formatted += `- ["NoteId: ${note.id}"] [${start}${end}] ${note.content}\n`
   })
   logger.debug("context", "Formatted notes", { formatted })

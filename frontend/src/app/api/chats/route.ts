@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server"
-import { getChats } from "@/db"
 import { ErrorData } from "@/lib/types/api-types"
 import { NextResponse } from "next/server"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
 
 export async function GET(request: Request) {
   const { userId } = await auth()
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
   const skip = parseInt(searchParams.get("skip") || "0", 10)
   const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50)
   try {
-    const { data, hasNext } = await getChats(userId, skip, limit)
+    const { data, hasNext } = await convex.query(api.chats.getChats, { userId, skip, limit })
     return NextResponse.json({ data, hasNext })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch chats"

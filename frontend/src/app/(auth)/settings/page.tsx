@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
-import { Input } from "@/components/ui/schadcn/input"
 import { toast } from "sonner"
 import {
   Loader2,
@@ -16,8 +15,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  X,
-  Tag,
   Languages
 } from "lucide-react"
 import {
@@ -38,7 +35,6 @@ import {
   DialogDescription
 } from "@/components/ui/schadcn/dialog"
 import type { TimelessNote } from "@/lib/types/database-types"
-import { useQuickTagsStore } from "@/lib/stores/metadata-store"
 import { T, useGT, useLocaleSelector } from "gt-react"
 
 export default function SettingsPage() {
@@ -51,12 +47,8 @@ export default function SettingsPage() {
   const [newNoteContent, setNewNoteContent] = useState("")
   const [editingNote, setEditingNote] = useState<TimelessNote | null>(null)
   const [editingContent, setEditingContent] = useState("")
-  const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
 
-  const { tags, addTag, removeTag, updateTag } = useQuickTagsStore()
-  const [newTag, setNewTag] = useState("")
-  const [editingTagNewName, setEditingTagNewName] = useState<string | null>(null)
-  const editingTagOldName = useRef<string | null>(null)
   const gt = useGT()
   const { locale, locales, setLocale, getLocaleProperties } = useLocaleSelector()
 
@@ -99,7 +91,7 @@ export default function SettingsPage() {
   })
 
   const createNoteMutation = useMutation({
-    mutationFn: () => createTimelessNoteClient(newNoteContent.trim(), {}),
+    mutationFn: () => createTimelessNoteClient(newNoteContent.trim()),
     onSuccess: () => {
       toast.success(gt("Note added"))
       setNewNoteContent("")
@@ -114,8 +106,7 @@ export default function SettingsPage() {
     mutationFn: () => {
       if (!editingNote) return Promise.reject()
       return updateNoteClient(editingNote.id, {
-        content: editingContent.trim(),
-        metadata: editingNote.metadata ?? undefined
+        content: editingContent.trim()
       })
     },
     onSuccess: () => {
@@ -157,37 +148,12 @@ export default function SettingsPage() {
     setEditingNote(note)
   }
 
-  const handleAddTag = () => {
-    if (!newTag.trim()) return
-    addTag(newTag.trim().toLowerCase())
-    setNewTag("")
-  }
-  const handleEditTagOpen = (tag: string) => {
-    if (!tag) {
-      toast.error(gt("No tag selected"))
-      return
-    }
-    setEditingTagNewName(tag)
-    editingTagOldName.current = tag
-  }
-  const OnEditTagSave = () => {
-    if (!editingTagNewName || !editingTagOldName.current) {
-      toast.error(gt("There is an error in the tag editing"))
-      return
-    }
-    updateTag(editingTagOldName.current, editingTagNewName)
-    setEditingTagNewName(null)
-    editingTagOldName.current = null
-  }
   return (
     <div className="w-full max-w-3xl mx-auto py-10 px-4 min-dvh-screen overflow-y-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-primary">
           <T>Settings</T>
         </h1>
-        <p className="text-muted-foreground mt-1">
-          <T>Manage your preferences</T>
-        </p>
       </div>
 
       <div className="space-y-6">
@@ -195,9 +161,6 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold mb-2">
             <T>Theme</T>
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            <T>Choose your preferred color scheme.</T>
-          </p>
           <div className="flex gap-2">
             <Button
               variant={mounted && theme === "light" ? "default" : "outline"}
@@ -234,9 +197,6 @@ export default function SettingsPage() {
             <Languages className="size-4 mr-2" />
             <T>Language</T>
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            <T>Choose your preferred language.</T>
-          </p>
           <div className="flex gap-2">
             {(locales ?? []).map((loc) => {
               const props = getLocaleProperties(loc)
@@ -263,9 +223,6 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold mb-2">
             <T>Context Notes</T>
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            <T>These notes are always available to the AI as context about you.</T>
-          </p>
 
           {notesLoading ? (
             <div className="flex items-center justify-center py-8">
@@ -387,56 +344,6 @@ export default function SettingsPage() {
             </>
           )}
         </div>
-        <div className="rounded-lg border bg-card p-6">
-          <p className="text-sm text-muted-foreground mb-4">
-            <T>Tags you can quickly add to your notes.</T>
-          </p>
-
-          <div className="space-y-2 mb-4">
-            {tags.map((tag, index) => (
-              <div
-                key={typeof tag === "string" ? tag : index}
-                className="flex items-center gap-2 p-3 rounded-md bg-secondary"
-              >
-                <Tag className="size-4 text-primary" />
-                <span className="font-medium text-sm">{tag}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => handleEditTagOpen(tag)}
-                >
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => removeTag(tag)}
-                >
-                  <X className="size-4" />
-                </Button>
-              </div>
-            ))}
-            {tags.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                <T>No quick tags configured</T>
-              </p>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              placeholder={gt("Tag name")}
-              className="flex-1"
-            />
-            <Button onClick={handleAddTag} disabled={!newTag.trim()} size="icon">
-              <Plus className="size-4" />
-            </Button>
-          </div>
-        </div>
       </div>
 
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>
@@ -496,29 +403,6 @@ export default function SettingsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={editingTagNewName !== null}
-        onOpenChange={(open) => !open && setEditingTagNewName(null)}
-      >
-        <DialogContent className="w-[90dvh]">
-          <DialogHeader>
-            <DialogTitle>
-              <T>Edit Tag</T>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              value={editingTagNewName ?? ""}
-              onChange={(e) => setEditingTagNewName(e.target.value)}
-              placeholder={gt("Tag name")}
-              className="flex-1"
-            />
-            <Button onClick={OnEditTagSave} disabled={!editingTagNewName?.trim()}>
-              <T>Save</T>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

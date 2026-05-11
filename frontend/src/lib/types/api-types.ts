@@ -1,5 +1,9 @@
-import { NoteMetadata } from "@/db/schema"
-import { NoteData, TimeNote, TopicDbData, DbTimeNote } from "@/lib/types/database-types"
+import {
+  NoteData,
+  TimeNote,
+  TopicDbData,
+  DbTimeNote
+} from "@/lib/types/database-types"
 
 export type TimeNoteBody = Omit<DbTimeNote, "topicId"> & {
   timeless: false
@@ -8,22 +12,26 @@ export type TimeNoteBody = Omit<DbTimeNote, "topicId"> & {
 export type TimelessNoteBody = DbTimeNote & {
   timeless: true
   content: string
-  metadata: NoteMetadata
 }
+
+// Topic IDs are now Convex ID strings
 export type TopicBody =
-  | { [id: number]: TopicDbData & { modified: boolean } }
+  | { [id: string]: TopicDbData & { modified: boolean } }
   | { new: TopicDbData }
-  | { removed: number }
+  | { removed: string }
   | undefined
+
 export type UpdateNoteBody = Partial<TimeNoteBody> & {
   topic?: TopicBody
 }
+
 export type CreateNoteBody = Omit<
   TimeNoteBody | TimelessNoteBody,
   "createdAt" | "updatedAt" | "files" | "id"
 > & {
   topic?: TopicBody
 }
+
 export const isTimeNote = (note: NoteData): note is TimeNote => {
   return note.startTimestamp !== null
 }

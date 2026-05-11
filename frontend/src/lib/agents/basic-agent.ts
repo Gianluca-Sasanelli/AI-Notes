@@ -4,10 +4,11 @@ import { stepCountIs, streamText } from "ai"
 import { handleAgentError } from "@/lib/utils"
 import { NotesTools } from "./tools/notes-tools"
 import { buildAssistantSystemPrompt } from "./system-prompts/prompts"
-import { getUserSummary, getLatestTimelessNotes } from "@/db"
 import { auth } from "@clerk/nextjs/server"
 import { WebSearchTools } from "./tools/web-search"
 import type { ProviderOptions } from "./models"
+import { convex } from "@/lib/convex-server"
+import { api } from "@convex/_generated/api"
 
 export async function runAssistantAgent(
   messages: ModelMessage[],
@@ -21,8 +22,8 @@ export async function runAssistantAgent(
   }
 
   const [summary, timelessNotes] = await Promise.all([
-    getUserSummary(userId),
-    getLatestTimelessNotes(userId, 20)
+    convex.query(api.userSummaries.getUserSummary, { userId }),
+    convex.query(api.notes.getLatestTimelessNotes, { userId, limit: 20 })
   ])
 
   const systemPrompt = buildAssistantSystemPrompt(

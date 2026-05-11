@@ -20,7 +20,7 @@ export type PendingFile = {
 
 type FileUploadProps =
   | {
-      noteId: number
+      noteId: string
       noteFiles: string[]
       pendingFilestoUpload: PendingFile[]
       onPendingFilesChange: (files: PendingFile[]) => void

@@ -2,10 +2,9 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { Calendar, FileText, Tag, Pencil, Trash2, Loader2, Paperclip, Circle } from "lucide-react"
+import { Calendar, FileText, Pencil, Trash2, Loader2, Paperclip, Circle } from "lucide-react"
 import Link from "next/link"
 import { Card } from "@/components/ui/schadcn/card"
-import { Badge } from "@/components/ui/schadcn/badge"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
 import {
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/schadcn/dialog"
 import { PaginationControls } from "@/components/pagination-controls"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
-import { MetadataEditor } from "@/components/ui/metadata-editor"
 import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
 import {
   getNotesClient,
@@ -28,7 +26,6 @@ import {
 } from "@/lib/api"
 import { toast } from "sonner"
 import { TimeNote, NoteGranularity } from "@/lib/types/database-types"
-import type { NoteMetadata } from "@/db/schema"
 import { formatTimestampRange } from "@/lib/notes-utils"
 import { TopicEditor, type TopicEdit, isEditableTopic } from "@/components/ui/topic-editor"
 import { TopicSelector } from "@/components/ui/topic-selector"
@@ -38,15 +35,14 @@ export function NotesList() {
   const [skip, setSkip] = useState(0)
   const [limit, setLimit] = useState(10)
   const [editingNote, setEditingNote] = useState<TimeNote | null>(null)
-  const [deletingNoteId, setDeletingNoteId] = useState<number | null>(null)
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
   const [editingContent, setEditingContent] = useState("")
   const [editingStartTimestamp, setEditingStartTimestamp] = useState(new Date())
   const [editingEndTimestamp, setEditingEndTimestamp] = useState<Date | null>(null)
   const [editingGranularity, setEditingGranularity] = useState<NoteGranularity>("day")
-  const [editingMetadata, setEditingMetadata] = useState<NoteMetadata | null>(null)
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const [topicEdit, setTopicEdit] = useState<TopicEdit>(null)
-  const [queryTopicId, setQueryTopic] = useState<number | null>(null)
+  const [queryTopicId, setQueryTopic] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const gt = useGT()
 
@@ -67,10 +63,9 @@ export function NotesList() {
         editingNote.id,
         {
           content: editingContent.trim(),
-          startTimestamp: editingStartTimestamp ?? undefined,
-          endTimestamp: editingEndTimestamp ?? undefined,
-          granularity: editingGranularity,
-          metadata: editingMetadata ?? undefined
+          startTimestamp: editingStartTimestamp.getTime(),
+          endTimestamp: editingEndTimestamp ? editingEndTimestamp.getTime() : null,
+          granularity: editingGranularity
         },
         topic
       )
@@ -136,7 +131,6 @@ export function NotesList() {
     setEditingStartTimestamp(new Date(note.startTimestamp))
     setEditingEndTimestamp(note.endTimestamp ? new Date(note.endTimestamp) : null)
     setEditingGranularity(note.granularity)
-    setEditingMetadata(note.metadata)
     setTopicEdit(
       note.topic
         ? { id: note.topic.id, name: note.topic.name, color: note.topic.color, modified: false }
@@ -257,7 +251,6 @@ export function NotesList() {
               className="min-h-[100px] focus:border-primary focus:outline-none"
             />
             <div className="flex flex-wrap items-center gap-2">
-              <MetadataEditor value={editingMetadata ?? {}} onChange={setEditingMetadata} />
               <TopicEditor value={topicEdit} onChange={setTopicEdit} />
               {editingNote && (
                 <FileUpload
@@ -333,10 +326,8 @@ function TimeNoteCard({
 }: {
   note: TimeNote
   onEdit: (note: TimeNote) => void
-  onDelete: (id: number) => void
+  onDelete: (id: string) => void
 }) {
-  const noteMetadata = note.metadata as Record<string, string | number | boolean> | null
-
   return (
     <Card
       className="p-4 transition-colors hover:brightness-110"
@@ -362,18 +353,6 @@ function TimeNoteCard({
           </div>
 
           <p className="text-sm leading-relaxed">{note.content}</p>
-
-          {noteMetadata && Object.keys(noteMetadata).length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {Object.entries(noteMetadata).map(([key, val]) => (
-                <Badge key={key} variant="secondary" className="gap-1 py-0.5 text-xs font-normal">
-                  <Tag className="h-3 w-3" />
-                  <span className="font-medium">{key}:</span>
-                  <span>{String(val)}</span>
-                </Badge>
-              ))}
-            </div>
-          )}
 
           {note.files && note.files.length > 0 && (
             <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">

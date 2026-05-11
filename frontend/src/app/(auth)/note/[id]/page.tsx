@@ -4,7 +4,6 @@ import { use, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Calendar,
-  Tag,
   Paperclip,
   ArrowLeft,
   FileText,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { Card } from "@/components/ui/schadcn/card"
-import { Badge } from "@/components/ui/schadcn/badge"
 import { Button } from "@/components/ui/schadcn/button"
 import { getNoteClient, getFileUrlClient } from "@/lib/api"
 import { formatTimestampRange } from "@/lib/notes-utils"
@@ -28,7 +26,7 @@ const isImageFile = (filename: string) => {
   return ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext ?? "")
 }
 
-function FileItem({ noteId, filename }: { noteId: number; filename: string }) {
+function FileItem({ noteId, filename }: { noteId: string; filename: string }) {
   const [url, setUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -75,8 +73,7 @@ function FileItem({ noteId, filename }: { noteId: number; filename: string }) {
 }
 
 export default function NotePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
-  const noteId = parseInt(id, 10)
+  const { id: noteId } = use(params)
   const queryClient = useQueryClient()
 
   const {
@@ -86,7 +83,7 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
   } = useQuery({
     queryKey: ["note", noteId],
     queryFn: () => getNoteClient(noteId),
-    enabled: !isNaN(noteId),
+    enabled: noteId.length > 0,
     placeholderData: () => {
       const queries = queryClient.getQueriesData<PaginatedResponse<TimeNote | TimelessNote>>({
         queryKey: ["notes"]
@@ -98,16 +95,6 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
       return undefined
     }
   })
-
-  if (isNaN(noteId)) {
-    return (
-      <div className="w-full max-w-3xl mx-auto py-10 px-4">
-        <Card className="p-12 text-center">
-          <p className="text-muted-foreground">Invalid note ID</p>
-        </Card>
-      </div>
-    )
-  }
 
   if (isLoading) {
     return (
@@ -131,8 +118,6 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
       </div>
     )
   }
-
-  const metadata = note.metadata as Record<string, string | number | boolean>
 
   return (
     <div className="w-full max-w-3xl mx-auto py-10 px-4 overflow-y-auto">
@@ -162,23 +147,6 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-base leading-relaxed whitespace-pre-wrap">{note.content}</p>
         </div>
-
-        {metadata && Object.keys(metadata).length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Tags
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(metadata).map(([key, val]) => (
-                <Badge key={key} variant="secondary" className="gap-1.5 py-1 text-sm font-normal">
-                  <span className="font-medium">{key}:</span>
-                  <span>{String(val)}</span>
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
 
         {note.files && note.files.length > 0 && (
           <div className="space-y-3">
