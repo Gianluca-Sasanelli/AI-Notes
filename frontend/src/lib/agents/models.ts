@@ -68,4 +68,4 @@ const MODEL_CAPABILITIES: Record<AIModel, ModelCapabilities> = {
   [GROQ_MODEL.GPT_OSS_20B]: { supportsFiles: false }
 }
 
-export const supportsFiles = (model: AIModel) => MODEL_CAPABILITIES[model].supportsFiles
+export const supportsFiles = (model: AIModel) => MODEL_CAPABILITIES[model]?.supportsFiles ?? false
