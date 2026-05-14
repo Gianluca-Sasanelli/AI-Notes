@@ -9,6 +9,9 @@ import { removePartsFromMessages, createChatWithTitle } from "@/lib/utils"
 import { convex } from "@/lib/convex-server"
 import { api } from "@convex/_generated/api"
 import { RemoveReasoning } from "@/lib/utils"
+import { getResumableStreamContext } from "@/lib/redis"
+import { listenForAbort } from "@/lib/chat-abort-controllers"
+import { registerActiveChat, deregisterActiveChat } from "@/lib/active-chat-tracker"
 
 export const dynamic = "force-dynamic"
 export async function POST(req: NextRequest) {
@@ -38,11 +41,29 @@ export async function POST(req: NextRequest) {
   }
   let hasError = false
 
+  const { signal: abortSignal, cleanup: cleanupAbortListener } = listenForAbort(chatId)
+
+  // Ignore client disconnect — stream continues server-side so onFinish can persist
+  // and the client can resume via GET /api/chat/[id]/stream.
+  // Abort is only triggered explicitly via DELETE /api/chat/[id]/stream (Redis PubSub).
+  req.signal.addEventListener("abort", () => {})
+
+  const streamContext = getResumableStreamContext()
+
   const response = createUIMessageStreamResponse({
     status: 200,
+    async consumeSseStream({ stream }) {
+      try {
+        await streamContext.createNewResumableStream(chatId, () => stream)
+      } catch {
+        console.warn("[RESUME] Failed to create resumable stream — Redis may be unavailable")
+      }
+    },
     stream: createUIMessageStream<ChatUIMessage>({
       originalMessages: messages,
       async execute({ writer }) {
+        registerActiveChat(userId, chatId).catch(() => {})
+
         writer.write({
           type: "data-ai-status",
           data: { frontend_message: "Thinking..." }
@@ -50,7 +71,8 @@ export async function POST(req: NextRequest) {
         const streamAssistant = await runAssistantAgent(
           ServerMessages,
           modelInstance,
-          providerOptions
+          providerOptions,
+          abortSignal
         )
         writer.merge(streamAssistant.toUIMessageStream())
       },
@@ -65,6 +87,10 @@ export async function POST(req: NextRequest) {
       },
       onFinish: async ({ messages }) => {
         console.info("ON FINISH CALLED")
+
+        await deregisterActiveChat(userId, chatId).catch(() => {})
+        cleanupAbortListener()
+
         if (hasError) {
           console.warn("hasError is true. Returning early")
           return

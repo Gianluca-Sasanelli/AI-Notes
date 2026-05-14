@@ -13,7 +13,8 @@ import { api } from "@convex/_generated/api"
 export async function runAssistantAgent(
   messages: ModelMessage[],
   model: LanguageModelV3,
-  providerOptions?: ProviderOptions
+  providerOptions?: ProviderOptions,
+  abortSignal?: AbortSignal
 ) {
   const { userId } = await auth()
   if (!userId) {
@@ -36,6 +37,7 @@ export async function runAssistantAgent(
     tools: { ...tools, ...webSearchTools },
     stopWhen: stepCountIs(10),
     providerOptions,
+    abortSignal,
     onError: (error) => {
       throw handleAgentError(error, "ASSISTANT AGENT")
     }

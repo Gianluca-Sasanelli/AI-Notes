@@ -4,8 +4,9 @@ import { getChatsClient } from "@/lib/api"
 import type { ChatHistoryItem } from "@/lib/types/database-types"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks"
+import { useActiveChats } from "@/lib/hooks/useActiveChats"
 import { useQuery } from "@tanstack/react-query"
-import { History } from "lucide-react"
+import { History, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
@@ -62,6 +63,8 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
   })
   const pathname = usePathname()
   const isMobile = useIsMobile()
+  const { activeChats } = useActiveChats()
+  console.log("activeChats", activeChats)
   const groupedChats = useMemo(() => (data ? groupChatsByDate(data.data) : []), [data])
   const gt = useGT()
 
@@ -116,6 +119,9 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                         isActive && "bg-accent text-accent-foreground"
                       )}
                     >
+                      {activeChats.has(chat.id) && (
+                        <Loader2 className="mr-1 h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
+                      )}
                       <span className="truncate" title={chat.title || untitledText}>
                         {chat.title || untitledText}
                       </span>

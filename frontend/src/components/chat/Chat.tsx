@@ -32,7 +32,10 @@ export default function Chat({
     },
     experimental_throttle: 100,
     transport: new DefaultChatTransport({
-      api: "/api/chat"
+      api: "/api/chat",
+      prepareReconnectToStreamRequest({ id }) {
+        return { api: `/api/chat/${id}/stream` }
+      }
     })
   })
 
