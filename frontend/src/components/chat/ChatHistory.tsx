@@ -10,6 +10,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
 import { ChatDropdown } from "./ChatDropdown"
+import { Skeleton } from "@/components/ui/schadcn/skeleton"
 import { useGT } from "gt-react"
 
 type DateGroup = {
@@ -74,7 +75,20 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
 
   const untitledText = gt("Untitled")
 
-  if (isLoading || !data) return null
+  if (isLoading || !data) {
+    return (
+      <div className="flex flex-col gap-3 px-2">
+        <Skeleton className="h-3 w-16" />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-6 w-full rounded-md" />
+        ))}
+        <Skeleton className="h-3 w-20 mt-2" />
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Skeleton key={i} className="h-6 w-full rounded-md" />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-1">

@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { Calendar, FileText, Pencil, Trash2, Loader2, Paperclip, Circle } from "lucide-react"
+import { Calendar, FileText, Pencil, Trash2, Paperclip, Circle } from "lucide-react"
 import Link from "next/link"
 import { Card } from "@/components/ui/schadcn/card"
+import { Skeleton } from "@/components/ui/schadcn/skeleton"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
 import {
@@ -145,8 +146,10 @@ export function NotesList() {
   return (
     <div className="space-y-4">
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="space-y-3">
+          <NoteCardSkeleton showTopic />
+          <NoteCardSkeleton showTopic showFiles />
+          <NoteCardSkeleton />
         </div>
       ) : notes.length === 0 ? (
         <>
@@ -316,6 +319,41 @@ export function NotesList() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+function NoteCardSkeleton({ showTopic, showFiles }: { showTopic?: boolean; showFiles?: boolean }) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="flex items-center gap-1.5">
+              <Skeleton className="h-4 w-4 rounded-sm" />
+              <Skeleton className="h-4 w-32" />
+            </span>
+            {showTopic && (
+              <span className="flex items-center gap-1.5">
+                <Skeleton className="h-3 w-3 rounded-full" />
+                <Skeleton className="h-4 w-16" />
+              </span>
+            )}
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+          {showFiles && (
+            <div className="flex items-center gap-1.5 pt-1">
+              <Skeleton className="h-3 w-3 rounded-sm" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          )}
+        </div>
+        <div className="flex gap-1">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+    </Card>
   )
 }
 
