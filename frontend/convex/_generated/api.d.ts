@@ -12,7 +12,6 @@ import type * as chats from "../chats.js";
 import type * as files from "../files.js";
 import type * as notes from "../notes.js";
 import type * as topics from "../topics.js";
-import type * as userSummaries from "../userSummaries.js";
 
 import type {
   ApiFromModules,
@@ -25,7 +24,6 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   notes: typeof notes;
   topics: typeof topics;
-  userSummaries: typeof userSummaries;
 }>;
 
 /**

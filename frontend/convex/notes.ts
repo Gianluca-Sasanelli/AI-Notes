@@ -160,31 +160,6 @@ export const deleteNote = mutation({
     await ctx.db.delete(args.id)
   }
 })
-
-export const getNotesAfterDate = query({
-  args: {
-    userId: v.string(),
-    afterDate: v.number(),
-    limit: v.optional(v.number())
-  },
-  handler: async (ctx, args) => {
-    const limit = args.limit ?? 10
-    const allNotes = await ctx.db
-      .query("notes")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .filter((q) =>
-        q.and(
-          q.gt(q.field("updatedAt"), args.afterDate),
-          q.neq(q.field("startTimestamp"), undefined)
-        )
-      )
-      .collect()
-
-    allNotes.sort((a, b) => b.startTimestamp! - a.startTimestamp!)
-    return allNotes.slice(0, limit)
-  }
-})
-
 export const getLatestNotes = query({
   args: {
     userId: v.string(),

@@ -1,5 +1,4 @@
 export * from "./api-notes"
 export * from "./api-chats"
-export * from "./api-user-summary"
 export * from "./api-files"
 export * from "./api-topics"

@@ -56,13 +56,6 @@ export type ChatData = {
 
 export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
 
-export type UserSummaryData = {
-  userId: string
-  notesSummary: string
-  createdAt: number
-  updatedAt: number
-}
-
 export type TopicData = {
   _id: string
   name: string

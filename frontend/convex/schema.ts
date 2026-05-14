@@ -45,10 +45,4 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_client_id", ["clientId"]),
 
-  userSummaries: defineTable({
-    userId: v.string(),
-    notesSummary: v.string(),
-    createdAt: v.number(),
-    updatedAt: v.number()
-  }).index("by_user", ["userId"])
 })

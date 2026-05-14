@@ -6,21 +6,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
 import { toast } from "sonner"
+import { Loader2, Sun, Moon, Monitor, Plus, Pencil, Trash2, Languages } from "lucide-react"
 import {
-  Loader2,
-  Sun,
-  Moon,
-  Monitor,
-  RefreshCw,
-  Plus,
-  Pencil,
-  Trash2,
-  Languages
-} from "lucide-react"
-import {
-  getUserSummaryClient,
-  updateUserSummaryClient,
-  regenerateUserSummaryClient,
   getNotesClient,
   createTimelessNoteClient,
   updateNoteClient,
@@ -41,7 +28,6 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const queryClient = useQueryClient()
   const isMobile = useIsMobile()
-  const [editedSummary, setEditedSummary] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
   const [newNoteContent, setNewNoteContent] = useState("")
@@ -56,38 +42,9 @@ export default function SettingsPage() {
     queueMicrotask(() => setMounted(true))
   }, [])
 
-  const { data: summary, isLoading } = useQuery({
-    queryKey: ["userSummary"],
-    queryFn: getUserSummaryClient
-  })
-
   const { data: contextNotes, isLoading: notesLoading } = useQuery({
     queryKey: ["timelessNotes"],
     queryFn: () => getNotesClient({ skip: 0, limit: 100, timeless: true })
-  })
-
-  const { mutate: updateSummary, isPending: isSaving } = useMutation({
-    mutationFn: updateUserSummaryClient,
-    onSuccess: () => {
-      toast.success(gt("Summary saved"))
-      queryClient.invalidateQueries({ queryKey: ["userSummary"] })
-      setEditedSummary(null)
-    },
-    onError: () => {
-      toast.error(gt("Failed to save summary"))
-    }
-  })
-
-  const { mutate: regenerateSummary, isPending: isRegenerating } = useMutation({
-    mutationFn: regenerateUserSummaryClient,
-    onSuccess: () => {
-      toast.success(gt("Summary regenerated from your notes"))
-      queryClient.invalidateQueries({ queryKey: ["userSummary"] })
-      setEditedSummary(null)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || gt("Failed to regenerate summary"))
-    }
   })
 
   const createNoteMutation = useMutation({
@@ -133,15 +90,6 @@ export default function SettingsPage() {
       toast.error(gt("Failed to delete note"))
     }
   })
-
-  const currentValue = editedSummary ?? summary?.notesSummary ?? ""
-  const hasChanges = editedSummary !== null && editedSummary !== (summary?.notesSummary ?? "")
-
-  const handleSave = () => {
-    if (editedSummary !== null && editedSummary.trim() !== "") {
-      updateSummary(editedSummary)
-    }
-  }
 
   const handleEditOpen = (note: TimelessNote) => {
     setEditingContent(note.content)
@@ -288,62 +236,6 @@ export default function SettingsPage() {
           )}
         </div>
 
-        <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">
-            <T>AI Summary</T>
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            <T>
-              This summary is used as context when you chat with the AI assistant. It&apos;s
-              automatically generated from your notes but you can edit it.
-            </T>
-          </p>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <>
-              <Textarea
-                value={currentValue}
-                onChange={(e) => setEditedSummary(e.target.value)}
-                placeholder={gt(
-                  "No summary yet. Add at least 5 notes to generate one automatically."
-                )}
-                className="min-h-[200px] resize-y bg-secondary focus:border-primary focus:outline-none"
-              />
-              {summary && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {gt("Last updated:")} {new Date(summary.updatedAt).toLocaleString()}
-                </p>
-              )}
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => regenerateSummary()}
-                  disabled={isRegenerating || isSaving}
-                  size={isMobile ? "sm" : "default"}
-                >
-                  {isRegenerating ? (
-                    <Loader2 className="size-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="size-4 mr-2" />
-                  )}
-                  {isMobile ? <T>Regenerate</T> : <T>Regenerate from Notes</T>}
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={!hasChanges || isSaving || isRegenerating}
-                  size={isMobile ? "sm" : "default"}
-                >
-                  {isSaving && <Loader2 className="size-4 mr-2 animate-spin" />}
-                  <T>Save Changes</T>
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
       </div>
 
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>

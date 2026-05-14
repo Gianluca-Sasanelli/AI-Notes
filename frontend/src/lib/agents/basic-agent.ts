@@ -21,16 +21,12 @@ export async function runAssistantAgent(
     throw new Error("User not authenticated")
   }
 
-  const [summary, timelessNotes] = await Promise.all([
-    convex.query(api.userSummaries.getUserSummary, { userId }),
-    convex.query(api.notes.getLatestTimelessNotes, { userId, limit: 20 })
-  ])
+  const timelessNotes = await convex.query(api.notes.getLatestTimelessNotes, {
+    userId,
+    limit: 20
+  })
 
-  const systemPrompt = buildAssistantSystemPrompt(
-    summary?.notesSummary ?? null,
-    timelessNotes,
-    context
-  )
+  const systemPrompt = buildAssistantSystemPrompt(timelessNotes, context)
 
   const tools = NotesTools(userId)
   const webSearchTools = WebSearchTools()
