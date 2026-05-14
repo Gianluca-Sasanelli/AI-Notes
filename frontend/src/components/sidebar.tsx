@@ -3,7 +3,8 @@
 import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/schadcn/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/schadcn/sheet"
 import {
@@ -13,7 +14,7 @@ import {
   TooltipTrigger
 } from "@/components/ui/schadcn/tooltip"
 import { cn } from "@/lib/utils"
-import { Notebook, Plus, Pencil, PanelLeft } from "lucide-react"
+import { Notebook, Plus, Pencil, PanelLeft, Sun, Moon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/schadcn/avatar"
 import { AccountDialog } from "@/components/account-dialog"
 import { ChatHistory } from "@/components/chat/ChatHistory"
@@ -43,6 +44,59 @@ const navigationItems = [
   }
 ]
 
+function ThemeToggle({ isCollapsed }: { isCollapsed: boolean }) {
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true))
+  }, [])
+
+  const isDark = mounted && resolvedTheme === "dark"
+
+  const toggle = () => setTheme(isDark ? "light" : "dark")
+
+  if (isCollapsed) {
+    return (
+      <Button variant="ghost" size="icon" onClick={toggle} className="w-full justify-center">
+        {isDark ? <Moon className="size-6" /> : <Sun className="size-6" />}
+      </Button>
+    )
+  }
+
+  return (
+    <div
+      onClick={toggle}
+      className="relative flex w-full cursor-pointer items-center rounded-lg bg-muted p-1"
+    >
+      <div
+        className={cn(
+          "absolute h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-md bg-background shadow-sm transition-transform duration-300 ease-in-out",
+          isDark ? "translate-x-[calc(100%+4px)]" : "translate-x-0"
+        )}
+      />
+      <div
+        className={cn(
+          "z-10 flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 transition-colors duration-300",
+          !isDark ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        <Sun className="size-4" />
+        <span className="text-xs font-medium">Light</span>
+      </div>
+      <div
+        className={cn(
+          "z-10 flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 transition-colors duration-300",
+          isDark ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        <Moon className="size-4" />
+        <span className="text-xs font-medium">Dark</span>
+      </div>
+    </div>
+  )
+}
+
 function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClose?: () => void }) {
   const pathname = usePathname()
   const { user, isLoaded } = useUser()
@@ -57,7 +111,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col transition-all duration-200">
+      <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex-none p-1">
           <nav className="flex flex-col space-y-1">
             {navigationItems.map((item) => {
@@ -105,6 +159,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
       </div>
 
       <div className="mb-2 min-h-0 flex-none mt-auto flex flex-col ">
+        <ThemeToggle isCollapsed={isCollapsed} />
         {(() => {
           const initials = user?.firstName?.[0] || user?.primaryEmailAddress?.emailAddress?.[0]
 
