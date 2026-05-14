@@ -148,7 +148,7 @@ export function ChatDropdown({
       </div>
 
       <ResponsiveDialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <ResponsiveDialogContent className="min-w-[30vw] max-w-[70vw]">
+        <ResponsiveDialogContent className="sm:max-w-lg">
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>Rename Chat</ResponsiveDialogTitle>
           </ResponsiveDialogHeader>
@@ -170,7 +170,7 @@ export function ChatDropdown({
       </ResponsiveDialog>
 
       <ResponsiveDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <ResponsiveDialogContent className="min-w-[30vw] max-w-[70vw]">
+        <ResponsiveDialogContent className="sm:max-w-lg">
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>Delete Chat</ResponsiveDialogTitle>
           </ResponsiveDialogHeader>

@@ -247,6 +247,12 @@ function MobileSidebar() {
       <SheetContent
         side="left"
         className="w-[80%] max-w-[280px] bg-secondary text-secondary-foreground p-0 py-2"
+        onInteractOutside={(e) => {
+          const target = e.target as HTMLElement
+          if (target?.closest?.("[data-clerk-portal], .cl-userButtonPopoverCard, .cl-modalContent, .cl-userProfile-root")) {
+            e.preventDefault()
+          }
+        }}
       >
         <VisuallyHidden.Root>
           <SheetTitle>{gt("Navigation Menu")}</SheetTitle>
