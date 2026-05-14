@@ -107,7 +107,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
               href="/settings"
               onClick={onClose}
               className={cn(
-                "group inline-flex h-[50px] w-full items-center  justify-start p-2 pl-3 whitespace-nowrap bg-transparent text-sm font-medium text-foreground hover:bg-accent rounded-md",
+                "group inline-flex h-[50px] w-full items-center  justify-start p-2 pl-3 whitespace-nowrap bg-transparent text-sm font-medium text-secondary-foreground hover:bg-accent hover:text-accent-foreground rounded-md",
                 pathname === "/settings" && "bg-accent text-accent-foreground"
               )}
             >
@@ -128,7 +128,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
           )
         })()}
 
-        <div className="h-[50px] w-full flex-none border-t" suppressHydrationWarning>
+        <div className="h-[50px] w-full flex-none" suppressHydrationWarning>
           {!isLoaded ? (
             <div
               className={
@@ -143,7 +143,7 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                     appearance={{
                       elements: {
                         rootBox:
-                          "!size-full hover:bg-accent bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md text-sm font-medium text-secondary-foreground [&_*]:!outline-none [&_*]:!ring-0",
+                          "!size-full hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md text-sm font-medium text-secondary-foreground [&_*]:!outline-none [&_*]:!ring-0",
                         userButtonTrigger: "size-full cursor-pointer !outline-none !ring-0",
                         userButtonBox: "size-full !outline-none !ring-0",
                         userButtonAvatarBox:
@@ -152,7 +152,8 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                         userButtonOuterIdentifier: "hidden",
                         card: "bg-popover border-border",
                         profileSectionTitle: "!text-secondary-foreground",
-                        accordionTriggerButton: "text-secondary-foreground hover:bg-accent",
+                        accordionTriggerButton:
+                          "text-secondary-foreground hover:bg-accent hover:text-accent-foreground",
                         accordionContent: "bg-background",
                         profileSectionContent: "text-secondary-foreground"
                       }
@@ -169,15 +170,16 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
                 appearance={{
                   elements: {
                     rootBox:
-                      "!size-full cursor-pointer hover:bg-accent bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md [&_*]:!outline-none [&_*]:!ring-0",
-                    userButtonTrigger: "hidden",
+                      "!size-full cursor-pointer hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md [&_*]:!outline-none [&_*]:!ring-0",
+                    userButtonTrigger: "size-full cursor-pointer !outline-none !ring-0",
                     userButtonBox: "size-full flex items-center !gap-0 focus:ring-0",
                     userButtonAvatarBox: "order-first !size-6",
                     userButtonOuterIdentifier:
-                      "flex-1 p-0  whitespace-nowrap text-left  !text-foreground",
+                      "flex-1 p-0  whitespace-nowrap text-left  !text-secondary-foreground",
                     card: "bg-popover border-border",
                     profileSectionTitle: "p-0 !text-secondary-foreground items-center",
-                    accordionTriggerButton: "hover:bg-accent focus:bg-accent",
+                    accordionTriggerButton:
+                      "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                     accordionContent: "bg-background",
                     profileSectionContent: "text-secondary-foreground"
                   }
@@ -214,7 +216,7 @@ function DesktopSidebar() {
               size="icon"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className={cn(
-                "hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                "hover:bg-accent hover:text-accent-foreground cursor-pointer text-secondary-foreground",
                 !isCollapsed && "ml-auto"
               )}
             >
@@ -242,7 +244,10 @@ function MobileSidebar() {
           <PanelLeft className="size-6 " />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[80%] max-w-[280px] bg-secondary p-0 py-2">
+      <SheetContent
+        side="left"
+        className="w-[80%] max-w-[280px] bg-secondary text-secondary-foreground p-0 py-2"
+      >
         <VisuallyHidden.Root>
           <SheetTitle>{gt("Navigation Menu")}</SheetTitle>
         </VisuallyHidden.Root>

@@ -1,0 +1,14 @@
+{
+  "name": "ai-notes-root",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && bun --bun next dev",
+    "dev:convex": "cd frontend && bunx convex dev",
+    "dev:all": "bun dev:convex & bun dev & wait",
+    "format": "cd frontend && bun format",
+    "lint": "cd frontend && bun lint",
+    "format:lint": "cd frontend && bun format:lint",
+    "build": "cd frontend && bun run build",
+    "typecheck": "cd frontend && bun typecheck"
+  }
+}

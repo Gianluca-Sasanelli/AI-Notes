@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun --bun next dev ",
+    "dev": "bun --bun next dev",
     "build": "bun --bun next build",
     "start": "bun --bun next start",
     "lint": "eslint",
@@ -50,6 +50,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwind-scrollbar": "^4.0.2",
     "unpdf": "^0.12.1",
+    "vaul": "^1.1.2",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

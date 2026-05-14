@@ -92,14 +92,14 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                 return (
                   <div
                     key={chat.id}
-                    className="group relative flex items-center rounded-md hover:bg-accent hover:text-accent !cursor-pointer"
+                    className="group relative flex items-center rounded-md hover:bg-accent !cursor-pointer"
                   >
                     <Link
                       href={`/chat/${chat.id}`}
                       onClick={onNavigate}
                       className={cn(
-                        "flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 text-base rounded-md text-secondary-foreground",
-                        isActive && "bg-accent "
+                        "flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 text-base rounded-md text-secondary-foreground hover:text-accent-foreground",
+                        isActive && "bg-accent text-accent-foreground"
                       )}
                     >
                       <span className="truncate" title={chat.title || untitledText}>
@@ -123,7 +123,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
             <Link
               href="/recents"
               onClick={onNavigate}
-              className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:bg-accent"
+              className="group m-0 flex items-center rounded-lg border border-transparent p-1.5 px-2 transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <History className="mr-2 size-4 shrink-0 text-sidebar-foreground/60" />
               <span className="block text-lg">{gt("All Chats")}</span>

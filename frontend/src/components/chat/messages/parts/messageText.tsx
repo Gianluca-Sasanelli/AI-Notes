@@ -30,7 +30,7 @@ export default function MessageUI({
   return (
     <div className={isUser ? "flex justify-end" : ""}>
       {isUser ? (
-        <div className="break-words rounded-2xl border bg-muted p-2 text-muted-foreground [word-break:break-word]">
+        <div className="break-words rounded-2xl bg-muted p-2 text-muted-foreground [word-break:break-word]">
           {message}
         </div>
       ) : (
