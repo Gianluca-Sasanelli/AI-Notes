@@ -138,17 +138,17 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
           ) : isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="size-full">
+                <div className="size-full pointer-events-auto touch-manipulation">
                   <UserButton
                     appearance={{
                       elements: {
                         rootBox:
-                          "!size-full hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md text-sm font-medium text-secondary-foreground [&_*]:!outline-none [&_*]:!ring-0",
-                        userButtonTrigger: "size-full cursor-pointer !outline-none !ring-0",
-                        userButtonBox: "size-full !outline-none !ring-0",
+                          "!size-full hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md text-sm font-medium text-secondary-foreground",
+                        userButtonTrigger: "size-full cursor-pointer",
+                        userButtonBox: "size-full",
                         userButtonAvatarBox:
-                          "order-first !size-6 justify-start !outline-none !ring-0",
-                        userButtonAvatarImage: "!outline-none !ring-0",
+                          "order-first !size-6 justify-start",
+                        userButtonAvatarImage: "",
                         userButtonOuterIdentifier: "hidden",
                         card: "bg-popover border-border",
                         profileSectionTitle: "!text-secondary-foreground",
@@ -165,13 +165,13 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
               <TooltipContent side="right">{gt("Profile")}</TooltipContent>
             </Tooltip>
           ) : (
-            <div className="size-full cursor-pointer">
+            <div className="size-full cursor-pointer pointer-events-auto touch-manipulation">
               <UserButton
                 appearance={{
                   elements: {
                     rootBox:
-                      "!size-full cursor-pointer hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md [&_*]:!outline-none [&_*]:!ring-0",
-                    userButtonTrigger: "size-full cursor-pointer !outline-none !ring-0",
+                      "!size-full cursor-pointer hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md",
+                    userButtonTrigger: "size-full cursor-pointer",
                     userButtonBox: "size-full flex items-center !gap-0 focus:ring-0",
                     userButtonAvatarBox: "order-first !size-6",
                     userButtonOuterIdentifier:
