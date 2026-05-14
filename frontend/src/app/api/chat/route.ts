@@ -88,38 +88,34 @@ export async function POST(req: NextRequest) {
       onFinish: async ({ messages }) => {
         console.info("ON FINISH CALLED")
 
-        await deregisterActiveChat(userId, chatId).catch(() => {})
-        cleanupAbortListener()
-
         if (hasError) {
           console.warn("hasError is true. Returning early")
+          await deregisterActiveChat(userId, chatId).catch(() => {})
+          cleanupAbortListener()
           return
         }
 
         const processedMessages = removePartsFromMessages(messages, "data")
 
-        if (isFirstUserMessage) {
-          try {
-            await createChatWithTitle(userId, chatId, processedMessages, ServerMessages)
-          } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : String(error)
-            console.error("Error creating chat", errorMsg)
-          }
-          return
-        }
-
         try {
-          await convex.mutation(api.chats.updateChat, {
-            userId,
-            clientId: chatId,
-            messages: processedMessages
-          })
+          if (isFirstUserMessage) {
+            await createChatWithTitle(userId, chatId, processedMessages, ServerMessages)
+          } else {
+            await convex.mutation(api.chats.updateChat, {
+              userId,
+              clientId: chatId,
+              messages: processedMessages
+            })
+          }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : String(error)
           console.error(
             "Error saving chat",
             errorMsg.length > 400 ? errorMsg.slice(0, 400) + "..." : errorMsg
           )
+        } finally {
+          await deregisterActiveChat(userId, chatId).catch(() => {})
+          cleanupAbortListener()
         }
       }
     })

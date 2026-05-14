@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import ChatInit from "@/components/chat/ChatInit"
 import { convex } from "@/lib/convex-server"
 import { api } from "@convex/_generated/api"
+import { getActiveChats } from "@/lib/active-chat-tracker"
 import ChatErrorPage from "./error"
 
 export const dynamic = "force-dynamic"
@@ -15,10 +16,13 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
   }
 
   const { id } = await params
-  const chat = await convex.query(api.chats.getChat, { userId, clientId: id })
+  const [chat, activeChats] = await Promise.all([
+    convex.query(api.chats.getChat, { userId, clientId: id }),
+    getActiveChats(userId)
+  ])
   if (!chat) {
     return <ChatErrorPage error={{ name: "ChatError", message: "Chat not found" }} />
   }
-  console.log("Chat fetched", chat)
-  return <ChatInit chatId={id} storedmessages={chat.messages} />
+  const isStreaming = activeChats.includes(id)
+  return <ChatInit chatId={id} storedmessages={chat.messages} isStreaming={isStreaming} />
 }

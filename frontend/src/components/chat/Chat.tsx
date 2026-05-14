@@ -2,42 +2,59 @@
 
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
-import { useMemo, useRef } from "react"
-import { toast } from "sonner"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import ChatInput from "./ChatInput"
 import ChatMessages from "./messages/ChatMessages"
-import { ChatUIMessage } from "@/lib/types/chat-types"
-import { useEffect } from "react"
+import { ChatUIMessage, extractTextFromMessage } from "@/lib/types/chat-types"
 import { useQueryClient } from "@tanstack/react-query"
 import { useModelStore } from "@/lib/stores/model-store"
-import { extractTextFromMessage } from "@/lib/types/chat-types"
+import { handleChatError, isNetworkError } from "@/lib/chat-error"
 import { T } from "gt-react"
 export default function Chat({
   chatId,
-  storedmessages
+  storedmessages,
+  isStreaming
 }: {
   chatId: string | null
   storedmessages?: ChatUIMessage[]
+  isStreaming?: boolean
 }) {
   const backupChatId = useMemo(() => crypto.randomUUID(), [])
   const inputRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
   const selectedModel = useModelStore((s) => s.selectedModel)
-  const { messages, sendMessage, setMessages, status, stop, error } = useChat<ChatUIMessage>({
-    ...(storedmessages && { messages: storedmessages }),
-    id: chatId ?? backupChatId,
-    onError: (error) => {
-      console.log("The error is", error)
-      toast.error(error.message)
-    },
-    experimental_throttle: 100,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      prepareReconnectToStreamRequest({ id }) {
-        return { api: `/api/chat/${id}/stream` }
-      }
+  const activeChatId = chatId ?? backupChatId
+  const { messages, sendMessage, setMessages, status, stop, error, clearError, resumeStream } =
+    useChat<ChatUIMessage>({
+      ...(storedmessages && { messages: storedmessages }),
+      id: activeChatId,
+      onError: handleChatError,
+      experimental_throttle: 100,
+      resume: !!isStreaming,
+      transport: new DefaultChatTransport({
+        api: "/api/chat",
+        prepareReconnectToStreamRequest({ id }) {
+          return { api: `/api/chat/${id}/stream` }
+        }
+      })
     })
-  })
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") return
+      if (status !== "error") return
+      if (!error || !isNetworkError(error)) return
+      clearError()
+      resumeStream()
+    }
+    document.addEventListener("visibilitychange", onVisibility)
+    return () => document.removeEventListener("visibilitychange", onVisibility)
+  }, [status, error, clearError, resumeStream])
+
+  const handleStop = useCallback(() => {
+    fetch(`/api/chat/${activeChatId}/stream`, { method: "DELETE" }).catch(() => {})
+    stop()
+  }, [stop, activeChatId])
 
   const ResendMessage = (messageId: string, model?: string, isAssistant?: boolean) => {
     let messageIndex = messages.findIndex((m) => m.id === messageId)
@@ -96,7 +113,7 @@ export default function Chat({
                 window.history.replaceState({}, "", `/chat/${backupChatId}`)
               }}
               isLoading={isLoadingFromSDK}
-              onStopGeneration={stop}
+              onStopGeneration={handleStop}
             />
           </div>
         </div>
@@ -127,7 +144,7 @@ export default function Chat({
             sendMessage({ text, files }, { body: { model: selectedModel } })
           }
           isLoading={isLoadingFromSDK}
-          onStopGeneration={stop}
+          onStopGeneration={handleStop}
         />
       </div>
     </>
