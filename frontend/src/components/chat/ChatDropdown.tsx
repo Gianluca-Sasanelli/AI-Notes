@@ -170,7 +170,7 @@ export function ChatDropdown({
       </ResponsiveDialog>
 
       <ResponsiveDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <ResponsiveDialogContent className="sm:max-w-lg">
+        <ResponsiveDialogContent className="md:max-w-lg">
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>Delete Chat</ResponsiveDialogTitle>
           </ResponsiveDialogHeader>
