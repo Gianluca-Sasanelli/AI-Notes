@@ -6,12 +6,12 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/schadcn/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/schadcn/dialog"
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle
+} from "@/components/ui/schadcn/responsive-dialog"
 import { Input } from "@/components/ui/schadcn/input"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/schadcn/tooltip"
 import { deleteChatClient, updateChatClient } from "@/lib/api"
@@ -147,46 +147,46 @@ export function ChatDropdown({
         )}
       </div>
 
-      <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent className="min-w-[30vw] max-w-[70vw]">
-          <DialogHeader>
-            <DialogTitle>Rename Chat</DialogTitle>
-          </DialogHeader>
+      <ResponsiveDialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
+        <ResponsiveDialogContent className="min-w-[30vw] max-w-[70vw]">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Rename Chat</ResponsiveDialogTitle>
+          </ResponsiveDialogHeader>
           <Input
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="Enter new title"
             className={`${dropdownsize === "lg" ? "text-lg" : ""}`}
           />
-          <DialogFooter>
+          <ResponsiveDialogFooter>
             <Button variant="outline" onClick={() => setIsRenameOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleRename} disabled={isUpdatingChat}>
               {isUpdatingChat ? "Saving..." : "Save"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </ResponsiveDialogFooter>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
 
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="min-w-[30vw] max-w-[70vw]">
-          <DialogHeader>
-            <DialogTitle>Delete Chat</DialogTitle>
-          </DialogHeader>
+      <ResponsiveDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <ResponsiveDialogContent className="min-w-[30vw] max-w-[70vw]">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Delete Chat</ResponsiveDialogTitle>
+          </ResponsiveDialogHeader>
           <p className="text-muted-foreground">
             Are you sure you want to delete this chat? This action cannot be undone.
           </p>
-          <DialogFooter>
+          <ResponsiveDialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={isDeletingChat}>
               {isDeletingChat ? "Deleting..." : "Delete"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </ResponsiveDialogFooter>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </>
   )
 }
