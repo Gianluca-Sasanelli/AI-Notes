@@ -109,7 +109,7 @@ export function ChatHistory({ onNavigate }: { onNavigate?: () => void }) {
                     <div
                       className={cn(
                         "absolute right-1 flex items-center",
-                        !isMobile && "opacity-0 group-hover:opacity-50"
+                        !isMobile && "opacity-0 group-hover:opacity-100"
                       )}
                     >
                       <ChatDropdown chatId={chat.id} currentTitle={chat.title || untitledText} />
