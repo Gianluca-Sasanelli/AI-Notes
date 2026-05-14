@@ -1,6 +1,6 @@
 "use client"
 
-import { UserButton, useUser } from "@clerk/nextjs"
+import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
@@ -13,8 +13,12 @@ import {
   TooltipTrigger
 } from "@/components/ui/schadcn/tooltip"
 import { cn } from "@/lib/utils"
-import { Notebook, Plus, Pencil, PanelLeft, Settings } from "lucide-react"
+import { Notebook, Plus, Pencil, PanelLeft } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/schadcn/avatar"
+import { AccountDialog } from "@/components/account-dialog"
 import { ChatHistory } from "@/components/chat/ChatHistory"
+import { getChatsClient } from "@/lib/api"
+import { usePrefetchQuery } from "@tanstack/react-query"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { useGT } from "gt-react"
 
@@ -41,8 +45,9 @@ const navigationItems = [
 
 function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClose?: () => void }) {
   const pathname = usePathname()
-  const { isLoaded } = useUser()
+  const { user, isLoaded } = useUser()
   const gt = useGT()
+  const [accountOpen, setAccountOpen] = useState(false)
 
   const navTitles: Record<string, string> = {
     "nav.notes": gt("Notes"),
@@ -99,96 +104,56 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
         )}
       </div>
 
-      <div className="h-[100px] min-h-0 flex-none mt-auto flex flex-col ">
+      <div className="mb-2 min-h-0 flex-none mt-auto flex flex-col ">
         {(() => {
-          const settingsText = gt("Settings")
-          const SettingsLink = (
-            <Link
-              href="/settings"
-              onClick={onClose}
-              className={cn(
-                "group inline-flex h-[50px] w-full items-center  justify-start p-2 pl-3 whitespace-nowrap bg-transparent text-sm font-medium text-secondary-foreground hover:bg-accent hover:text-accent-foreground rounded-md",
-                pathname === "/settings" && "bg-accent text-accent-foreground"
-              )}
+          const initials = user?.firstName?.[0] || user?.primaryEmailAddress?.emailAddress?.[0]
+
+          const avatarButton = (
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onClick={() => setAccountOpen(true)}
+              className="w-full justify-start p-2 text-base font-medium"
             >
-              <div className="size-6 flex items-center ">
-                <Settings />
-              </div>
-              {!isCollapsed && <span className="ml-2">{settingsText}</span>}
-            </Link>
+              <Avatar className="size-8 shrink-0">
+                <AvatarImage src={user?.imageUrl} alt={user?.fullName || ""} />
+                {initials && (
+                  <AvatarFallback className="bg-primary/10 text-xs font-medium">
+                    {initials.toUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              {!isCollapsed && (
+                <span className="ml-2 truncate text-secondary-foreground">
+                  {user?.fullName || user?.primaryEmailAddress?.emailAddress || ""}
+                </span>
+              )}
+            </Button>
           )
 
-          return isCollapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>{SettingsLink}</TooltipTrigger>
-              <TooltipContent side="right">{settingsText}</TooltipContent>
-            </Tooltip>
-          ) : (
-            SettingsLink
+          if (!isLoaded) {
+            return (
+              <div className="inline-flex items-center rounded-md p-2">
+                <div className="size-6 animate-pulse rounded-full bg-muted" />
+                {!isCollapsed && <div className="ml-2 h-3 w-24 animate-pulse rounded bg-muted" />}
+              </div>
+            )
+          }
+
+          return (
+            <>
+              {isCollapsed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>{avatarButton}</TooltipTrigger>
+                  <TooltipContent side="right">{gt("Profile")}</TooltipContent>
+                </Tooltip>
+              ) : (
+                avatarButton
+              )}
+              <AccountDialog open={accountOpen} onOpenChange={setAccountOpen} />
+            </>
           )
         })()}
-
-        <div className="h-[50px] w-full flex-none" suppressHydrationWarning>
-          {!isLoaded ? (
-            <div
-              className={
-                "flex items-center justify-start size-full bg-muted animate-pulse rounded-md"
-              }
-            ></div>
-          ) : isCollapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="size-full pointer-events-auto touch-manipulation">
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        rootBox:
-                          "!size-full hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md text-sm font-medium text-secondary-foreground",
-                        userButtonTrigger: "size-full cursor-pointer",
-                        userButtonBox: "size-full",
-                        userButtonAvatarBox:
-                          "order-first !size-6 justify-start",
-                        userButtonAvatarImage: "",
-                        userButtonOuterIdentifier: "hidden",
-                        card: "bg-popover border-border",
-                        profileSectionTitle: "!text-secondary-foreground",
-                        accordionTriggerButton:
-                          "text-secondary-foreground hover:bg-accent hover:text-accent-foreground",
-                        accordionContent: "bg-background",
-                        profileSectionContent: "text-secondary-foreground"
-                      }
-                    }}
-                    showName={false}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right">{gt("Profile")}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <div className="size-full cursor-pointer pointer-events-auto touch-manipulation">
-              <UserButton
-                appearance={{
-                  elements: {
-                    rootBox:
-                      "!size-full cursor-pointer hover:bg-accent hover:text-accent-foreground bg-transparent whitespace-nowrap justify-start p-2 pl-3 rounded-md",
-                    userButtonTrigger: "size-full cursor-pointer",
-                    userButtonBox: "size-full flex items-center !gap-0 focus:ring-0",
-                    userButtonAvatarBox: "order-first !size-6",
-                    userButtonOuterIdentifier:
-                      "flex-1 p-0  whitespace-nowrap text-left  !text-secondary-foreground",
-                    card: "bg-popover border-border",
-                    profileSectionTitle: "p-0 !text-secondary-foreground items-center",
-                    accordionTriggerButton:
-                      "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                    accordionContent: "bg-background",
-                    profileSectionContent: "text-secondary-foreground"
-                  }
-                }}
-                showName
-              />
-            </div>
-          )}
-        </div>
       </div>
     </>
   )
@@ -247,12 +212,6 @@ function MobileSidebar() {
       <SheetContent
         side="left"
         className="w-[80%] max-w-[280px] bg-secondary text-secondary-foreground p-0 py-2"
-        onInteractOutside={(e) => {
-          const target = e.target as HTMLElement
-          if (target?.closest?.("[data-clerk-portal], .cl-userButtonPopoverCard, .cl-modalContent, .cl-userProfile-root")) {
-            e.preventDefault()
-          }
-        }}
       >
         <VisuallyHidden.Root>
           <SheetTitle>{gt("Navigation Menu")}</SheetTitle>
@@ -266,9 +225,19 @@ function MobileSidebar() {
   )
 }
 
+function PrefetchChatHistory() {
+  usePrefetchQuery({
+    queryKey: ["chats", 0, 20],
+    queryFn: () => getChatsClient(0, 20),
+    staleTime: 2 * 60 * 1000
+  })
+  return null
+}
+
 export function Sidebar() {
   return (
     <>
+      <PrefetchChatHistory />
       <div className="hidden lg:block">
         <DesktopSidebar />
       </div>

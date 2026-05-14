@@ -9,10 +9,12 @@ function toHtml(content: string): string {
   const raw = typeof parsed === "string" ? parsed : ""
   const clean = DOMPurify.sanitize(raw, { ADD_ATTR: ["target", "rel"] })
   const withLinks = clean.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ')
-  return withLinks.replace(
-    /<table/g,
-    '<div class="w-0 min-w-full overflow-x-auto rounded-lg border border-border/80"><table'
-  ).replace(/<\/table>/g, "</table></div>")
+  return withLinks
+    .replace(
+      /<table/g,
+      '<div class="w-0 min-w-full overflow-x-auto rounded-lg border border-border/80"><table'
+    )
+    .replace(/<\/table>/g, "</table></div>")
 }
 
 const MemoizedMarkdown = memo(
