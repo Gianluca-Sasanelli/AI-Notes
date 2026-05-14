@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
 import { toast } from "sonner"
-import { Loader2, Sun, Moon, Monitor, Plus, Pencil, Trash2, Languages } from "lucide-react"
+import { Loader2, Sun, Moon, Monitor, Plus, Pencil, Trash2, Languages, Info } from "lucide-react"
 import {
   getNotesClient,
   createTimelessNoteClient,
@@ -22,6 +22,7 @@ import {
   DialogDescription
 } from "@/components/ui/schadcn/dialog"
 import type { TimelessNote } from "@/lib/types/database-types"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/schadcn/tooltip"
 import { T, useGT, useLocaleSelector } from "gt-react"
 
 export default function SettingsPage() {
@@ -168,8 +169,19 @@ export default function SettingsPage() {
         </div>
 
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">
+          <h2 className="text-lg font-semibold mb-2 flex items-center gap-1.5">
             <T>Context Notes</T>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="size-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <T>
+                  These notes give the AI context about you — your role, preferences, or anything it
+                  should know when helping you.
+                </T>
+              </TooltipContent>
+            </Tooltip>
           </h2>
 
           {notesLoading ? (
@@ -235,7 +247,6 @@ export default function SettingsPage() {
             </>
           )}
         </div>
-
       </div>
 
       <Dialog open={editingNote !== null} onOpenChange={(open) => !open && setEditingNote(null)}>

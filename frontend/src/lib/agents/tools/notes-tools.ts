@@ -54,6 +54,37 @@ export const NotesTools = (userId: string) => {
         })
       }
     }),
+    listTopics: tool({
+      description:
+        "List all topics the user has created. Returns [{ id, name, color }]. Use this to discover available topics before fetching notes by topic.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const { data } = await convex.query(api.topics.getTopics, {
+          userId,
+          limit: 50
+        })
+        return data.map((t) => ({ id: t._id, name: t.name, color: t.color }))
+      }
+    }),
+    getNotesByTopic: tool({
+      description:
+        "Get all notes belonging to a specific topic. Returns [{ id, content, startTimestamp, endTimestamp }]. Use listTopics first to get valid topic IDs.",
+      inputSchema: z.object({
+        topicId: z.string().describe("The topic ID to fetch notes for.")
+      }),
+      execute: async ({ topicId }: { topicId: string }) => {
+        const notes = await convex.query(api.notes.getNotesByTopicId, {
+          userId,
+          topicId: topicId as Id<"topics">
+        })
+        return notes.map((n) => ({
+          id: n._id,
+          content: n.content,
+          startTimestamp: n.startTimestamp,
+          endTimestamp: n.endTimestamp
+        }))
+      }
+    }),
     getNoteFile: tool({
       description:
         "Get the content of a file attached to a note. For PDFs returns { type, filename, text, pages }. For images returns { type, filename, size }. Otherwise { type: 'unknown', filename, size } or { error }.",

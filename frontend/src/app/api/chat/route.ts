@@ -8,7 +8,6 @@ import { ChatUIMessage, chatRequestSchema } from "@/lib/types/chat-types"
 import { removePartsFromMessages, createChatWithTitle } from "@/lib/utils"
 import { convex } from "@/lib/convex-server"
 import { api } from "@convex/_generated/api"
-import RetrieveContext from "@/lib/agents/context/context"
 import { RemoveReasoning } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
@@ -27,8 +26,7 @@ export async function POST(req: NextRequest) {
     return new Response("Bad Request", { status: 400 })
   }
 
-  const { messages, id: chatId, model, context } = parseResult.data
-  console.log("The context received is", context)
+  const { messages, id: chatId, model } = parseResult.data
   const { model: modelInstance, hasReasoning, providerOptions } = getModelInstance(model)
   const isFirstUserMessage = messages.length === 1 && messages[0].role === "user"
 
@@ -38,7 +36,6 @@ export async function POST(req: NextRequest) {
   if (!hasReasoning) {
     ServerMessages = RemoveReasoning(ServerMessages)
   }
-  const RetrievedContext = await RetrieveContext(context, userId)
   let hasError = false
 
   const response = createUIMessageStreamResponse({
@@ -53,7 +50,6 @@ export async function POST(req: NextRequest) {
         const streamAssistant = await runAssistantAgent(
           ServerMessages,
           modelInstance,
-          RetrievedContext,
           providerOptions
         )
         writer.merge(streamAssistant.toUIMessageStream())

@@ -1,22 +1,18 @@
-import { FileIcon, FolderIcon, Loader2, SendIcon, StopCircle, X } from "lucide-react"
+import { FileIcon, Loader2, Plus, SendIcon, StopCircle, X } from "lucide-react"
 import { useEffect, useRef, useState, type KeyboardEvent as KeyboardEventReact } from "react"
 
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/schadcn/tooltip"
-import { ChatContextPopover } from "@/components/ui/chat-context"
-import { TopicData } from "@/lib/types/database-types"
 import { handleGlobalKeyDown } from "@/lib/hooks"
 import { ModelSelector } from "./ModelSelector"
 
 import Image from "next/image"
 import React from "react"
-import { chatContext } from "@/lib/types/chat-types"
 import { useGT } from "gt-react"
 import { useModelStore } from "@/lib/stores/model-store"
 import { supportsFiles as modelSupportsFiles } from "@/lib/agents/models"
 interface ChatInputProps {
-  onSendMessage: (text: string, files?: FileList, context?: chatContext) => void
+  onSendMessage: (text: string, files?: FileList) => void
   isLoading: boolean
   onStopGeneration?: () => void
   startingInput?: string
@@ -40,11 +36,9 @@ const ChatInput = React.memo(function ChatInput({
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([])
-  const [selectedTopic, setSelectedTopic] = useState<TopicData | null>(null)
   const gt = useGT()
   const selectedModel = useModelStore((s) => s.selectedModel)
   const canAttachFiles = modelSupportsFiles(selectedModel)
-  console.log("Selected topic in ChatInput is", selectedTopic)
 
   let placeholdertext = gt("Ask about your notes.")
   if (attachedFiles.length > 0) {
@@ -116,9 +110,7 @@ const ChatInput = React.memo(function ChatInput({
       attachedFiles.forEach((file) => dataTransfer.items.add(file.file))
       fileListToSend = dataTransfer.files
     }
-    const context: chatContext = selectedTopic ? { topicId: selectedTopic._id.toString() } : null
-    console.log("The context being sent is", context)
-    onSendMessage(input, fileListToSend, context)
+    onSendMessage(input, fileListToSend)
 
     setInput("")
     setAttachedFiles([])
@@ -189,37 +181,21 @@ const ChatInput = React.memo(function ChatInput({
         <div className="flex max-h-[30%] items-center justify-between pr-2 mt-auto">
           <div className="flex items-center gap-2">
             <ModelSelector />
-            {selectedTopic && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSelectedTopic(null)}
-                    className="rounded-full"
-                  >
-                    <FolderIcon
-                      className="size-5"
-                      style={{ color: selectedTopic.color ?? undefined }}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start">
-                  <p>{selectedTopic.name}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
           </div>
           <div className="flex items-center gap-2">
-            <ChatContextPopover
-              disabled={isLoading}
-              selectedTopicId={selectedTopic?._id}
-              canAddFile={canAttachFiles}
-              onAddFile={triggerFileInput}
-              onSelectTopic={(topic) => {
-                setSelectedTopic(topic)
-              }}
-            />
+            {canAttachFiles && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="rounded-md text-foreground"
+                disabled={isLoading}
+                title={gt("Add file")}
+                onClick={triggerFileInput}
+              >
+                <Plus className="size-6" />
+              </Button>
+            )}
             {isLoading && onStopGeneration ? (
               <Button
                 onClick={onStopGeneration}

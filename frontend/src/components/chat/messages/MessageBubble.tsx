@@ -5,8 +5,7 @@ import { toast } from "sonner"
 import {
   extractTextFromMessage,
   type ChatUIMessage,
-  type ChatUIMessagePart,
-  type chatContext
+  type ChatUIMessagePart
 } from "@/lib/types/chat-types"
 import MessageReasoning from "./parts/messageReasoning"
 import MessageUI from "./parts/messageText"
@@ -27,12 +26,7 @@ interface MessageBubbleProps {
   message: ChatUIMessage
   messageRef?: React.RefObject<HTMLDivElement | null>
   onResendMessage: (messageId: string, selectedModel?: string, isAssistant?: boolean) => void
-  onEditMessage?: (
-    messageId: string,
-    newText: string,
-    files?: FileList,
-    context?: chatContext | null
-  ) => void
+  onEditMessage?: (messageId: string, newText: string, files?: FileList) => void
   showMessageOptions?: boolean
 }
 type ToolTypes<T> = T extends `tool-${string}` ? T : never
@@ -61,8 +55,8 @@ export function MessageBubble(props: MessageBubbleProps) {
         {IsEditingBoundary ? (
           <div className="w-full transition-all transition-duration-300 ">
             <ChatInput
-              onSendMessage={(text: string, files?: FileList, context?: chatContext) => {
-                onEditMessage(message.id, text, files, context || null)
+              onSendMessage={(text: string, files?: FileList) => {
+                onEditMessage(message.id, text, files)
                 setIsEditing(false)
               }}
               isLoading={false}

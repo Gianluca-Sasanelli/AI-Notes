@@ -6,7 +6,7 @@ import { useMemo, useRef } from "react"
 import { toast } from "sonner"
 import ChatInput from "./ChatInput"
 import ChatMessages from "./messages/ChatMessages"
-import { chatContext, ChatUIMessage } from "@/lib/types/chat-types"
+import { ChatUIMessage } from "@/lib/types/chat-types"
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useModelStore } from "@/lib/stores/model-store"
@@ -51,21 +51,13 @@ export default function Chat({
     )
   }
 
-  const SendEditMessage = (
-    messageId: string,
-    newText: string,
-    files?: FileList,
-    context?: chatContext
-  ) => {
+  const SendEditMessage = (messageId: string, newText: string, files?: FileList) => {
     const messageIndex = messages.findIndex((m) => m.id === messageId)
     if (messageIndex === -1) return
 
     setMessages(messages.slice(0, messageIndex))
 
-    sendMessage(
-      { text: newText, files },
-      { body: { model: selectedModel, context: context || null } }
-    )
+    sendMessage({ text: newText, files }, { body: { model: selectedModel } })
   }
 
   const isLoadingFromSDK = useMemo(() => status === "streaming" || status === "submitted", [status])
@@ -88,14 +80,13 @@ export default function Chat({
           </p>
           <div className="flex w-full max-w-3xl sm:max-w-2xl min-h-[15svh] flex-col rounded-xl">
             <ChatInput
-              onSendMessage={(text: string, files?: FileList, context?: chatContext) => {
+              onSendMessage={(text: string, files?: FileList) => {
                 sendMessage(
                   { text, files },
                   {
                     body: {
                       id: backupChatId,
-                      model: selectedModel,
-                      context: context || null
+                      model: selectedModel
                     }
                   }
                 )
@@ -129,11 +120,8 @@ export default function Chat({
         aria-label="Chat input"
       >
         <ChatInput
-          onSendMessage={(text: string, files?: FileList, context?: chatContext) =>
-            sendMessage(
-              { text, files },
-              { body: { model: selectedModel, context: context || null } }
-            )
+          onSendMessage={(text: string, files?: FileList) =>
+            sendMessage({ text, files }, { body: { model: selectedModel } })
           }
           isLoading={isLoadingFromSDK}
           onStopGeneration={stop}

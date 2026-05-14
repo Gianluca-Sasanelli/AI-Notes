@@ -13,7 +13,6 @@ import { api } from "@convex/_generated/api"
 export async function runAssistantAgent(
   messages: ModelMessage[],
   model: LanguageModelV3,
-  context?: string,
   providerOptions?: ProviderOptions
 ) {
   const { userId } = await auth()
@@ -26,7 +25,7 @@ export async function runAssistantAgent(
     limit: 20
   })
 
-  const systemPrompt = buildAssistantSystemPrompt(timelessNotes, context)
+  const systemPrompt = buildAssistantSystemPrompt(timelessNotes)
 
   const tools = NotesTools(userId)
   const webSearchTools = WebSearchTools()
