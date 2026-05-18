@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { Calendar, FileText, Pencil, Trash2, Paperclip, Circle } from "lucide-react"
+import { useState, useCallback, useRef, useMemo, useEffect } from "react"
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Calendar, FileText, Pencil, Trash2, Paperclip, Circle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Card } from "@/components/ui/schadcn/card"
 import { Skeleton } from "@/components/ui/schadcn/skeleton"
@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogDescription
 } from "@/components/ui/schadcn/dialog"
-import { PaginationControls } from "@/components/pagination-controls"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
 import {
@@ -32,9 +31,10 @@ import { TopicEditor, type TopicEdit, isEditableTopic } from "@/components/ui/to
 import { TopicSelector } from "@/components/ui/topic-selector"
 import { transformTopicEditToTopicBody } from "@/lib/utils"
 import { T, useGT, Var } from "gt-react"
+
+const PAGE_SIZE = 10
+
 export function NotesList() {
-  const [skip, setSkip] = useState(0)
-  const [limit, setLimit] = useState(10)
   const [editingNote, setEditingNote] = useState<TimeNote | null>(null)
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
   const [editingContent, setEditingContent] = useState("")
@@ -46,12 +46,48 @@ export function NotesList() {
   const [queryTopicId, setQueryTopic] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const gt = useGT()
+  const observer = useRef<IntersectionObserver | null>(null)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["notes", skip, limit, queryTopicId],
-    queryFn: () => getNotesClient({ skip, limit, timeless: false, topicId: queryTopicId }),
-    placeholderData: keepPreviousData
-  })
+  const { data, isLoading, isError, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["notes", queryTopicId],
+      queryFn: ({ pageParam }) => {
+        throw new Error("Test error: failed to fetch notes")
+        return getNotesClient({
+          skip: pageParam,
+          limit: PAGE_SIZE,
+          timeless: false,
+          topicId: queryTopicId
+        })
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        if (!lastPage.hasNext) return undefined
+        return allPages.reduce((total, page) => total + page.data.length, 0)
+      }
+    })
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error instanceof Error ? error.message : gt("Failed to load notes"))
+    }
+  }, [isError, error, gt])
+
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetchingNextPage) return
+      if (observer.current) observer.current.disconnect()
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage()
+        }
+      })
+      if (node) observer.current.observe(node)
+    },
+    [isFetchingNextPage, hasNextPage, fetchNextPage]
+  )
+
+  const notes = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]) as TimeNote[]
 
   const updateMutation = useMutation({
     mutationFn: async () => {
@@ -80,7 +116,7 @@ export function NotesList() {
       setEditingNote(null)
       setPendingFiles([])
       setTopicEdit(null)
-      queryClient.invalidateQueries({ queryKey: ["notes", skip, limit] })
+      queryClient.invalidateQueries({ queryKey: ["notes"] })
       queryClient.invalidateQueries({ queryKey: ["note-files", noteId] })
       queryClient.invalidateQueries({ queryKey: ["topics"] })
     },
@@ -122,11 +158,6 @@ export function NotesList() {
     }
   })
 
-  const handleParamsChange = (params: { skip?: number; limit?: number }) => {
-    if (params.skip !== undefined) setSkip(params.skip)
-    if (params.limit !== undefined) setLimit(params.limit)
-  }
-
   const handleEditOpen = (note: TimeNote) => {
     setEditingContent(note.content)
     setEditingStartTimestamp(new Date(note.startTimestamp))
@@ -140,9 +171,6 @@ export function NotesList() {
     setEditingNote(note)
   }
 
-  const notes = data?.data ?? []
-  const hasNext = data?.hasNext ?? false
-
   return (
     <div className="space-y-4">
       {isLoading ? (
@@ -154,21 +182,26 @@ export function NotesList() {
       ) : notes.length === 0 ? (
         <>
           {queryTopicId !== null && (
-            <TopicSelector
-              value={queryTopicId}
-              onChange={(topicId) => {
-                setQueryTopic(topicId)
-                setSkip(0)
-              }}
-            />
+            <TopicSelector value={queryTopicId} onChange={(topicId) => setQueryTopic(topicId)} />
           )}
           <Card className="p-12">
             <div className="text-center">
-              <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-              <p className="text-muted-foreground">
-                <T>No notes yet</T>
-              </p>
-              {queryTopicId !== null && (
+              {isError ? (
+                <>
+                  <FileText className="mx-auto mb-3 h-10 w-10 text-destructive" />
+                  <p className="text-destructive">
+                    <T>Failed to load notes</T>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    <T>No notes yet</T>
+                  </p>
+                </>
+              )}
+              {queryTopicId !== null && !isError && (
                 <Button
                   variant="destructive"
                   size="sm"
@@ -186,19 +219,7 @@ export function NotesList() {
       ) : (
         <>
           <div className="flex justify-between items-center mb-2">
-            <TopicSelector
-              value={queryTopicId}
-              onChange={(topicId) => {
-                setQueryTopic(topicId)
-                setSkip(0)
-              }}
-            />
-            <PaginationControls
-              skip={skip}
-              limit={limit}
-              hasNext={hasNext}
-              onParamsChange={handleParamsChange}
-            />
+            <TopicSelector value={queryTopicId} onChange={(topicId) => setQueryTopic(topicId)} />
           </div>
           <div className="space-y-3">
             {notes.map((note) => (
@@ -211,14 +232,12 @@ export function NotesList() {
             ))}
           </div>
 
-          {notes.length > 10 && (
-            <PaginationControls
-              skip={skip}
-              limit={limit}
-              hasNext={hasNext}
-              onParamsChange={handleParamsChange}
-              className="justify-end"
-            />
+          <div ref={sentinelRef} className="h-4" />
+
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           )}
         </>
       )}
