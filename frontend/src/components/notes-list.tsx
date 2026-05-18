@@ -52,7 +52,6 @@ export function NotesList() {
     useInfiniteQuery({
       queryKey: ["notes", queryTopicId],
       queryFn: ({ pageParam }) => {
-        throw new Error("Test error: failed to fetch notes")
         return getNotesClient({
           skip: pageParam,
           limit: PAGE_SIZE,
