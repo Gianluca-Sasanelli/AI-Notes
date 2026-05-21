@@ -22,7 +22,6 @@ export const createTopic = mutation({
       userId: args.userId,
       name: args.name,
       color: args.color,
-      createdAt: now,
       updatedAt: now
     })
   }

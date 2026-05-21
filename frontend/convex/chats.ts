@@ -18,7 +18,6 @@ export const createChat = mutation({
       clientId: args.clientId,
       messages: args.messages,
       title: args.title,
-      createdAt: now,
       updatedAt: now
     })
   }

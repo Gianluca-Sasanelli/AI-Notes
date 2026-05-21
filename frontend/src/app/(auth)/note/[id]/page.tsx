@@ -244,7 +244,7 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
                     note.endTimestamp ? new Date(note.endTimestamp) : null,
                     note.granularity
                   )
-                : format(new Date(note.createdAt), "EEE, MMM d, yyyy 'at' HH:mm")}
+                : format(new Date(note._creationTime), "EEE, MMM d, yyyy 'at' HH:mm")}
             </span>
             {isTimeNote(note) && note.topic && (
               <span className="flex items-center gap-1.5">

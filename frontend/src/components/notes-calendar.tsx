@@ -1,56 +1,34 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useState, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Calendar, CalendarDayButton } from "@/components/ui/schadcn/calendar"
-import { getNotesClient } from "@/lib/api"
+import { getNotesByDateRangeClient } from "@/lib/api"
 import { TimeNote } from "@/lib/types/database-types"
-import { format, startOfDay, addDays, isSameDay } from "date-fns"
+import { format, startOfDay, addDays, isSameDay, startOfMonth, endOfMonth } from "date-fns"
 import Link from "next/link"
 import { Card } from "@/components/ui/schadcn/card"
-import { Calendar as CalendarIcon, Circle, Paperclip, FileText, Loader2 } from "lucide-react"
+import { Calendar as CalendarIcon, Circle, Paperclip, FileText } from "lucide-react"
 import { formatTimestampRange } from "@/lib/notes-utils"
 import { Skeleton } from "@/components/ui/schadcn/skeleton"
-import { toast } from "sonner"
-import { useGT } from "gt-react"
 import { T, Var } from "gt-react"
-
-const PAGE_SIZE = 50
 
 export function NotesCalendar() {
   const [selectedDay, setSelectedDay] = useState<Date>(new Date())
   const [month, setMonth] = useState<Date>(new Date())
-  const gt = useGT()
 
-  const { data, isLoading, isError, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["notes-calendar"],
-      queryFn: ({ pageParam }) =>
-        getNotesClient({ skip: pageParam, limit: PAGE_SIZE, timeless: false }),
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage.hasNext) return undefined
-        return allPages.reduce((total, page) => total + page.data.length, 0)
-      }
-    })
+  const from = startOfMonth(month).getTime()
+  const to = endOfMonth(month).getTime()
 
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
-
-  useEffect(() => {
-    if (isError) {
-      toast.error(error instanceof Error ? error.message : gt("Failed to load notes"))
-    }
-  }, [isError, error, gt])
-
-  const notes = useMemo(
-    () => (data?.pages.flatMap((page) => page.data) ?? []) as TimeNote[],
-    [data]
-  )
-
+  const {
+    data: notes = [],
+    isLoading,
+    isError
+  } = useQuery({
+    queryKey: ["notes-calendar", from, to],
+    queryFn: () => getNotesByDateRangeClient(from, to)
+  })
+  console.log("The notes are", notes)
   type DayNoteInfo = { note: TimeNote; position: "single" | "start" | "middle" | "end" }
 
   const notesByDay = useMemo(() => {
@@ -80,8 +58,6 @@ export function NotesCalendar() {
 
   const selectedDayKey = format(selectedDay, "yyyy-MM-dd")
   const selectedDayNotes = notesByDay.get(selectedDayKey) ?? []
-
-  const isStillLoading = isLoading || isFetchingNextPage
 
   if (isLoading) {
     return (
@@ -149,13 +125,6 @@ export function NotesCalendar() {
           }}
         />
       </Card>
-
-      {isStillLoading && (
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <T>Loading all notes...</T>
-        </div>
-      )}
 
       <div>
         <h2 className="text-lg font-semibold mb-3">{format(selectedDay, "EEEE, MMMM d, yyyy")}</h2>

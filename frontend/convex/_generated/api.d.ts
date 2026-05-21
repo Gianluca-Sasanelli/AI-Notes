@@ -10,6 +10,7 @@
 
 import type * as chats from "../chats.js";
 import type * as files from "../files.js";
+import type * as migrations from "../migrations.js";
 import type * as notes from "../notes.js";
 import type * as topics from "../topics.js";
 
@@ -22,6 +23,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   chats: typeof chats;
   files: typeof files;
+  migrations: typeof migrations;
   notes: typeof notes;
   topics: typeof topics;
 }>;

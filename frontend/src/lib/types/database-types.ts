@@ -10,11 +10,11 @@ export type PaginatedResponse<T> = {
 
 type BaseNoteData = {
   _id: string
+  _creationTime: number
   topicId: string | null
   startTimestamp: number | null
   endTimestamp: number | null
   granularity: NoteGranularity | null
-  createdAt: number
   updatedAt: number
   content: string
   files: string[]
@@ -47,20 +47,20 @@ export type TimeNoteSummary = Pick<
 >
 
 export type ChatData = {
-  id: string
+  _id: string
   messages: unknown[]
   title: string | undefined
-  createdAt: number
+  _creationTime: number
   updatedAt: number
 }
 
-export type ChatHistoryItem = Pick<ChatData, "id" | "title" | "updatedAt">
+export type ChatHistoryItem = Pick<ChatData, "_id" | "title" | "updatedAt">
 
 export type TopicData = {
   _id: string
   name: string
   color: string | undefined
-  createdAt: number
+  _creationTime: number
   updatedAt: number
 }
 

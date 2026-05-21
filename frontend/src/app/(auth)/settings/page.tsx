@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useTheme } from "next-themes"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/schadcn/button"
 import { Textarea } from "@/components/ui/schadcn/textarea"
@@ -26,7 +25,6 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/schadcn
 import { T, useGT, useLocaleSelector } from "gt-react"
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme()
   const queryClient = useQueryClient()
   const isMobile = useIsMobile()
   const [mounted, setMounted] = useState(false)
@@ -107,41 +105,6 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         <div className="rounded-lg border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-2">
-            <T>Theme</T>
-          </h2>
-          <div className="flex gap-2">
-            <Button
-              variant={mounted && theme === "light" ? "default" : "outline"}
-              onClick={() => setTheme("light")}
-              className="flex-1"
-              size={isMobile ? "icon" : "default"}
-            >
-              <Sun className={isMobile ? "size-4" : "size-4 mr-2"} />
-              {!isMobile && <T>Light</T>}
-            </Button>
-            <Button
-              variant={mounted && theme === "dark" ? "default" : "outline"}
-              onClick={() => setTheme("dark")}
-              className="flex-1"
-              size={isMobile ? "icon" : "default"}
-            >
-              <Moon className={isMobile ? "size-4" : "size-4 mr-2"} />
-              {!isMobile && <T>Dark</T>}
-            </Button>
-            <Button
-              variant={mounted && theme === "system" ? "default" : "outline"}
-              onClick={() => setTheme("system")}
-              className="flex-1"
-              size={isMobile ? "icon" : "default"}
-            >
-              <Monitor className={isMobile ? "size-4" : "size-4 mr-2"} />
-              {!isMobile && <T>System</T>}
-            </Button>
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-card p-6">
           <h2 className="text-lg font-semibold mb-2 flex items-center">
             <Languages className="size-4 mr-2" />
             <T>Language</T>
@@ -217,7 +180,7 @@ export default function SettingsPage() {
                 ))}
                 {(contextNotes?.data ?? []).length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    <T>No context notes yet</T>
+                    <T>General context notes (like you age, sport etc.)</T>
                   </p>
                 )}
               </div>

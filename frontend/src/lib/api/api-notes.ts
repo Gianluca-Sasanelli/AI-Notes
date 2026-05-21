@@ -65,6 +65,17 @@ export async function getNotesClient(
   return await res.json()
 }
 
+export async function getNotesByDateRangeClient(from: number, to: number): Promise<TimeNote[]> {
+  const params = new URLSearchParams({ from: from.toString(), to: to.toString() })
+  const res = await fetch(`/api/notes?${params.toString()}`)
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message)
+  }
+  const json = await res.json()
+  return json.data
+}
+
 export async function getNoteClient(id: string) {
   const res = await fetch(`/api/notes/${id}`)
   if (!res.ok) {

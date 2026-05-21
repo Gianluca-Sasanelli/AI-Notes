@@ -216,7 +216,6 @@ function SidebarContent({ isCollapsed, onClose }: { isCollapsed: boolean; onClos
 
 function DesktopSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true)
-  const gt = useGT()
 
   return (
     <aside
@@ -229,24 +228,17 @@ function DesktopSidebar() {
         {!isCollapsed && (
           <span className="font-semibold  whitespace-nowrap text-2xl text-primary">AI Notes</span>
         )}
-        <Tooltip disableHoverableContent={true}>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className={cn(
-                "hover:bg-accent hover:text-accent-foreground cursor-pointer text-secondary-foreground",
-                !isCollapsed && "ml-auto"
-              )}
-            >
-              <PanelLeft className="size-6 " />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            {isCollapsed ? gt("Expand") : gt("Collapse")}
-          </TooltipContent>
-        </Tooltip>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={cn(
+            "hover:bg-accent hover:text-accent-foreground cursor-pointer text-secondary-foreground",
+            !isCollapsed && "ml-auto"
+          )}
+        >
+          <PanelLeft className="size-6 " />
+        </Button>
       </div>
       <SidebarContent isCollapsed={isCollapsed} />
     </aside>

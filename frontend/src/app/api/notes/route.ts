@@ -7,32 +7,40 @@ import { convex } from "@/lib/convex-server"
 import { api } from "@convex/_generated/api"
 import { Id } from "@convex/_generated/dataModel"
 
+const flattenFiles = (notes: { files: { filename: string }[] }[]) =>
+  notes.map((n) => ({ ...n, files: n.files.map((f) => f.filename) }))
+
 export async function GET(request: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
-  }
-
+  const { userId } = (await auth()) as { userId: string }
   const { searchParams } = new URL(request.url)
-  const skip = parseInt(searchParams.get("skip") || "0", 10)
-  const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50)
-  const includeTotal = searchParams.get("total") === "true"
-  const timeless = searchParams.get("timeless") === "true"
-  const topicIdParam = (searchParams.get("topicId") || undefined) as Id<"topics"> | undefined
 
-  logger.info("api", "GET /api/notes", { skip, limit, includeTotal, timeless })
   try {
+    const from = searchParams.get("from")
+    const to = searchParams.get("to")
+    if (from && to) {
+      const notes = await convex.query(api.notes.getTimeNotesByDateRange, {
+        userId,
+        from: parseInt(from, 10),
+        to: parseInt(to, 10)
+      })
+      return NextResponse.json({ data: flattenFiles(notes) })
+    }
+
+    const timeless = searchParams.get("timeless") === "true"
+    const skip = parseInt(searchParams.get("skip") || "0", 10)
+    const limit = Math.min(parseInt(searchParams.get("limit") || "10", 10), 50)
+    const includeTotal = searchParams.get("total") === "true"
+    const topicId = (searchParams.get("topicId") || undefined) as Id<"topics"> | undefined
+
     const result = timeless
       ? await convex.query(api.notes.getTimelessNotes, { userId, skip, limit, includeTotal })
-      : await convex.query(api.notes.getTimeNotes, {
-          userId,
-          skip,
-          limit,
-          includeTotal,
-          topicId: topicIdParam
-        })
-    const data = result.data.map((n) => ({ ...n, files: n.files.map((f) => f.filename) }))
-    return NextResponse.json({ data, hasNext: result.hasNext, total: result.total })
+      : await convex.query(api.notes.getTimeNotes, { userId, skip, limit, includeTotal, topicId })
+
+    return NextResponse.json({
+      data: flattenFiles(result.data),
+      hasNext: result.hasNext,
+      total: result.total
+    })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch notes"
     logger.error("api", "GET /api/notes failed", { error: errorMessage })
@@ -41,10 +49,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json<ErrorData>({ message: "Unauthorized" }, { status: 401 })
-  }
+  const { userId } = (await auth()) as { userId: string }
 
   const body = (await request.json()) as CreateNoteBody
 

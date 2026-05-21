@@ -6,7 +6,7 @@ export default defineSchema({
     userId: v.string(),
     name: v.string(),
     color: v.optional(v.string()),
-    createdAt: v.number(),
+
     updatedAt: v.number()
   })
     .index("by_user", ["userId"])
@@ -28,7 +28,7 @@ export default defineSchema({
         contentType: v.optional(v.string())
       })
     ),
-    createdAt: v.number(),
+
     updatedAt: v.number()
   })
     .index("by_user", ["userId"])
@@ -39,7 +39,7 @@ export default defineSchema({
     clientId: v.string(),
     messages: v.array(v.any()),
     title: v.optional(v.string()),
-    createdAt: v.number(),
+
     updatedAt: v.number()
   })
     .index("by_user", ["userId"])

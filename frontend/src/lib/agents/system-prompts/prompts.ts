@@ -20,14 +20,14 @@ export const buildAssistantSystemPrompt = (timelessNotes: { content: string }[])
 
 <db-schema>
   The data is stored in Convex. All ids are opaque strings (Convex document ids).
-  All timestamps (createdAt, updatedAt, startTimestamp, endTimestamp) are Unix milliseconds (number).
+  All timestamps (_creationTime, updatedAt, startTimestamp, endTimestamp) are Unix milliseconds (number).
 
   topics:
     - _id: Id<"topics">
     - userId: string
     - name: string
     - color?: string  (hex like "#3b82f6")
-    - createdAt: number
+    - _creationTime: number (auto, set by Convex)
     - updatedAt: number
     Indexes: by_user (userId), by_user_name (userId, name)
 
@@ -40,7 +40,7 @@ export const buildAssistantSystemPrompt = (timelessNotes: { content: string }[])
     - granularity?: "hour" | "day" | "month"  (absent iff startTimestamp is absent)
     - content: string
     - files: Array<{ storageId: Id<"_storage">, filename: string, contentType?: string }>
-    - createdAt: number
+    - _creationTime: number (auto, set by Convex)
     - updatedAt: number
     Indexes: by_user (userId), by_user_start_timestamp (userId, startTimestamp)
 </db-schema>

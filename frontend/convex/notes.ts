@@ -26,7 +26,6 @@ export const createNote = mutation({
       granularity: args.granularity,
       topicId: args.topicId,
       files: [],
-      createdAt: now,
       updatedAt: now
     })
   }
@@ -93,8 +92,7 @@ export const getTimelessNotes = query({
       .filter((q) => q.eq(q.field("startTimestamp"), undefined))
       .collect()
 
-    // Sort by createdAt desc in memory (no index needed for personal-scale data)
-    allNotes.sort((a, b) => b.createdAt - a.createdAt)
+    allNotes.sort((a, b) => b._creationTime - a._creationTime)
 
     const total = args.includeTotal ? allNotes.length : undefined
     const page = allNotes.slice(skip, skip + limit + 1)
@@ -189,7 +187,7 @@ export const getLatestTimelessNotes = query({
       .filter((q) => q.eq(q.field("startTimestamp"), undefined))
       .collect()
 
-    notes.sort((a, b) => b.createdAt - a.createdAt)
+    notes.sort((a, b) => b._creationTime - a._creationTime)
     return notes.slice(0, limit)
   }
 })
@@ -253,13 +251,24 @@ export const getTimeNotesByDateRange = query({
     to: v.number()
   },
   handler: async (ctx, args) => {
-    return ctx.db
+    const notes = await ctx.db
       .query("notes")
       .withIndex("by_user_start_timestamp", (q) =>
         q.eq("userId", args.userId).gte("startTimestamp", args.from).lte("startTimestamp", args.to)
       )
       .order("desc")
       .collect()
+
+    return Promise.all(
+      notes.map(async (note) => {
+        let topic = null
+        if (note.topicId) {
+          const t = await ctx.db.get(note.topicId)
+          if (t) topic = { _id: t._id, name: t.name, color: t.color }
+        }
+        return { ...note, topic }
+      })
+    )
   }
 })
 
