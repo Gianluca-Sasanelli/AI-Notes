@@ -2,9 +2,9 @@
   "name": "ai-notes-root",
   "private": true,
   "scripts": {
-    "dev": "cd frontend && bun --bun next dev",
+    "dev": "bun dev:convex & bun dev:server & wait",
     "dev:convex": "cd frontend && bunx convex dev",
-    "dev:all": "bun dev:convex & bun dev & wait",
+    "dev:server": "cd frontend && bun --bun next dev",
     "format": "cd frontend && bun format",
     "lint": "cd frontend && bun lint",
     "format:lint": "cd frontend && bun format:lint",

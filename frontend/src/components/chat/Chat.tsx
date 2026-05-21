@@ -10,14 +10,17 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useModelStore } from "@/lib/stores/model-store"
 import { handleChatError, isNetworkError } from "@/lib/chat-error"
 import { T } from "gt-react"
+import { ScrollToBottomButton } from "../ui/schadcn/scroll-to-bottom-button"
 export default function Chat({
   chatId,
   storedmessages,
-  isStreaming
+  isStreaming,
+  scrollContainerRef
 }: {
   chatId: string | null
   storedmessages?: ChatUIMessage[]
   isStreaming?: boolean
+  scrollContainerRef: React.RefObject<HTMLElement | null>
 }) {
   const backupChatId = useMemo(() => crypto.randomUUID(), [])
   const inputRef = useRef<HTMLDivElement>(null)
@@ -80,6 +83,14 @@ export default function Chat({
     sendMessage({ text: newText, files }, { body: { model: selectedModel } })
   }
 
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (!el || !storedmessages?.length) return
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "instant" })
+    })
+  }, [scrollContainerRef, storedmessages?.length])
+
   const isLoadingFromSDK = useMemo(() => status === "streaming" || status === "submitted", [status])
   useEffect(() => {
     if (messages.length === 2 && !chatId && !isLoadingFromSDK) {
@@ -134,11 +145,12 @@ export default function Chat({
         />
       </div>
       <div
-        className="container sticky bottom-0 z-10 mx-auto flex w-full max-w-3xl flex-col bg-background px-4 pb-2 lg:pb-5 lg:px-8"
+        className="container sticky bottom-0 z-10 mx-auto flex w-full max-w-3xl flex-col bg-transparent px-4 pb-2 lg:pb-5 lg:px-8"
         ref={inputRef}
         role="region"
         aria-label="Chat input"
       >
+        <ScrollToBottomButton containerRef={scrollContainerRef} className="mb-2" />
         <ChatInput
           onSendMessage={(text: string, files?: FileList) =>
             sendMessage({ text, files }, { body: { model: selectedModel } })
