@@ -1,7 +1,7 @@
 "use client"
 
 import { use, useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   Calendar,
   Paperclip,
@@ -10,16 +10,44 @@ import {
   Loader2,
   ExternalLink,
   Image as ImageIcon,
-  File
+  File,
+  Pencil,
+  Trash2,
+  Circle
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/schadcn/card"
 import { Button } from "@/components/ui/schadcn/button"
-import { getNoteClient, getFileUrlClient } from "@/lib/api"
+import { Textarea } from "@/components/ui/schadcn/textarea"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/schadcn/dialog"
+import { DateTimePicker } from "@/components/ui/datetime-picker"
+import { FileUpload, type PendingFile } from "@/components/ui/file-upload"
+import { TopicEditor, type TopicEdit, isEditableTopic } from "@/components/ui/topic-editor"
+import {
+  getNoteClient,
+  getFileUrlClient,
+  updateNoteClient,
+  deleteNoteClient,
+  uploadFileClient
+} from "@/lib/api"
 import { formatTimestampRange } from "@/lib/notes-utils"
-import { TimeNote, TimelessNote, PaginatedResponse } from "@/lib/types/database-types"
+import {
+  TimeNote,
+  TimelessNote,
+  NoteGranularity,
+  PaginatedResponse
+} from "@/lib/types/database-types"
 import { isTimeNote } from "@/lib/types/api-types"
+import { transformTopicEditToTopicBody } from "@/lib/utils"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 const isImageFile = (filename: string) => {
   const ext = filename.split(".").pop()?.toLowerCase()
@@ -75,6 +103,17 @@ function FileItem({ noteId, filename }: { noteId: string; filename: string }) {
 export default function NotePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: noteId } = use(params)
   const queryClient = useQueryClient()
+  const router = useRouter()
+
+  const [editing, setEditing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [editingContent, setEditingContent] = useState("")
+  const [editingStartTimestamp, setEditingStartTimestamp] = useState(new Date())
+  const [editingEndTimestamp, setEditingEndTimestamp] = useState<Date | null>(null)
+  const [editingGranularity, setEditingGranularity] = useState<NoteGranularity>("day")
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+  const [topicEdit, setTopicEdit] = useState<TopicEdit>(null)
+  const [editingFiles, setEditingFiles] = useState<string[]>([])
 
   const {
     data: note,
@@ -93,6 +132,70 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
         if (found) return found
       }
       return undefined
+    }
+  })
+
+  const handleEditOpen = () => {
+    if (!note) return
+    setEditingContent(note.content)
+    if (isTimeNote(note)) {
+      setEditingStartTimestamp(new Date(note.startTimestamp))
+      setEditingEndTimestamp(note.endTimestamp ? new Date(note.endTimestamp) : null)
+      setEditingGranularity(note.granularity)
+      setTopicEdit(
+        note.topic
+          ? { _id: note.topic._id, name: note.topic.name, color: note.topic.color, modified: false }
+          : null
+      )
+    }
+    setEditingFiles(note.files ? [...note.files] : [])
+    setEditing(true)
+  }
+
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (!note) return Promise.reject()
+      const topic = isTimeNote(note) ? transformTopicEditToTopicBody(topicEdit) : undefined
+      await updateNoteClient(
+        noteId,
+        {
+          content: editingContent.trim(),
+          ...(isTimeNote(note) && {
+            startTimestamp: editingStartTimestamp.getTime(),
+            endTimestamp: editingEndTimestamp ? editingEndTimestamp.getTime() : null,
+            granularity: editingGranularity
+          })
+        },
+        topic
+      )
+      for (const pf of pendingFiles) {
+        await uploadFileClient(noteId, pf.file, pf.filename)
+      }
+    },
+    onSuccess: () => {
+      toast.success("Note updated")
+      setEditing(false)
+      setPendingFiles([])
+      setTopicEdit(null)
+      queryClient.invalidateQueries({ queryKey: ["note", noteId] })
+      queryClient.invalidateQueries({ queryKey: ["notes"] })
+      queryClient.invalidateQueries({ queryKey: ["note-files", noteId] })
+      queryClient.invalidateQueries({ queryKey: ["topics"] })
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to update")
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteNoteClient(noteId),
+    onSuccess: () => {
+      toast.success("Note deleted")
+      queryClient.invalidateQueries({ queryKey: ["notes"] })
+      router.push("/notes")
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to delete")
     }
   })
 
@@ -131,17 +234,38 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
       </div>
 
       <Card className="p-6 space-y-6">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            {isTimeNote(note)
-              ? formatTimestampRange(
-                  new Date(note.startTimestamp),
-                  note.endTimestamp ? new Date(note.endTimestamp) : null,
-                  note.granularity
-                )
-              : format(new Date(note.createdAt), "EEE, MMM d, yyyy 'at' HH:mm")}
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4" />
+              {isTimeNote(note)
+                ? formatTimestampRange(
+                    new Date(note.startTimestamp),
+                    note.endTimestamp ? new Date(note.endTimestamp) : null,
+                    note.granularity
+                  )
+                : format(new Date(note.createdAt), "EEE, MMM d, yyyy 'at' HH:mm")}
+            </span>
+            {isTimeNote(note) && note.topic && (
+              <span className="flex items-center gap-1.5">
+                <Circle className="h-3 w-3" fill={note.topic.color} stroke={note.topic.color} />
+                {note.topic.name}
+              </span>
+            )}
+          </div>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="icon" onClick={handleEditOpen}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="!bg-transparent"
+              onClick={() => setDeleting(true)}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
         </div>
 
         <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -162,6 +286,90 @@ export default function NotePage({ params }: { params: Promise<{ id: string }> }
           </div>
         )}
       </Card>
+
+      <Dialog
+        open={editing}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditing(false)
+            setTopicEdit(null)
+          }
+        }}
+      >
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[95svh] flex flex-col overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Note</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 w-full min-w-0 flex-1">
+            {isTimeNote(note) && (
+              <DateTimePicker
+                startTimestamp={editingStartTimestamp}
+                endTimestamp={editingEndTimestamp}
+                onStartChange={setEditingStartTimestamp}
+                onEndChange={setEditingEndTimestamp}
+                granularity={editingGranularity}
+                onGranularityChange={setEditingGranularity}
+              />
+            )}
+            <Textarea
+              value={editingContent}
+              onChange={(e) => setEditingContent(e.target.value)}
+              rows={4}
+              className="min-h-[100px] focus:border-primary focus:outline-none"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              {isTimeNote(note) && <TopicEditor value={topicEdit} onChange={setTopicEdit} />}
+              <FileUpload
+                noteId={noteId}
+                noteFiles={editingFiles}
+                pendingFilestoUpload={pendingFiles}
+                onPendingFilesChange={setPendingFiles}
+                onDeleteFile={(filename: string) => {
+                  setEditingFiles((prev) => prev?.filter((f) => f !== filename))
+                }}
+                compact
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => updateMutation.mutate()}
+                disabled={
+                  !editingContent.trim() ||
+                  updateMutation.isPending ||
+                  (isEditableTopic(topicEdit) && topicEdit.name.trim() === "")
+                }
+              >
+                {updateMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleting} onOpenChange={(open) => !open && setDeleting(false)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Note</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center lg:justify-end gap-2">
+            <Button variant="outline" onClick={() => setDeleting(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
